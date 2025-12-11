@@ -108,10 +108,6 @@ export default function Header() {
                 <LogOut size={16} /> Sign out
               </Button>
             </div>
-
-            <div className="p-2 border-t text-center text-xs text-muted-foreground">
-              Secured by <span className="font-semibold">Clerk</span>
-            </div>
           </PopoverContent>
         </Popover>
       </div>
