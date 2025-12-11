@@ -16,25 +16,12 @@ src/
  ├─ components/
  │   └─ ui/
  ├─ constants/
- │   └─ api/
- ├─ contexts/
- │   ├─ AuthContext.jsx
- │   ├─ AuthProvider.jsx
- │   ├─ ThemeContext.jsx
- │   └─ misc/
  ├─ hooks/
  ├─ layouts/
  ├─ lib/
- │   ├─ api.js
- │   ├─ utils.js
- │   └─ axios.js
  ├─ mocks/
  ├─ pages/
- ├─ reducers/
- │   └─ ObjectReducer.js
- ├─ router/
- ├─ services/
- ├─ utils/
+ ├─ routes/
  ├─ App.jsx
  └─ main.jsx
 ```
@@ -145,14 +132,6 @@ Folder untuk utilities tingkat “library”.
 
 Helper untuk request API (GET, POST, PUT, DELETE).
 
-### **`axios.js`**
-
-Axios instance yang sudah memiliki:
-
-* `baseURL`
-* interceptors (optional)
-* middleware
-
 ### **`utils.js`**
 
 Berisi fungsi `cn()` yang digunakan untuk menggabungkan class Tailwind dengan aman.
@@ -192,25 +171,6 @@ Setiap halaman biasanya memuat:
 
 ---
 
-## **`reducers/`**
-
-Folder untuk menyimpan reducer custom.
-Contoh:
-
-### **`ObjectReducer.js`**
-
-Reducer serbaguna untuk mengelola state object yang kompleks.
-
-Mendukung:
-
-* `put` → ganti seluruh state
-* `patch` → update sebagian field
-* `remove` → hapus beberapa key
-
-> Dibutuhkan untuk form kompleks atau data yang sering berubah.
-
----
-
 ## **`router/`**
 
 Konfigurasi routing aplikasi.
@@ -220,38 +180,6 @@ Biasanya berisi:
 * daftar route
 * protected route
 * router utama aplikasi
-
----
-
-## **`services/`**
-
-Abstraksi untuk memanggil API berdasarkan fitur.
-
-Contoh:
-
-```
-services/authService.js
-services/projectService.js
-```
-
-Kelebihan:
-
-* File API tidak bercampur
-* Tiap fitur punya logic terpisah
-* Mudah di-maintain
-
----
-
-## **`utils/`**
-
-Helper umum yang bukan bagian dari library.
-
-Contoh:
-
-* format tanggal
-* penyimpanan localStorage
-* fungsi validator
-* number formatter
 
 ---
 
