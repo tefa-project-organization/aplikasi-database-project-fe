@@ -1,8 +1,8 @@
 import React from "react";
 
-import { useSidebar } from "@/components/ui/sidebar"; 
-import { Button } from "@/components/ui/button"; 
-import { PanelLeftClose, PanelLeftOpen, Sun, Moon, User, LogOut } from "lucide-react"; 
+import { useSidebar } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { PanelLeftClose, PanelLeftOpen, Sun, Moon, User, LogOut } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 
 import {
@@ -33,7 +33,7 @@ export default function Header() {
   };
 
   return (
-    <header className="flex items-center justify-between border-b bg-background px-4 py-2">
+    <header className="sticky top-0 z-50 flex items-center justify-between border-b bg-background px-4 py-2">
       
       {/* Kiri: tombol collapse sidebar + breadcrumb */}
       <div className="flex items-center gap-3">
@@ -104,8 +104,14 @@ export default function Header() {
               <Button variant="ghost" className="w-full justify-start gap-2 px-4 py-2">
                 <User size={16} /> Manage Account
               </Button>
-              <Button variant="ghost" className="w-full justify-start gap-2 px-4 py-2">
-                <LogOut size={16} /> Sign out
+              <Button
+                id="logout"
+                name="logout"
+                variant="ghost"
+                className="w-full justify-start gap-2 px-4 py-2"
+              >
+                <LogOut size={16} />
+                Sign out
               </Button>
             </div>
           </PopoverContent>

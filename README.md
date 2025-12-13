@@ -92,9 +92,6 @@ Digunakan untuk menyimpan dan mengelola data yang dibutuhkan banyak komponen.
 Isi:
 
 * **AuthContext.jsx** → informasi login, token, dan user
-* **AuthProvider.jsx** → provider untuk membungkus aplikasi
-* **ThemeContext.jsx** → dark mode / light mode
-* **misc/** → folder tambahan untuk context lain (sesuai struktur lama di proyek sebelumnya)
 
 > Context membantu menghindari passing props secara berantai.
 

@@ -1,5 +1,5 @@
 import axios from "axios"
-import {useAuth} from "../contexts/AuthContext.js";
+import {useAuth} from "@/contexts/AuthContext.js";
 
 /*
   Notes:
