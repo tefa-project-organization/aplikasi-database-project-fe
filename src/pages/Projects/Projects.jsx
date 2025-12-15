@@ -1,9 +1,9 @@
 // src/pages/Projects/Projects.jsx
 import React, { useState, useMemo } from 'react';
 // Asumsikan Anda telah membuat file di folder components:
-import ProjectCard from '../../components/ProjectCard';
-import SearchBar from '../../components/SearchBar';
-import FilterControls from '../../components/FilterControls';
+import ProjectCard from './widget/ProjectCard';
+import SearchBar from './widget/SearchBar';
+import FilterControls from './widget/FilterControls';
 
 // --- Data Contoh (Mock Data) ---
 const MOCK_PROJECTS = [
@@ -41,8 +41,9 @@ export default function Projects() {
   }, [projects, searchTerm, filterStatus, filterPm]);
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Proyek is Here</h2> 
+    <div>
+      <h2 className="text-xl font-bold ">Projects</h2>
+      <p className='text-m mb-5'>Manage and monitor your projects here.</p>
 
       {/* Area Kontrol (Sesuai Wireframe) */}
       <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
