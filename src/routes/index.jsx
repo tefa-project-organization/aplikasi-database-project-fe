@@ -1,36 +1,48 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 
-import MainLayout from "@/layouts/MainLayout";
+import MainLayout from "@/layouts/MainLayout"
 
-import Login from "@/pages/Auth/Login";
-import Dashboard from "@/pages/Dashboard/Dashboard";
-import Projects from "@/pages/Projects/Projects";
-import Team from "@/pages/Team/Team";
-import UserManagement from "@/pages/UserManagement/UserManage";
-import ErrorPage from "@/pages/ErrorPage/ErrorPage";
+import Login from "@/pages/Auth/Login"
+import Dashboard from "@/pages/Dashboard/Dashboard"
+import Projects from "@/pages/Projects/Projects"
+import Team from "@/pages/Team/Team"
+import UserManagement from "@/pages/UserManagement/UserManage"
+import ErrorPage from "@/pages/ErrorPage/ErrorPage"
+
+import PrivateRoute from "./PrivateRoute"
+import PublicRoute from "./PublicRoute"
 
 export default function AppRoutes() {
   return (
     <Router>
       <Routes>
 
-        {/* ROOT → LOGIN */}
+        {/* ROOT -> LOGIN */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* AUTH */}
-        <Route path="/login" element={<Login />} />
+        {/* LOGIN (PUBLIC) */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
 
-        {/* APP (Protected nanti) */}
-        <Route element={<MainLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/usermanagement" element={<UserManagement />} />
+        {/* APP (PROTECTED) */}
+        <Route element={<PrivateRoute />}>
+          <Route element={<MainLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/projects" element={<Projects />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/usermanagement" element={<UserManagement />} />
+          </Route>
         </Route>
 
         {/* NOT FOUND */}
         <Route path="*" element={<ErrorPage />} />
       </Routes>
     </Router>
-  );
+  )
 }

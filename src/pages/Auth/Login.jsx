@@ -1,33 +1,41 @@
-import React, { useState } from "react";
-import { Formik, Form, Field as FormikField } from "formik";
-import { Eye, EyeOff } from "lucide-react";
+import React, { useState } from "react"
+import { Formik, Form, Field as FormikField } from "formik"
+import { Eye, EyeOff } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 import {
     Field,
     FieldContent,
     FieldTitle,
     FieldError,
-} from "@/components/ui/field";
+} from "@/components/ui/field"
 
-import LoginTheme from "./LoginTheme";
-import LoginValidate from "./LoginValidate";
-import loginAsset from "@/assets/img/login-asset.svg";
+import LoginTheme from "./LoginTheme"
+import LoginValidate from "./LoginValidate"
+import loginAsset from "@/assets/img/login-asset.svg"
+
+import { apiPost } from "@/lib/api"
+import { CREATE_LOGIN } from "@/constants/api/auth"
+import { useAuth } from "@/context/AuthContext"
 
 export default function Login() {
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false)
+
+    const { login } = useAuth()
+    const navigate = useNavigate()
 
     return (
         <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-background">
 
             {/* LEFT — IMAGE */}
             <div className="hidden lg:flex items-center justify-center">
-                {/* THEME TOGGLE */}
                 <div className="absolute bottom-6 left-6">
                     <LoginTheme />
                 </div>
+
                 <div className="max-w-sm text-center px-6">
                     <img
                         src={loginAsset}
@@ -50,7 +58,6 @@ export default function Login() {
             <div className="relative flex items-center justify-center px-6">
                 <div className="w-full max-w-md space-y-8">
 
-                    {/* HEADER */}
                     <div>
                         <h1 className="text-2xl font-semibold text-foreground">
                             Login
@@ -60,33 +67,57 @@ export default function Login() {
                         </p>
                     </div>
 
-                    {/* FORM */}
                     <Formik
-                        initialValues={{ username: "", password: "" }}
-                        validationSchema={LoginValidate}
+                        initialValues={{ identifier: "", password: "" }}
                         validateOnChange={false}
                         validateOnBlur={false}
-                        onSubmit={(values) => {
-                            console.log("LOGIN PAYLOAD:", values);
+                        onSubmit={async (values, { setSubmitting }) => {
+                            try {
+                                const res = await apiPost(CREATE_LOGIN, {
+                                    identifier: values.identifier,
+                                    password: values.password,
+                                })
+
+                                // HANDLE ERROR
+                                if (res.error) {
+                                    throw new Error(res.message || "Login gagal")
+                                }
+
+                                // Ambil data employee
+                                const employees = res.data?.data?.employees
+
+                                if (!employees) {
+                                    throw new Error("Data user tidak ditemukan dari server")
+                                }
+
+                                login(employees)
+                                navigate("/dashboard")
+                            } catch (err) {
+                                console.error("LOGIN ERROR:", err)
+                                alert(err.message || "Login gagal")
+                            } finally {
+                                setSubmitting(false)
+                            }
                         }}
                     >
+
                         {({ errors, touched }) => (
                             <Form className="space-y-6" autoComplete="off">
 
-                                {/* USERNAME */}
-                                <FormikField name="username">
+                                {/* IDENTIFIER */}
+                                <FormikField name="identifier">
                                     {({ field }) => (
-                                        <Field data-invalid={errors.username && touched.username}>
-                                            <FieldTitle>Username</FieldTitle>
+                                        <Field data-invalid={errors.identifier && touched.identifier}>
+                                            <FieldTitle>Email / Username</FieldTitle>
                                             <FieldContent>
                                                 <Input
                                                     {...field}
-                                                    placeholder="Masukkan username"
+                                                    placeholder="Masukkan email atau username"
                                                     autoComplete="off"
                                                 />
                                             </FieldContent>
-                                            {errors.username && touched.username && (
-                                                <FieldError>{errors.username}</FieldError>
+                                            {errors.identifier && touched.identifier && (
+                                                <FieldError>{errors.identifier}</FieldError>
                                             )}
                                         </Field>
                                     )}
@@ -135,7 +166,6 @@ export default function Login() {
                                     )}
                                 </FormikField>
 
-                                {/* SUBMIT */}
                                 <Button
                                     type="submit"
                                     className="w-full h-10 bg-neutral-900 text-white hover:bg-neutral-800 transition"
@@ -148,7 +178,6 @@ export default function Login() {
                     </Formik>
                 </div>
             </div>
-
         </div>
-    );
+    )
 }

@@ -51,7 +51,7 @@ export default function AppSidebar() {
       {/* HEADER */}
       <div
         className={`flex items-center border-b transition-all duration-200
-        ${open ? "gap-3 px-4 py-4 justify-start" : "px-3 py-4 justify-center"}`}
+  ${open ? "gap-3 px-4 py-4 justify-start" : "px-3 py-4 justify-center"}`}
       >
         <img
           src={headerIcon}
@@ -60,16 +60,20 @@ export default function AppSidebar() {
         />
 
         {open && (
-          <span className="text-lg font-semibold tracking-wide whitespace-nowrap">
-            Database Project
-          </span>
+          <div className="flex flex-col">
+            <span className="text-lg font-semibold tracking-wide whitespace-nowrap">
+              Database Project
+            </span>
+            <span className="text-xs text-gray-500">
+              Lorem ipsum dolor sit amet
+            </span>
+          </div>
         )}
       </div>
 
-
       {/* CONTENT */}
-      <SidebarContent className="px-1">
-        <SidebarMenu className="py-2 gap-1">
+      <SidebarContent className={`${open ? "px-3" : "px-1"}`}>
+        <SidebarMenu className="py-3 gap-1">
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.label}>
               <NavLink
@@ -99,7 +103,7 @@ export default function AppSidebar() {
 
                       {/* LABEL */}
                       {open && (
-                        <span className="text-sm font-medium whitespace-nowrap">
+                        <span className="text-sm font-semibold tracking-wide whitespace-nowrap text-sidebar-text">
                           {item.label}
                         </span>
                       )}
