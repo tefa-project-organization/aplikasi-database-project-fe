@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import MainLayout from "@/layouts/MainLayout"
 
 import Login from "@/pages/Auth/Login"
+import Logout from "@/pages/Auth/Logout"
+
 import Dashboard from "@/pages/Dashboard/Dashboard"
 import Projects from "@/pages/Projects/Projects"
 import Team from "@/pages/Team/Team"
@@ -32,6 +34,10 @@ export default function AppRoutes() {
 
         {/* APP (PROTECTED) */}
         <Route element={<PrivateRoute />}>
+
+           {/* LOGOUT */}
+          <Route path="/logout" element={<Logout />} />
+          
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />

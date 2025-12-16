@@ -1,9 +1,9 @@
 import React from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 import { useSidebar } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { PanelLeftClose, PanelLeftOpen, Sun, Moon, User, LogOut } from "lucide-react";
-import { useLocation, Link } from "react-router-dom";
 
 import {
   Breadcrumb,
@@ -24,6 +24,7 @@ function formatBreadcrumb(name) {
 export default function Header() {
   const { open, toggleSidebar } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   const pathnames = location.pathname.split("/").filter((p) => p);
 
   const [darkMode, setDarkMode] = React.useState(false);
@@ -34,8 +35,8 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b bg-background px-4 py-2">
-      
-      {/* Kiri: tombol collapse sidebar + breadcrumb */}
+
+      {/* kiri */}
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
@@ -57,7 +58,9 @@ export default function Header() {
                   {idx !== 0 && <BreadcrumbSeparator />}
                   {isLast ? (
                     <BreadcrumbItem>
-                      <BreadcrumbPage className="capitalize">{formatBreadcrumb(name)}</BreadcrumbPage>
+                      <BreadcrumbPage className="capitalize">
+                        {formatBreadcrumb(name)}
+                      </BreadcrumbPage>
                     </BreadcrumbItem>
                   ) : (
                     <BreadcrumbItem>
@@ -75,13 +78,12 @@ export default function Header() {
         </Breadcrumb>
       </div>
 
-      {/* Kanan: dark mode + profile */}
+      {/* kanan */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
           {darkMode ? <Sun size={18} /> : <Moon size={18} />}
         </Button>
 
-        {/* Profile */}
         <Popover>
           <PopoverTrigger>
             <Avatar className="w-8 h-8 cursor-pointer">
@@ -96,7 +98,9 @@ export default function Header() {
               </Avatar>
               <div className="flex flex-col">
                 <span className="font-semibold text-foreground">John Doe</span>
-                <span className="text-xs text-muted-foreground">JohnDoe@email.com</span>
+                <span className="text-xs text-muted-foreground">
+                  JohnDoe@email.com
+                </span>
               </div>
             </div>
 
@@ -104,11 +108,11 @@ export default function Header() {
               <Button variant="ghost" className="w-full justify-start gap-2 px-4 py-2">
                 <User size={16} /> Manage Account
               </Button>
+
               <Button
-                id="logout"
-                name="logout"
                 variant="ghost"
                 className="w-full justify-start gap-2 px-4 py-2"
+                onClick={() => navigate("/logout")}
               >
                 <LogOut size={16} />
                 Sign out

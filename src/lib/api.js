@@ -113,7 +113,7 @@ export async function fetchWithPagination(path, options = {}) {
 // logout (tetep aman)
 export async function apiLogout(path) {
   try {
-    const res = await api.get(path)
+    const res = await api.post(path, {})
     return formatSuccess(res)
   } catch (err) {
     return formatError(err)

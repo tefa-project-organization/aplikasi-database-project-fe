@@ -1,3 +1,4 @@
+// src\context\AuthProvider.jsx
 import { useState } from "react";
 import { AuthContext } from "./AuthContext";
 
@@ -5,9 +6,17 @@ import { apiPost, apiLogout } from "@/lib/api";
 import { CREATE_LOGIN, GET_LOGOUT } from "@/constants/api/auth";
 
 export default function AuthProvider({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const [employees, setemployees] = useState(() => {
+    const saved = localStorage.getItem("employees");
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem("employees");
+  });
+
   const [isLoading, setIsLoading] = useState(false);
-  const [employees, setemployees] = useState(null);
   const [error, setError] = useState(null);
 
   // LOGIN
@@ -24,12 +33,18 @@ export default function AuthProvider({ children }) {
       throw new Error(res.message);
     }
 
-    // cookie diset oleh server
-    setIsAuthenticated(true);
-    setemployees(res.data?.data || null);
-    setIsLoading(false);
+    const userData = res.data?.data || null;
 
-    return res;
+    setemployees(userData);
+    setIsAuthenticated(true);
+
+    // persist
+    localStorage.setItem("employees", JSON.stringify(userData));
+
+    setIsLoading(false);
+    
+    // RETURN DATA untuk memberi tahu bahwa login sukses
+    return { success: true, data: userData };
   }
 
   // LOGOUT
@@ -39,8 +54,12 @@ export default function AuthProvider({ children }) {
 
     await apiLogout(GET_LOGOUT);
 
-    setIsAuthenticated(false);
     setemployees(null);
+    setIsAuthenticated(false);
+
+    // clear storage
+    localStorage.removeItem("employees");
+
     setIsLoading(false);
   }
 
