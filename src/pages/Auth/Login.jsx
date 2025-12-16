@@ -72,33 +72,21 @@ export default function Login() {
                         validateOnChange={false}
                         validateOnBlur={false}
                         onSubmit={async (values, { setSubmitting }) => {
-                            try {
-                                const res = await apiPost(CREATE_LOGIN, {
-                                    identifier: values.identifier,
-                                    password: values.password,
-                                })
+  try {
+    await login({
+      identifier: values.identifier,
+      password: values.password,
+    });
 
-                                // HANDLE ERROR
-                                if (res.error) {
-                                    throw new Error(res.message || "Login gagal")
-                                }
+    navigate("/dashboard");
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    alert(err.message || "Login gagal");
+  } finally {
+    setSubmitting(false);
+  }
+}}
 
-                                // Ambil data employee
-                                const employees = res.data?.data?.employees
-
-                                if (!employees) {
-                                    throw new Error("Data user tidak ditemukan dari server")
-                                }
-
-                                login(employees)
-                                navigate("/dashboard")
-                            } catch (err) {
-                                console.error("LOGIN ERROR:", err)
-                                alert(err.message || "Login gagal")
-                            } finally {
-                                setSubmitting(false)
-                            }
-                        }}
                     >
 
                         {({ errors, touched }) => (
