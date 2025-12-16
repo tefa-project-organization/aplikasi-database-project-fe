@@ -72,22 +72,21 @@ export default function Login() {
                         validateOnChange={false}
                         validateOnBlur={false}
                         onSubmit={async (values, { setSubmitting }) => {
-  try {
-    await login({
-      identifier: values.identifier,
-      password: values.password,
-    });
+                            try {
+                                await login({
+                                identifier: values.identifier,
+                                password: values.password,
+                                });
 
-    navigate("/dashboard");
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    alert(err.message || "Login gagal");
-  } finally {
-    setSubmitting(false);
-  }
-}}
-
-                    >
+                                navigate("/dashboard");
+                            } catch (err) {
+                                console.error("LOGIN ERROR:", err);
+                                alert(err.message || "Login gagal");
+                            } finally {
+                                setSubmitting(false);
+                            }
+                            }}
+                        >
 
                         {({ errors, touched }) => (
                             <Form className="space-y-6" autoComplete="off">
