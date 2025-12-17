@@ -1,24 +1,20 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 
 import MainLayout from "@/layouts/MainLayout"
-
 import Login from "@/pages/Auth/Login"
 import Logout from "@/pages/Auth/Logout"
-
 import Dashboard from "@/pages/Dashboard/Dashboard"
 import Projects from "@/pages/Projects/Projects"
 import Team from "@/pages/Team/Team"
 import UserManagement from "@/pages/UserManagement/UserManage"
 import ErrorPage from "@/pages/ErrorPage/ErrorPage"
-
 import PrivateRoute from "./PrivateRoute"
 import PublicRoute from "./PublicRoute"
 
 export default function AppRoutes() {
   return (
-    <Router>
+    <BrowserRouter>  
       <Routes>
-
         {/* ROOT -> LOGIN */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
@@ -32,12 +28,11 @@ export default function AppRoutes() {
           }
         />
 
+        {/* LOGOUT (PUBLIC - bisa diakses tanpa auth) */}
+        <Route path="/logout" element={<Logout />} />
+
         {/* APP (PROTECTED) */}
         <Route element={<PrivateRoute />}>
-
-           {/* LOGOUT */}
-          <Route path="/logout" element={<Logout />} />
-          
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
@@ -49,6 +44,6 @@ export default function AppRoutes() {
         {/* NOT FOUND */}
         <Route path="*" element={<ErrorPage />} />
       </Routes>
-    </Router>
+    </BrowserRouter>
   )
 }
