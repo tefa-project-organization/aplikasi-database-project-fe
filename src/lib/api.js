@@ -110,13 +110,28 @@ export async function fetchWithPagination(path, options = {}) {
   return apiGet(path, params)
 }
 
-// logout (tetep aman)
+// logout
 export async function apiLogout(path) {
   try {
-    const res = await api.post(path, {})
-    return formatSuccess(res)
+    const res = await api.post(path, {});
+    return formatSuccess(res);
   } catch (err) {
-    return formatError(err)
+    // Untuk logout, jangan throw error khusus untuk 401
+    const errorObj = formatError(err);
+    
+    // Jika 401 (token expired), anggap normal untuk logout
+    if (err.response?.status === 401) {
+      console.log("Logout: Token sudah expired (expected)");
+      // Return success-like object meski 401
+      return { 
+        error: false, 
+        status: 200, 
+        data: { message: "Token expired, local logout performed" },
+        message: "Local logout completed" 
+      };
+    }
+    
+    return errorObj;
   }
 }
 

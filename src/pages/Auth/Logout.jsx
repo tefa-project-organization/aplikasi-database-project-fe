@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
 import {
   AlertDialog,
   AlertDialogContent,
@@ -10,32 +9,47 @@ import {
   AlertDialogFooter,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-
 import { useAuth } from "@/context/AuthContext.jsx"
 
 export default function Logout() {
   const navigate = useNavigate();
   const { logout } = useAuth();
-
-  const [status, setStatus] = useState("loading"); 
-  // loading | success | error
+  const [status, setStatus] = useState("loading");
+  const hasLoggedOut = useRef(false);
 
   useEffect(() => {
-    const doLogout = async () => {
+    if (hasLoggedOut.current) return;
+    hasLoggedOut.current = true;
+
+    const performLogout = async () => {
       try {
         await logout();
         setStatus("success");
+        
+        setTimeout(() => {
+          navigate("/login", { replace: true });
+        }, 3000);
+        
       } catch (err) {
-        console.error("LOGOUT ERROR:", err);
         setStatus("error");
+        
+        setTimeout(() => {
+          navigate("/login", { replace: true });
+        }, 3000);
       }
     };
 
-    doLogout();
-  }, [logout]);
+    performLogout();
+
+    return () => {};
+  }, [logout, navigate]);
+
+  const handleBackToLogin = () => {
+    navigate("/login", { replace: true });
+  };
 
   return (
-    <AlertDialog open>
+    <AlertDialog open={true}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
@@ -46,25 +60,22 @@ export default function Logout() {
 
           <AlertDialogDescription>
             {status === "success" &&
-              "Anda telah keluar dari sistem."}
-
+              "Anda telah keluar dari sistem. Anda akan dialihkan ke halaman login dalam beberapa detik."}
             {status === "error" &&
-              "Terjadi kesalahan saat logout. Silakan coba lagi."}
-
+              "Terjadi kesalahan saat logout, tetapi data lokal telah dihapus. Anda akan dialihkan ke halaman login."}
             {status === "loading" &&
-              "Mohon tunggu sebentar..."}
+              "Mohon tunggu sebentar, sedang memproses logout..."}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {status !== "loading" && (
-          <AlertDialogFooter>
-            <AlertDialogAction
-              onClick={() => navigate("/login", { replace: true })}
-            >
-              Kembali ke Login
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        )}
+        <AlertDialogFooter>
+          <AlertDialogAction
+            onClick={handleBackToLogin}
+            disabled={status === "loading"}
+          >
+            {status === "loading" ? "Memproses..." : "Kembali ke Login"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );

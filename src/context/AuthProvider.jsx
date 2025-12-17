@@ -1,13 +1,11 @@
 // src\context\AuthProvider.jsx
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AuthContext } from "./AuthContext";
-
 import { apiPost, apiLogout } from "@/lib/api";
 import { CREATE_LOGIN, GET_LOGOUT } from "@/constants/api/auth";
 
 export default function AuthProvider({ children }) {
-
-  const [employees, setemployees] = useState(() => {
+  const [employees, setEmployees] = useState(() => {
     const saved = localStorage.getItem("employees");
     return saved ? JSON.parse(saved) : null;
   });
@@ -19,8 +17,8 @@ export default function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // LOGIN
-  async function login(payload) {
+  // LOGIN - stabilkan dengan useCallback
+  const login = useCallback(async (payload) => {
     setIsLoading(true);
     setError(null);
 
@@ -34,34 +32,37 @@ export default function AuthProvider({ children }) {
     }
 
     const userData = res.data?.data || null;
-
-    setemployees(userData);
+    setEmployees(userData);
     setIsAuthenticated(true);
-
-    // persist
     localStorage.setItem("employees", JSON.stringify(userData));
-
     setIsLoading(false);
     
-    // RETURN DATA untuk memberi tahu bahwa login sukses
     return { success: true, data: userData };
-  }
+  }, []);
 
-  // LOGOUT
-  async function logout() {
+  // LOGOUT - stabilkan dengan useCallback dan handle 401 error
+  const logout = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
-    await apiLogout(GET_LOGOUT);
+    try {
+      // Coba API logout, tapi jangan throw error untuk 401
+      await apiLogout(GET_LOGOUT);
+    } catch (err) {
+      // Ignore 401 errors (token sudah invalid)
+      if (err?.response?.status !== 401) {
+        console.error("Logout API error:", err);
+      }
+    }
 
-    setemployees(null);
+    // SELALU clear data lokal
+    setEmployees(null);
     setIsAuthenticated(false);
-
-    // clear storage
     localStorage.removeItem("employees");
-
     setIsLoading(false);
-  }
+
+    return { success: true };
+  }, []);
 
   return (
     <AuthContext.Provider
