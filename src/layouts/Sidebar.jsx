@@ -65,7 +65,7 @@ export default function AppSidebar() {
               Database Project
             </span>
             <span className="text-xs text-gray-500">
-              Lorem ipsum dolor sit amet
+              Where work comes together
             </span>
           </div>
         )}

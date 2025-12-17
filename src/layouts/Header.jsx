@@ -16,6 +16,7 @@ import {
 
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useTheme } from "@/context/ThemeContext";
 
 function formatBreadcrumb(name) {
   return name.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
@@ -27,11 +28,7 @@ export default function Header() {
   const navigate = useNavigate();
   const pathnames = location.pathname.split("/").filter((p) => p);
 
-  const [darkMode, setDarkMode] = React.useState(false);
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark", !darkMode);
-  };
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b bg-background px-4 py-2">
@@ -80,8 +77,8 @@ export default function Header() {
 
       {/* kanan */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
-          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+        <Button variant="ghost" size="icon" onClick={toggleTheme}>
+          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
         </Button>
 
         <Popover>
