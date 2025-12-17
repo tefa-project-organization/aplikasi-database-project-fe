@@ -1,4 +1,3 @@
-// src\pages\Auth\Login.jsx
 import React, { useState } from "react"
 import { Formik, Form, Field as FormikField } from "formik"
 import { Eye, EyeOff } from "lucide-react"
@@ -21,29 +20,33 @@ import { useAuth } from "@/context/AuthContext.jsx"
 import LoginFailed from "./LoginFailed"
 
 export default function Login() {
+  // State untuk mengontrol visibilitas password
   const [showPassword, setShowPassword] = useState(false)
+  
+  // State untuk menyimpan pesan error dari proses login
   const [loginError, setLoginError] = useState(null)
 
-  // Ambil login API (dari provider) saja
-  const { login } = useAuth() // HANYA ambil login, TIDAK ADA setShowLoginToast
+  // Mengambil fungsi login dari AuthContext untuk autentikasi
+  const { login } = useAuth()
 
+  // Fungsi utama yang menangani proses login
   const handleLogin = async (values, setSubmitting) => {
     try {
       setLoginError(null)
 
-      // Panggil login API dari AuthProvider
+      // Memanggil API login dengan identifier dan password dari form
       await login({
         identifier: values.identifier,
         password: values.password,
       })
 
-      //  TRIGGER TOAST LANGSUNG DI SINI SETELAH LOGIN SUKSES
+      // Menampilkan notifikasi toast saat login berhasil
       toast.success("Login berhasil! Selamat datang.")
 
     } catch (err) {
       console.error("LOGIN ERROR:", err)
 
-      // Bedakan error berdasarkan respons API
+      // Menentukan pesan error berdasarkan status response dari API
       if (err.response && err.response.status >= 500) {
         setLoginError("Terjadi kesalahan server, silakan coba lagi nanti.")
       } else if (err.response && err.response.status === 404) {
@@ -52,6 +55,7 @@ export default function Login() {
         setLoginError("Email / Username atau password salah.")
       }
     } finally {
+      // Selalu reset state submitting baik sukses maupun error
       setSubmitting(false)
     }
   }
@@ -60,7 +64,7 @@ export default function Login() {
     <>
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-background">
 
-        {/* LEFT — IMAGE */}
+        {/* LEFT — IMAGE - Bagian gambar ilustrasi hanya tampil di desktop */}
         <div className="hidden lg:flex items-center justify-center relative"> 
           <div className="max-w-sm text-center px-6">
             <img
@@ -70,21 +74,20 @@ export default function Login() {
             />
 
             <h2 className="text-3xl font-semibold mb-3 text-foreground">
-              Welcome Back
+              Good to see you
             </h2>
 
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Sistem internal untuk membantu pengelolaan data dan operasional
-              secara efisien.
+              Your projects, your team, and all the details that keep the work moving forward.
             </p>
           </div>
         </div>
 
-        {/* RIGHT — FORM */}
+        {/* RIGHT — FORM - Bagian form login untuk semua ukuran layar */}
         <div className="relative flex items-center justify-center px-6">
           <div className="w-full max-w-md space-y-8">
 
-            {/* HEADER LOGIN + THEME */}
+            {/* HEADER LOGIN + THEME - Header dengan toggle tema */}
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-semibold text-foreground">
                 Login
@@ -96,9 +99,10 @@ export default function Login() {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              Silakan masuk untuk melanjutkan
+              Please sign in to continue
             </p>
 
+            {/* Formik wrapper untuk form handling, validation, dan submission */}
             <Formik
               initialValues={{ identifier: "", password: "" }}
               validationSchema={LoginValidate}
@@ -108,10 +112,10 @@ export default function Login() {
                 handleLogin(values, setSubmitting)
               }
             >
-              {({ errors, touched }) => (
+              {({ errors, touched, isSubmitting }) => (
                 <Form className="space-y-6" autoComplete="off">
 
-                  {/* IDENTIFIER */}
+                  {/* IDENTIFIER - Field untuk email atau username */}
                   <FormikField name="identifier">
                     {({ field }) => (
                       <Field data-invalid={errors.identifier && touched.identifier}>
@@ -130,7 +134,7 @@ export default function Login() {
                     )}
                   </FormikField>
 
-                  {/* PASSWORD */}
+                  {/* PASSWORD - Field untuk password dengan toggle visibility */}
                   <FormikField name="password">
                     {({ field }) => (
                       <Field data-invalid={errors.password && touched.password}>
@@ -165,11 +169,13 @@ export default function Login() {
                     )}
                   </FormikField>
 
+                  {/* Submit button dengan loading state */}
                   <Button
                     type="submit"
                     className="w-full h-10 bg-neutral-900 text-white hover:bg-neutral-800 transition"
+                    disabled={isSubmitting}
                   >
-                    Masuk
+                    {isSubmitting ? "Processing..." : "Masuk"}
                   </Button>
 
                 </Form>
@@ -179,7 +185,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* ALERT LOGIN GAGAL */}
+      {/* ALERT LOGIN GAGAL - Modal untuk menampilkan error login */}
       <LoginFailed
         open={!!loginError}
         message={loginError}
