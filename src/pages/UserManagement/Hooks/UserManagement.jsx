@@ -9,9 +9,7 @@ import {
 import ClientTable from "../Component/Client/ClientTable"
 import ClientDetail from "../Component/Client/ClientDetail"
 import PicTable from "../Component/PIC/PicTable"
-
-// sementara dummy component supaya ga error
-const EmployeeTable = () => <div className="text-gray-500">Employee Table (Coming Soon)</div>
+import EmployeeTable from "../Component/Employee/EmployeeTable" // IMPORT BARU
 
 // dummy clients
 const initialClients = [
@@ -37,8 +35,85 @@ const initialClients = [
 
 // dummy PICs
 const initialPics = [
-  { id: 1, name: "Rina", phone: "0812-3456-7890", email: "rina@mail.com", status: "active" },
-  { id: 2, name: "Budi", phone: "0813-9876-5432", email: "budi@mail.com", status: "inactive" },
+  { 
+    id: 1, 
+    name: "John Doe", 
+    phone: "08123456789", 
+    email: "john@example.com", 
+    title: "Manager",
+    client_id: 1,
+    project_id: 1
+  },
+  { 
+    id: 2, 
+    name: "Jane Smith", 
+    phone: "08987654321", 
+    email: "jane@example.com", 
+    title: "Supervisor",
+    client_id: 1,
+    project_id: 2
+  },
+  { 
+    id: 3, 
+    name: "Bob Johnson", 
+    phone: "08765432109", 
+    email: "bob@example.com", 
+    title: "Staff",
+    client_id: 2,
+    project_id: 3
+  },
+]
+
+// DUMMY EMPLOYEES - sesuai struktur BE
+const initialEmployees = [
+  {
+    id: 1,
+    nik: "32700001",
+    nip: "10001",
+    name: "Rafii",
+    email: "rafi1@mail.com",
+    password: "123456",
+    address: "Jl. Merdeka No. 10",
+    phone: "08220000001",
+    position: "Backend Developer",
+    status: "active"
+  },
+  {
+    id: 2,
+    nik: "32700002",
+    nip: "10002",
+    name: "Siti",
+    email: "siti@mail.com",
+    password: "123456",
+    address: "Jl. Sudirman No. 20",
+    phone: "08220000002",
+    position: "Frontend Developer",
+    status: "active"
+  },
+  {
+    id: 3,
+    nik: "32700003",
+    nip: "10003",
+    name: "Budi",
+    email: "budi@mail.com",
+    password: "123456",
+    address: "Jl. Gatot Subroto No. 30",
+    phone: "08220000003",
+    position: "UI/UX Designer",
+    status: "resigned"
+  },
+  {
+    id: 4,
+    nik: "32700004",
+    nip: "10004",
+    name: "Ani",
+    email: "ani@mail.com",
+    password: "123456",
+    address: "Jl. Thamrin No. 40",
+    phone: "08220000004",
+    position: "Project Manager",
+    status: "active"
+  },
 ]
 
 export default function UserManagement() {
@@ -48,12 +123,20 @@ export default function UserManagement() {
   const [pics, setPics] = useState(initialPics)
   const [selectedPic, setSelectedPic] = useState(null)
 
+  const [employees, setEmployees] = useState(initialEmployees) // STATE BARU
+  const [selectedEmployee, setSelectedEmployee] = useState(null) // STATE BARU
+
   const handleAddClient = (newClient) => {
     setClients((prev) => [...prev, { ...newClient, id: prev.length + 1 }])
   }
 
   const handleAddPic = (newPic) => {
     setPics((prev) => [...prev, { ...newPic, id: prev.length + 1 }])
+  }
+
+  // HANDLER BARU untuk employee
+  const handleAddEmployee = (newEmployee) => {
+    setEmployees((prev) => [...prev, { ...newEmployee, id: prev.length + 1 }])
   }
 
   return (
@@ -71,6 +154,7 @@ export default function UserManagement() {
           {selectedClient ? (
             <ClientDetail
               client={selectedClient}
+              allPics={pics}
               onClose={() => setSelectedClient(null)}
             />
           ) : (
@@ -91,7 +175,11 @@ export default function UserManagement() {
         </TabsContent>
 
         <TabsContent value="employee">
-          <EmployeeTable />
+          <EmployeeTable
+            employees={employees}
+            onDetail={setSelectedEmployee}
+            onAddEmployee={handleAddEmployee}
+          />
         </TabsContent>
       </Tabs>
     </div>

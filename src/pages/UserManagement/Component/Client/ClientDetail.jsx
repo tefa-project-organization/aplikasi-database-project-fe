@@ -1,70 +1,79 @@
-// src/pages/UserManagement/Component/Client/ClientDetail.jsx
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import ClientPicTable from "./ClientPicTable";
+import React, { useMemo } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
-// Dummy data - nanti akan diganti dengan data dari API/store
-const dummyAllPics = [
-  { id: 1, name: "John Doe", phone: "08123456789", email: "john@example.com", status: "active", position: "Manager" },
-  { id: 2, name: "Jane Smith", phone: "08987654321", email: "jane@example.com", status: "active", position: "Supervisor" },
-  { id: 3, name: "Bob Johnson", phone: "08765432109", email: "bob@example.com", status: "inactive", position: "Staff" },
-];
+export default function ClientDetail({ client, allPics = [], onClose }) {
+  // Filter PIC yang memiliki client_id sama dengan client.id
+  const assignedPics = useMemo(() => {
+    if (!client || !client.id) return []
+    return allPics.filter(pic => pic.client_id === client.id)
+  }, [client, allPics])
 
-export default function ClientDetail({ client, onClose }) {
-  const [selectedPicIds, setSelectedPicIds] = useState(
-    client?.picIds || [1] // Contoh: client memiliki PIC dengan ID 1
-  );
-
-  if (!client) return null;
-
-  const handlePicSelectionChange = (newSelectedIds) => {
-    setSelectedPicIds(newSelectedIds);
-    // Di sini Anda bisa menambahkan logic untuk menyimpan ke API
-    console.log("Selected PIC IDs:", newSelectedIds);
-  };
+  if (!client) return null
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Client Detail</h2>
-        <button
-          className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-          type="button"
-          onClick={onClose}
-        >
-          Close
-        </button>
+
+        {onClose && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="flex items-center gap-1"
+          >
+            ← Back to Client List
+          </Button>
+        )}
       </div>
 
       {/* Client Information Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>{client.name}</span>
-            <Badge variant={client.status === "active" ? "default" : "secondary"}>
-              {client.status}
-            </Badge>
+          <CardTitle>
+            {client.name}
           </CardTitle>
         </CardHeader>
+
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <strong className="block text-sm text-gray-500 dark:text-gray-400">Description</strong>
-              <span className="dark:text-gray-300">{client.description || "-"}</span>
+              <strong className="block text-sm text-gray-500 dark:text-gray-400">
+                Description
+              </strong>
+              <span className="dark:text-gray-300">
+                {client.description || "-"}
+              </span>
             </div>
+
             <div>
-              <strong className="block text-sm text-gray-500 dark:text-gray-400">Address</strong>
-              <span className="dark:text-gray-300">{client.address || "-"}</span>
+              <strong className="block text-sm text-gray-500 dark:text-gray-400">
+                Address
+              </strong>
+              <span className="dark:text-gray-300">
+                {client.address || "-"}
+              </span>
             </div>
+
             <div>
-              <strong className="block text-sm text-gray-500 dark:text-gray-400">Phone</strong>
-              <span className="dark:text-gray-300">{client.phone || "-"}</span>
+              <strong className="block text-sm text-gray-500 dark:text-gray-400">
+                Phone
+              </strong>
+              <span className="dark:text-gray-300">
+                {client.phone || "-"}
+              </span>
             </div>
+
             <div>
-              <strong className="block text-sm text-gray-500 dark:text-gray-400">NPWP</strong>
-              <span className="dark:text-gray-300">{client.npwp || "-"}</span>
+              <strong className="block text-sm text-gray-500 dark:text-gray-400">
+                NPWP
+              </strong>
+              <span className="dark:text-gray-300">
+                {client.npwp || "-"}
+              </span>
             </div>
           </div>
         </CardContent>
@@ -73,42 +82,65 @@ export default function ClientDetail({ client, onClose }) {
       {/* PIC Assignment Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Assigned PICs</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Assigned PICs</span>
+            <span className="text-sm font-normal text-muted-foreground">
+              {assignedPics.length} PIC{assignedPics.length !== 1 ? 's' : ''} assigned
+            </span>
+          </CardTitle>
         </CardHeader>
+        
         <CardContent>
-          <ClientPicTable
-            allPics={dummyAllPics} // Ganti dengan data dari store/API
-            selectedPicIds={selectedPicIds}
-            onSelectionChange={handlePicSelectionChange}
-          />
-          
-          {/* Selected PICs Summary - MENGGUNAKAN CARD YANG SAMA */}
-          {selectedPicIds.length > 0 && (
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  Selected PICs ({selectedPicIds.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {dummyAllPics
-                    .filter(pic => selectedPicIds.includes(pic.id))
-                    .map(pic => (
-                      <Badge 
-                        key={pic.id} 
-                        variant="outline" 
-                        className="px-3 py-1 dark:border-gray-600 dark:text-gray-300"
-                      >
-                        {pic.name} ({pic.position})
-                      </Badge>
+          {assignedPics.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground border rounded-lg">
+              <p>No PIC assigned to this client</p>
+              <p className="text-sm mt-1">Assign PIC through the PIC form</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Table View */}
+              <div className="rounded-md border">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b bg-gray-50 dark:bg-gray-800">
+                      <th className="text-left p-3 font-medium">PIC Name</th>
+                      <th className="text-left p-3 font-medium">Title</th>
+                      <th className="text-left p-3 font-medium">Email</th>
+                      <th className="text-left p-3 font-medium">Phone</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assignedPics.map((pic) => (
+                      <tr key={pic.id} className="border-b last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <td className="p-3 font-medium">{pic.name}</td>
+                        <td className="p-3">{pic.title || "-"}</td>
+                        <td className="p-3">{pic.email || "-"}</td>
+                        <td className="p-3">{pic.phone || "-"}</td>
+                      </tr>
                     ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Badges Summary */}
+              <div className="pt-2">
+                <h4 className="text-sm font-medium mb-2">Quick Overview:</h4>
+                <div className="flex flex-wrap gap-2">
+                  {assignedPics.map(pic => (
+                    <Badge
+                      key={pic.id}
+                      variant="secondary"
+                      className="px-3 py-1.5"
+                    >
+                      {pic.name} {pic.title ? `(${pic.title})` : ""}
+                    </Badge>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
