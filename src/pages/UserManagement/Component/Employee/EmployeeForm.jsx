@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogOverlay,
   DialogDescription,
 } from "@/components/ui/dialog"
 import {
@@ -17,7 +16,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select" // ✅ IMPORT SELECT
+} from "@/components/ui/select"
 
 export default function EmployeeForm({ onSubmit }) {
   const [open, setOpen] = useState(false)
@@ -82,12 +81,10 @@ export default function EmployeeForm({ onSubmit }) {
         <Button type="button" size="sm">+ Add Employee</Button>
       </DialogTrigger>
 
-      <DialogContent
-        aria-describedby="employee-dialog-description" 
-      >
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Employee</DialogTitle>
-          <DialogDescription id="employee-dialog-description" className="sr-only">
+          <DialogDescription>
             Form untuk menambahkan karyawan baru ke dalam sistem
           </DialogDescription>
         </DialogHeader>
@@ -188,7 +185,7 @@ export default function EmployeeForm({ onSubmit }) {
             />
           </div>
 
-          {/* Status - GUNAKAN SELECT DARI SHADCN/UI */}
+          {/* Status */}
           <div>
             <label className="block mb-1 font-medium">Status</label>
             <Select

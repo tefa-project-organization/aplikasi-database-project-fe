@@ -17,12 +17,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command" // ✅ IMPORT COMBOBOX
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -36,8 +32,7 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
     client_id: undefined,
     project_id: undefined,
   })
-  
-  // State untuk combobox open/close
+
   const [openClientCombobox, setOpenClientCombobox] = useState(false)
   const [openProjectCombobox, setOpenProjectCombobox] = useState(false)
 
@@ -84,7 +79,6 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
     setOpen(false)
   }
 
-  // Cari nama client/project berdasarkan ID untuk display
   const selectedClient = clients.find(c => c.id === form.client_id)
   const selectedProject = projects.find(p => p.id === form.project_id)
 
@@ -94,12 +88,14 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
         <Button type="button" size="sm">+ Add PIC</Button>
       </DialogTrigger>
 
-      <DialogContent aria-describedby="pic-dialog-description" className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md">
+        {/* DialogDescription harus child langsung, biar warning hilang */}
+        <DialogDescription className="sr-only">
+          Tambahkan Person In Charge baru untuk klien atau proyek.
+        </DialogDescription>
+
         <DialogHeader>
           <DialogTitle>Add New PIC</DialogTitle>
-          <DialogDescription id="pic-dialog-description" className="sr-only">
-            Form untuk menambahkan Person In Charge (PIC) baru
-          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 mt-2 max-h-[70vh] overflow-y-auto pr-2 scrollbar-none [&::-webkit-scrollbar]:hidden">
@@ -151,7 +147,7 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
             />
           </div>
 
-          {/* Client Combobox (DENGAN SEARCH) */}
+          {/* Client Combobox */}
           <div className="space-y-1">
             <label className="block font-medium">For Client</label>
             <Popover open={openClientCombobox} onOpenChange={setOpenClientCombobox}>
@@ -162,9 +158,7 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
                   aria-expanded={openClientCombobox}
                   className="w-full justify-between"
                 >
-                  {selectedClient
-                    ? clients.find((client) => client.id === selectedClient.id)?.name
-                    : "Select client..."}
+                  {selectedClient ? selectedClient.name : "Select client..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -201,7 +195,7 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
             )}
           </div>
 
-          {/* Project Combobox (DENGAN SEARCH) */}
+          {/* Project Combobox */}
           <div className="space-y-1">
             <label className="block font-medium">For Project</label>
             <Popover open={openProjectCombobox} onOpenChange={setOpenProjectCombobox}>
@@ -212,9 +206,7 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
                   aria-expanded={openProjectCombobox}
                   className="w-full justify-between"
                 >
-                  {selectedProject
-                    ? projects.find((project) => project.id === selectedProject.id)?.name
-                    : "Select project..."}
+                  {selectedProject ? selectedProject.name : "Select project..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -253,11 +245,7 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
 
           {/* Buttons */}
           <div className="flex justify-end space-x-2 mt-4">
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setOpen(false)}
-            >
+            <Button variant="ghost" type="button" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button type="button" onClick={handleSubmit}>
