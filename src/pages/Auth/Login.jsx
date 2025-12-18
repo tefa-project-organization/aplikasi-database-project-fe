@@ -37,14 +37,17 @@ export default function Login() {
       toast.success("Login berhasil! Selamat datang.")
 
     } catch (err) {
-      console.error("LOGIN ERROR:", err)
+      console.error("LOGIN ERROR:", err);
 
-      if (err.response && err.response.status >= 500) {
-        setLoginError("Terjadi kesalahan server, silakan coba lagi nanti.")
-      } else if (err.response && err.response.status === 404) {
-        setLoginError("Server tidak ditemukan, periksa koneksi atau endpoint.")
+      if (err.status >= 500) {
+        setLoginError("Terjadi kesalahan server, silakan coba lagi nanti.");
+      } else if (err.status === 404) {
+        setLoginError("Server tidak ditemukan, periksa koneksi atau endpoint.");
+      } else if (err.error?.message) {
+        // pakai pesan asli dari backend, misal 403
+        setLoginError(err.error.message);
       } else {
-        setLoginError("Email / Username atau password salah.")
+        setLoginError("Email / Username atau password salah.");
       }
     } finally {
       setSubmitting(false)
@@ -58,7 +61,7 @@ export default function Login() {
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-background">
 
         {/* LEFT — IMAGE */}
-        <div className="hidden lg:flex items-center justify-center relative"> 
+        <div className="hidden lg:flex items-center justify-center relative">
           <div className="max-w-sm text-center px-6">
             <img
               src={loginAsset}

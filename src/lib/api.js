@@ -1,9 +1,10 @@
+// src/lib/api.js
 import axios from "axios"
 
 /*
   Notes:
   1. Base URL otomatis pilih lokal atau production
-  2. Axios instance pake cookie auth
+  2. Axios instance pakai cookie auth (HTTP-only cookie)
   3. Helper konsisten response
 */
 
@@ -22,7 +23,7 @@ function getBaseApiUrl() {
 // AXIOS INSTANCE
 const api = axios.create({
   baseURL: getBaseApiUrl(),
-  withCredentials: true, // if backend use cookie auth
+  withCredentials: true, // pakai cookie HTTP-only
   headers: {
     Accept: "application/json",
   },
@@ -33,7 +34,7 @@ function formatError(err) {
   const status = err?.response?.status || 500
   const data = err?.response?.data
   const message =
-    data?.error ||
+    data?.error?.message || // backend format error nested
     data?.message ||
     err.message ||
     "Terjadi kesalahan sistem"
@@ -110,28 +111,27 @@ export async function fetchWithPagination(path, options = {}) {
   return apiGet(path, params)
 }
 
-// logout
+// LOGOUT
 export async function apiLogout(path) {
   try {
-    const res = await api.post(path, {});
-    return formatSuccess(res);
+    const res = await api.post(path, {}) // cookie dikirim otomatis
+    return formatSuccess(res)
   } catch (err) {
     // Untuk logout, jangan throw error khusus untuk 401
-    const errorObj = formatError(err);
+    const errorObj = formatError(err)
     
     // Jika 401 (token expired), anggap normal untuk logout
     if (err.response?.status === 401) {
-      console.log("Logout: Token sudah expired (expected)");
-      // Return success-like object meski 401
+      console.log("Logout: Token sudah expired (expected)")
       return { 
         error: false, 
         status: 200, 
         data: { message: "Token expired, local logout performed" },
         message: "Local logout completed" 
-      };
+      }
     }
     
-    return errorObj;
+    return errorObj
   }
 }
 

@@ -28,7 +28,12 @@ export default function AuthProvider({ children }) {
       setIsAuthenticated(false);
       setIsLoading(false);
       setError(res.message);
-      throw new Error(res.message);
+
+      // throw object lengkap agar FE bisa baca pesan backend
+      throw {
+        status: res.errors?.status || 400,
+        error: res.errors?.error || { message: res.message },
+      };
     }
 
     const userData = res.data?.data || null;
@@ -36,7 +41,7 @@ export default function AuthProvider({ children }) {
     setIsAuthenticated(true);
     localStorage.setItem("employees", JSON.stringify(userData));
     setIsLoading(false);
-    
+
     return { success: true, data: userData };
   }, []);
 
