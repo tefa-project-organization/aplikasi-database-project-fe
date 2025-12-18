@@ -18,17 +18,19 @@ export default function EmployeeDetail({ employee, onClose }) {
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-bold">Employee Detail</h2>
           <Badge
-            variant={employee.status === "active" ? "default" : "secondary"}
+            variant="outline"
             className={
-              employee.status === "active" 
-                ? "bg-blue-500 hover:bg-blue-600"  // GANTI HIJAU -> BIRU
-                : "bg-gray-500 hover:bg-gray-600"
+              employee.status === "active"
+                ? "bg-blue-400 hover:bg-blue-500 border-blue-500 text-black dark:text-black font-medium"
+                : employee.status === "resigned"
+                  ? "bg-red-400 hover:bg-red-500 border-red-500 text-black dark:text-black font-medium"
+                  : "bg-gray-300 hover:bg-gray-400 border-gray-400 text-black dark:text-black font-medium"
             }
           >
             {employee.status}
           </Badge>
         </div>
-        
+
         {onClose && (
           <Button
             variant="ghost"

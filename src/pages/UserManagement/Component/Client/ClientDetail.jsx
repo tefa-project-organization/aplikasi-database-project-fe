@@ -89,7 +89,7 @@ export default function ClientDetail({ client, allPics = [], onClose }) {
             </span>
           </CardTitle>
         </CardHeader>
-        
+
         <CardContent>
           {assignedPics.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground border rounded-lg">

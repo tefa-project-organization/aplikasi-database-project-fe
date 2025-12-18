@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react"
-import { useNavigate } from "react-router-dom"
 
 // shadcn UI
 import {
@@ -19,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription, // ✅ TAMBAHKAN
 } from "@/components/ui/dialog"
 import { Combobox } from "@/components/ui/combobox"
 
@@ -45,62 +45,13 @@ const PM_OPTIONS = [
 
 // --- MOCK DATA ---
 const MOCK_PROJECTS = [
-  {
-    id: 1,
-    name: "Project 1",
-    description: "lorem ipsum dolor sit amet.",
-    status: "In Progress",
-    pm: "Don Be",
-
-    // tambahan
-    client: "PT Maju Jaya",
-    pic: "Azri",
-    startDate: "2024-01-10",
-    deadline: "2024-02-20",
-  },
-  {
-    id: 2,
-    name: "Project 2",
-    description: "lorem ipsum dolor sit amet.",
-    status: "Finished",
-    pm: "Narti",
-
-    // tambahan
-    client: "CV Sejahtera",
-    pic: "Bima",
-    startDate: "2023-11-01",
-    deadline: "2023-12-15",
-  },
-  {
-    id: 3,
-    name: "Project 3",
-    description: "lorem ipsum dolor sit amet.",
-    status: "Overdue",
-    pm: "Don Be",
-
-    // tambahan
-    client: "PT Digital Nusantara",
-    pic: "Rizky",
-    startDate: "2024-01-01",
-    deadline: "2024-01-31",
-  },
-  {
-    id: 4,
-    name: "Project 4",
-    description: "Deskripsi proyek penting.",
-    status: "In Progress",
-    pm: "Narti",
-
-    // tambahan
-    client: "PT Kreatif Solusi",
-    pic: "Adit",
-    startDate: "2024-02-05",
-    deadline: "2024-03-10",
-  },
+  { id: 1, name: "Project 1", description: "lorem ipsum dolor sit amet.", status: "In Progress", pm: "Don Be" },
+  { id: 2, name: "Project 2", description: "lorem ipsum dolor sit amet.", status: "Finished", pm: "Narti" },
+  { id: 3, name: "Project 3", description: "lorem ipsum dolor sit amet.", status: "Overdue", pm: "Don Be" },
+  { id: 4, name: "Project 4", description: "Deskripsi proyek penting.", status: "In Progress", pm: "Narti" },
 ]
 
 export default function Projects() {
-  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("All")
   const [filterPm, setFilterPm] = useState("All PM")
@@ -117,10 +68,9 @@ export default function Projects() {
   const [detailProject, setDetailProject] = useState(null)
   
   const handleDetail = (project) => {
-  setDetailProject(project)
-  setOpenDetail(true)
-}
-
+    setDetailProject(project)
+    setOpenDetail(true)
+  }
 
   // form state
   const [form, setForm] = useState({
@@ -202,7 +152,7 @@ export default function Projects() {
           className="w-[180px]"
         />
 
-        {/* DIALOG */}
+        {/* DIALOG TAMBAH/EDIT */}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
@@ -219,6 +169,10 @@ export default function Projects() {
               <DialogTitle>
                 {isEdit ? "Edit Proyek" : "Tambah Proyek"}
               </DialogTitle>
+              {/* ✅ TAMBAHKAN DIALOG DESCRIPTION */}
+              <DialogDescription className="sr-only">
+                {isEdit ? "Form untuk mengedit data proyek" : "Form untuk menambahkan proyek baru"}
+              </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
@@ -306,106 +260,81 @@ export default function Projects() {
         </Dialog>
       </div>
       
-      {/* DETAIL DIALOG */}
+      {/* DIALOG DETAIL PROYEK */}
       <Dialog open={openDetail} onOpenChange={setOpenDetail}>
-      <DialogContent className="max-w-9xl w-[98vw] px-18 py-16">
-      <DialogHeader>
-      <DialogTitle className="text-3xl font-semibold">
-        Detail Proyek
-      </DialogTitle>
-      </DialogHeader>
+        <DialogContent className="max-w-9xl w-[98vw] px-18 py-16">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-semibold">
+              Detail Proyek
+            </DialogTitle>
+            {/* ✅ TAMBAHKAN DIALOG DESCRIPTION */}
+            <DialogDescription className="sr-only">
+              Detail lengkap tentang proyek
+            </DialogDescription>
+          </DialogHeader>
 
-      {detailProject && (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mt-10">
-    
-    {/* KIRI - INFO UTAMA */}
-    <div className="space-y-6">
-      <div>
-        <p className="text-sm text-muted-foreground">Nama Proyek</p>
-        <p className="text-lg font-medium">{detailProject.name}</p>
-      </div>
+          {detailProject && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mt-10">
+              {/* KIRI */}
+              <div className="space-y-6">
+                <div>
+                  <p className="text-base text-muted-foreground">Nama Proyek</p>
+                  <p className="text-lg font-medium">{detailProject.name}</p>
+                </div>
 
-      <div>
-        <p className="text-sm text-muted-foreground">Client</p>
-        <p className="text-lg font-medium">{detailProject.client}</p>
-      </div>
+                <div>
+                  <p className="text-base text-muted-foreground">
+                    Project Manager
+                  </p>
+                  <p className="text-lg font-medium">{detailProject.pm}</p>
+                </div>
 
-      <div>
-        <p className="text-sm text-muted-foreground">Project Manager</p>
-        <p className="text-lg font-medium">{detailProject.pm}</p>
-      </div>
+                <div>
+                  <p className="text-base text-muted-foreground">Status</p>
+                  <span
+                    className={`inline-block mt-2 px-4 py-1.5 rounded text-sm font-semibold
+                      ${
+                        detailProject.status === "In Progress"
+                          ? "bg-blue-100 text-blue-700"
+                          : detailProject.status === "Finished"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                  >
+                    {detailProject.status}
+                  </span>
+                </div>
+              </div>
 
-      <div>
-        <p className="text-sm text-muted-foreground">PIC</p>
-        <p className="text-lg font-medium">{detailProject.pic}</p>
-      </div>
+              {/* KANAN */}
+              <div className="space-y-6">
+                <div>
+                  <p className="text-base text-muted-foreground">Deskripsi</p>
+                  <p className="text-base leading-relaxed">
+                    {detailProject.description}
+                  </p>
+                </div>
 
-      <div>
-        <p className="text-sm text-muted-foreground">Status</p>
-        <span
-          className={`inline-block mt-2 px-4 py-1.5 rounded text-sm font-semibold
-            ${
-              detailProject.status === "In Progress"
-                ? "bg-blue-100 text-blue-700"
-                : detailProject.status === "Finished"
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}
-        >
-          {detailProject.status}
-        </span>
-      </div>
-    </div>
+                <div>
+                  <p className="text-base text-muted-foreground">Dokumen</p>
+                  <p className="text-base text-muted-foreground">
+                    Tidak ada dokumen
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
-    {/* KANAN - WAKTU & DESKRIPSI */}
-    <div className="space-y-6">
-      <div>
-        <p className="text-sm text-muted-foreground">Tanggal Mulai</p>
-        <p className="text-base font-medium">
-          {detailProject.startDate}
-        </p>
-      </div>
-
-      <div>
-        <p className="text-sm text-muted-foreground">Deadline</p>
-        <p className="text-base font-medium">
-          {detailProject.deadline}
-        </p>
-      </div>
-
-      <div>
-        <p className="text-sm text-muted-foreground">Deskripsi</p>
-        <p className="text-base leading-relaxed">
-          {detailProject.description}
-        </p>
-      </div>
-
-      <div>
-        <p className="text-sm text-muted-foreground">Dokumen</p>
-        <p className="text-base text-muted-foreground">
-          Tidak ada dokumen
-        </p>
-      </div>
-    </div>
-
-  </div>
-)}
-
-    <DialogFooter className="mt-14">
-    <Button variant="secondary" onClick={() => {setOpenDetail(false) 
-        navigate(`/team/${detailProject.id}`)
-    }}>
-      View Team
-     </Button>
-      <Button
-        className="px-8 py-3 text-base"
-        onClick={() => setOpenDetail(false)}
-      >
-        Tutup
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+          <DialogFooter className="mt-14">
+            <Button
+              className="px-8 py-3 text-base"
+              onClick={() => setOpenDetail(false)}
+            >
+              Tutup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* PROJECT LIST */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -433,11 +362,7 @@ export default function Projects() {
             </CardContent>
 
             <CardFooter className="flex justify-end gap-2">
-            <Button variant="secondary" onClick={() => {setOpenDetail(false)
-             navigate("/team",)}}>
-             View Team
-           </Button>
-            <Button size="sm"variant="outline"onClick={() => handleDetail(project)}>
+              <Button size="sm"variant="outline"onClick={() => handleDetail(project)}>
                 Detail
               </Button>
               <Button size="sm" onClick={() => handleEdit(project)}>

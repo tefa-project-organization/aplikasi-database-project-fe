@@ -1,4 +1,3 @@
-// src/pages/UserManagement/Component/PIC/PicTable.jsx
 import React, { useState, useMemo } from "react"
 import {
     Table,
@@ -13,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import PicForm from "./PicForm"
 import PicDetail from "./PicDetail"
 
-export default function PicTable({ pics = [], onAddPic }) {
+export default function PicTable({ pics = [], clients = [], projects = [], onAddPic }) {
     const [search, setSearch] = useState("")
     const [sortAsc, setSortAsc] = useState(true)
     const [currentPage, setCurrentPage] = useState(1)
@@ -42,6 +41,19 @@ export default function PicTable({ pics = [], onAddPic }) {
         currentPage * perPage
     )
 
+    // Fungsi untuk mendapatkan nama dari ID
+    const getClientName = (clientId) => {
+        if (!clientId) return "-"
+        const client = clients.find(c => c.id === clientId)
+        return client ? client.name : `ID: ${clientId}`
+    }
+
+    const getProjectName = (projectId) => {
+        if (!projectId) return "-"
+        const project = projects.find(p => p.id === projectId)
+        return project ? project.name : `ID: ${projectId}`
+    }
+
     // DETAIL PAGE
     if (detailPic) {
         return (
@@ -51,12 +63,17 @@ export default function PicTable({ pics = [], onAddPic }) {
             />
         )
     }
+
     return (
         <div className="space-y-4">
             {/* HEADER */}
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">PIC List</h2>
-                <PicForm onSubmit={onAddPic} />
+                <PicForm
+                    onSubmit={onAddPic}
+                    clients={clients}
+                    projects={projects}
+                />
             </div>
 
             {/* SEARCH + SORT */}
@@ -86,8 +103,8 @@ export default function PicTable({ pics = [], onAddPic }) {
                             <TableHead>Title</TableHead>
                             <TableHead>Phone</TableHead>
                             <TableHead>Email</TableHead>
-                            <TableHead>Client ID</TableHead>
-                            <TableHead>Project ID</TableHead>
+                            <TableHead>Client</TableHead>
+                            <TableHead>Project</TableHead>
                             <TableHead className="text-right">Action</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -107,8 +124,12 @@ export default function PicTable({ pics = [], onAddPic }) {
                                 <TableCell>{pic.title || "-"}</TableCell>
                                 <TableCell>{pic.phone || "-"}</TableCell>
                                 <TableCell>{pic.email || "-"}</TableCell>
-                                <TableCell>{pic.client_id}</TableCell>
-                                <TableCell>{pic.project_id}</TableCell>
+                                <TableCell>
+                                    {pic.client_name || getClientName(pic.client_id)}
+                                </TableCell>
+                                <TableCell>
+                                    {pic.project_name || getProjectName(pic.project_id)}
+                                </TableCell>
                                 <TableCell className="text-right space-x-2">
                                     <Button
                                         variant="outline"

@@ -9,7 +9,15 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogOverlay,
+  DialogDescription,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select" // ✅ IMPORT SELECT
 
 export default function EmployeeForm({ onSubmit }) {
   const [open, setOpen] = useState(false)
@@ -30,8 +38,11 @@ export default function EmployeeForm({ onSubmit }) {
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleSelectChange = (value) => {
+    setForm((prev) => ({ ...prev, status: value }))
+  }
+
   const handleSubmit = () => {
-    // Validasi required fields
     if (!form.nik.trim() || !form.nip.trim() || !form.name.trim()) {
       alert("NIK, NIP, and Name are required")
       return
@@ -51,7 +62,6 @@ export default function EmployeeForm({ onSubmit }) {
 
     onSubmit?.(payload)
 
-    // Reset form
     setForm({
       nik: "",
       nip: "",
@@ -72,14 +82,14 @@ export default function EmployeeForm({ onSubmit }) {
         <Button type="button" size="sm">+ Add Employee</Button>
       </DialogTrigger>
 
-      <DialogOverlay className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" />
-
       <DialogContent
-        className="sm:max-w-md max-w-full overflow-hidden z-50"
-        style={{ scrollbarWidth: "none" }}
+        aria-describedby="employee-dialog-description" 
       >
         <DialogHeader>
           <DialogTitle>Add New Employee</DialogTitle>
+          <DialogDescription id="employee-dialog-description" className="sr-only">
+            Form untuk menambahkan karyawan baru ke dalam sistem
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 mt-2 max-h-[70vh] overflow-y-auto pr-2 scrollbar-none [&::-webkit-scrollbar]:hidden">
@@ -178,19 +188,22 @@ export default function EmployeeForm({ onSubmit }) {
             />
           </div>
 
-          {/* Status */}
+          {/* Status - GUNAKAN SELECT DARI SHADCN/UI */}
           <div>
             <label className="block mb-1 font-medium">Status</label>
-            <select
-              name="status"
+            <Select
               value={form.status}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
+              onValueChange={handleSelectChange}
             >
-              <option value="active">Active</option>
-              <option value="resigned">Resigned</option>
-              <option value="inactive">Inactive</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="resigned">Resigned</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Buttons */}

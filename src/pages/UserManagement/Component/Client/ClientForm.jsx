@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogOverlay,
+  DialogDescription,
 } from "@/components/ui/dialog"
 
 export default function ClientForm({ onSubmit }) {
@@ -41,12 +41,8 @@ export default function ClientForm({ onSubmit }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" size="sm">
-          + Add Client
-        </Button>
+        <Button type="button" size="sm">+ Add Client</Button>
       </DialogTrigger>
-
-      <DialogOverlay className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" />
 
       <DialogContent
         className="sm:max-w-md max-w-full overflow-hidden z-50"
@@ -54,23 +50,15 @@ export default function ClientForm({ onSubmit }) {
       >
         <DialogHeader>
           <DialogTitle>Add New Client</DialogTitle>
+          <DialogDescription>
+            Form untuk menambahkan client baru
+          </DialogDescription>
         </DialogHeader>
 
-        <div
-          className="space-y-2 mt-2 max-h-[70vh] overflow-y-auto pr-2 scrollbar-none [&::-webkit-scrollbar]:hidden"
-          style={{
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-          }}
-        >
+        <div className="space-y-2 mt-2 max-h-[70vh] overflow-y-auto pr-2 scrollbar-none [&::-webkit-scrollbar]:hidden">
           <div>
             <label className="block mb-1 font-medium">Name</label>
-            <Input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Enter client name"
-            />
+            <Input name="name" value={form.name} onChange={handleChange} placeholder="Enter client name" />
           </div>
 
           <div>

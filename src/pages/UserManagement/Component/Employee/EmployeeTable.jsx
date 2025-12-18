@@ -44,6 +44,22 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail 
         currentPage * perPage
     )
 
+    // Fungsi untuk menentukan warna badge
+    const getBadgeStyles = (status) => {
+        const baseStyle = "font-medium text-black dark:text-black" // TEXT HITAM SELALU
+
+        switch (status) {
+            case "active":
+                return `${baseStyle} bg-blue-400 hover:bg-blue-500 border-blue-500`
+            case "resigned":
+                return `${baseStyle} bg-red-400 hover:bg-red-500 border-red-500`
+            case "inactive":
+                return `${baseStyle} bg-gray-300 hover:bg-gray-400 border-gray-400`
+            default:
+                return `${baseStyle} bg-gray-200 hover:bg-gray-300 border-gray-300`
+        }
+    }
+
     // DETAIL PAGE
     if (detailEmployee) {
         return (
@@ -115,12 +131,8 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail 
                                 <TableCell>{employee.phone || "-"}</TableCell>
                                 <TableCell>
                                     <Badge
-                                        variant={employee.status === "active" ? "default" : "secondary"}
-                                        className={
-                                            employee.status === "active"
-                                                ? "bg-blue-500 hover:bg-blue-600"  // GANTI HIJAU -> BIRU
-                                                : "bg-gray-500 hover:bg-gray-600"
-                                        }
+                                        variant="outline"
+                                        className={getBadgeStyles(employee.status)}
                                     >
                                         {employee.status}
                                     </Badge>

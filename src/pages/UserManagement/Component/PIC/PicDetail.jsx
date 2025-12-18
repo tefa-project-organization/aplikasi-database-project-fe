@@ -1,4 +1,3 @@
-// src/pages/UserManagement/Component/PIC/PicDetail.jsx
 import React from "react"
 import {
   Card,
@@ -59,16 +58,16 @@ export default function PicDetail({ pic, onClose }) {
 
             <div>
               <strong className="block text-sm text-muted-foreground">
-                Client ID
+                For Client
               </strong>
-              <span>{pic.client_id || "Not assigned"}</span>
+              <span>{pic.client_name || (pic.client_id ? `Client ID: ${pic.client_id}` : "Not assigned")}</span>
             </div>
 
             <div>
               <strong className="block text-sm text-muted-foreground">
-                Project ID
+                For Project
               </strong>
-              <span>{pic.project_id || "Not assigned"}</span>
+              <span>{pic.project_name || (pic.project_id ? `Project ID: ${pic.project_id}` : "Not assigned")}</span>
             </div>
           </div>
         </CardContent>
