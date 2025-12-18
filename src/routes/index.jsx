@@ -10,6 +10,7 @@ import UserManagement from "@/pages/UserManagement/Hooks/UserManagement"
 import ErrorPage from "@/pages/ErrorPage/ErrorPage"
 import PrivateRoute from "./PrivateRoute"
 import PublicRoute from "./PublicRoute"
+import TeamDetail from "@/pages/Team/TeamDetail"
 
 export default function AppRoutes() {
   return (
@@ -37,12 +38,13 @@ export default function AppRoutes() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/team" element={<Team />} />
+            <Route path="/team/:id" element={<TeamDetail />} />
             <Route path="/usermanagement" element={<UserManagement />} />
           </Route>
         </Route>
 
         {/* NOT FOUND */}
-        <Route path="*" element={<ErrorPage />} />
+        <Route path="*" eleme nt={<ErrorPage />} />
       </Routes>
     </BrowserRouter>
   )
