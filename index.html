@@ -2,12 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/src/assets/icon/header-icon.svg" />
+    <!-- Favicon akan diupdate oleh JavaScript -->
+    <link rel="icon" type="image/svg+xml" id="favicon" href="/src/assets/icon/logo_wgs_fullBlack.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Database Project</title>
+    <script>
+      // Update favicon berdasarkan theme system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const favicon = document.getElementById('favicon');
+      if (prefersDark) {
+        favicon.href = '/src/assets/icon/logo_wgs_fullWhite.svg';
+      }
+      
+      // Listen untuk perubahan theme
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+        favicon.href = e.matches 
+          ? '/src/assets/icon/logo_wgs_fullWhite.svg'
+          : '/src/assets/icon/logo_wgs_fullBlack.svg';
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

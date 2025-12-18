@@ -1,8 +1,8 @@
 import * as Yup from "yup";
 
 const LoginValidate = Yup.object({
-  username: Yup.string()
-    .required("Username wajib diisi"),
+  identifier: Yup.string()
+    .required("Email / Username wajib diisi"),
   password: Yup.string()
     .required("Password wajib diisi"),
 });

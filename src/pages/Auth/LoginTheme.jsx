@@ -1,10 +1,9 @@
 import React from "react";
 import { Moon, Sun } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function LoginTheme() {
-  const toggleTheme = () => {
-    document.documentElement.classList.toggle("dark");
-  };
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <button
@@ -18,8 +17,11 @@ export default function LoginTheme() {
         transition
       "
     >
-      <Sun className="h-4 w-4 dark:hidden" />
-      <Moon className="h-4 w-4 hidden dark:block" />
+      {theme === "dark" ? (
+        <Sun className="h-4 w-4" />
+      ) : (
+        <Moon className="h-4 w-4" />
+      )}
       <span>Theme</span>
     </button>
   );

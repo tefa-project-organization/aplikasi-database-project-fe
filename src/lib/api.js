@@ -1,62 +1,55 @@
 import axios from "axios"
-import {useAuth} from "@/contexts/AuthContext.js";
 
 /*
   Notes:
   1. Base URL otomatis pilih lokal atau production
-  2. Axios instance pake cookie auth (withCredentials: true + otomatis cek cookienya)
-  3. Interceptor handle 401, jadi bisa reload page otomatis
-  4. List formatt respon error, status, data, message
-  5. List helper GET, POST, Patch, DELETE, fetchWithPagination
-  6. POST/Patch otomatis nge-cek FormData buat multipart
+  2. Axios instance pake cookie auth
+  3. Helper konsisten response
 */
 
-// base URL api, otomatis nyesuain lokal - prdction
+// base URL api
 function getBaseApiUrl() {
   const hname = window.location.hostname || ""
   if (hname.includes("localhost") || hname.includes("127.0.0.1")) {
-    return import.meta.env.VITE_BASE_URL_API_LOCAL || import.meta.env.VITE_BASE_URL_API_DOMAIN
+    return (
+      import.meta.env.VITE_BASE_URL_API_LOCAL ||
+      import.meta.env.VITE_BASE_URL_API_DOMAIN
+    )
   }
   return import.meta.env.VITE_BASE_URL_API_DOMAIN
 }
 
-// instance axios, cookie otomatis dikirim
+// AXIOS INSTANCE
 const api = axios.create({
   baseURL: getBaseApiUrl(),
-  withCredentials: true, // cookie auth otomatis
-  headers: { Accept: "application/json" },
+  withCredentials: true, // if backend use cookie auth
+  headers: {
+    Accept: "application/json",
+  },
 })
 
-// intercept response, kalo 401 langsung reload page
-// api.interceptors.response.use(
-//   (res) => res,
-//   (err) => {
-//     if (err?.response?.status === 401)
-//
-//
-//     return Promise.reject(err)
-//   }
-// )
-
-// helper format error, biar konsisten
+// FORMAT RESPONSE
 function formatError(err) {
   const status = err?.response?.status || 500
   const data = err?.response?.data
-  const message = data?.error || data?.message || err.message || "Terjadi kesalahan sistem"
+  const message =
+    data?.error ||
+    data?.message ||
+    err.message ||
+    "Terjadi kesalahan sistem"
   return { error: true, status, data, message }
 }
 
-// helper format sukses, biar konsisten
 function formatSuccess(res) {
   return {
     error: false,
     status: res.status,
     data: res.data,
-    message: (res.data?.message) || "Success",
+    message: res.data?.message || "Success",
   }
 }
 
-// GET request sederhana, params jadi query string otomatis
+// HELPERS
 export async function apiGet(path, params = {}) {
   try {
     const res = await api.get(path, { params })
@@ -66,11 +59,16 @@ export async function apiGet(path, params = {}) {
   }
 }
 
-// POST request, cek FormData otomatis untuk multipart
 export async function apiPost(path, payload, extraConfig = {}) {
   try {
     const isForm = payload instanceof FormData
-    const config = { ...(isForm ? { headers: { "Content-Type": "multipart/form-data" } } : {}), ...extraConfig }
+    const config = {
+      ...(isForm
+        ? { headers: { "Content-Type": "multipart/form-data" } }
+        : {}),
+      ...extraConfig,
+    }
+
     const res = await api.post(path, payload, config)
     return formatSuccess(res)
   } catch (err) {
@@ -78,11 +76,16 @@ export async function apiPost(path, payload, extraConfig = {}) {
   }
 }
 
-// Patch request, sama seperti POST
 export async function apiPatch(path, payload, extraConfig = {}) {
   try {
     const isForm = payload instanceof FormData
-    const config = { ...(isForm ? { headers: { "Content-Type": "multipart/form-data" } } : {}), ...extraConfig }
+    const config = {
+      ...(isForm
+        ? { headers: { "Content-Type": "multipart/form-data" } }
+        : {}),
+      ...extraConfig,
+    }
+
     const res = await api.patch(path, payload, config)
     return formatSuccess(res)
   } catch (err) {
@@ -90,7 +93,6 @@ export async function apiPatch(path, payload, extraConfig = {}) {
   }
 }
 
-// DELETE request, bisa kasih query params opsional
 export async function apiDelete(path, params = {}) {
   try {
     const res = await api.delete(path, { params })
@@ -100,7 +102,6 @@ export async function apiDelete(path, params = {}) {
   }
 }
 
-// fetch data dengan server-side pagination
 export async function fetchWithPagination(path, options = {}) {
   const { page = 1, limit = 10, sort, order, ...other } = options
   const params = { page, limit, ...other }
@@ -109,19 +110,28 @@ export async function fetchWithPagination(path, options = {}) {
   return apiGet(path, params)
 }
 
-// fetch logout
+// logout
 export async function apiLogout(path) {
   try {
-    const tempApi = axios.create({
-      baseURL: getBaseApiUrl(),
-      withCredentials: true,
-      headers: { Accept: "application/json" },
-    });
-
-    const res = await tempApi.get(path);
+    const res = await api.post(path, {});
     return formatSuccess(res);
   } catch (err) {
-    return formatError(err);
+    // Untuk logout, jangan throw error khusus untuk 401
+    const errorObj = formatError(err);
+    
+    // Jika 401 (token expired), anggap normal untuk logout
+    if (err.response?.status === 401) {
+      console.log("Logout: Token sudah expired (expected)");
+      // Return success-like object meski 401
+      return { 
+        error: false, 
+        status: 200, 
+        data: { message: "Token expired, local logout performed" },
+        message: "Local logout completed" 
+      };
+    }
+    
+    return errorObj;
   }
 }
 
