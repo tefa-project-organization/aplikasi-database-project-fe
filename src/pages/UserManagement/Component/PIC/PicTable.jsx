@@ -1,79 +1,56 @@
 // src/pages/UserManagement/Component/PIC/PicTable.jsx
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react"
 import {
-    Table, TableBody, TableCell, TableHead, TableHeader, TableRow
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import PicForm from "./PicForm";
-import PicDetail from "./PicDetail";
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import PicForm from "./PicForm"
+import PicDetail from "./PicDetail"
 
-export default function PicTable({ pics, onAddPic }) {
-    const [search, setSearch] = useState("");
-    const [sortAsc, setSortAsc] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [detailPic, setDetailPic] = useState(null); // state untuk detail PIC
-    const perPage = 10;
+export default function PicTable({ pics = [], onAddPic }) {
+    const [search, setSearch] = useState("")
+    const [sortAsc, setSortAsc] = useState(true)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [detailPic, setDetailPic] = useState(null)
 
-    // filter + sort
+    const perPage = 10
+
+    // filter + sort by name
     const filteredPics = useMemo(() => {
-        let filtered = pics.filter(p =>
-            p.name.toLowerCase().includes(search.toLowerCase())
-        );
-        filtered.sort((a, b) => {
-            const dateA = a.createdAt ? new Date(a.createdAt) : a.id;
-            const dateB = b.createdAt ? new Date(b.createdAt) : b.id;
-            return sortAsc ? dateA - dateB : dateB - dateA;
-        });
-        return filtered;
-    }, [pics, search, sortAsc]);
+        let filtered = pics.filter((p) =>
+            p.name?.toLowerCase().includes(search.toLowerCase())
+        )
 
-    const totalPages = Math.ceil(filteredPics.length / perPage);
+        filtered.sort((a, b) =>
+            sortAsc
+                ? a.name.localeCompare(b.name)
+                : b.name.localeCompare(a.name)
+        )
+
+        return filtered
+    }, [pics, search, sortAsc])
+
+    const totalPages = Math.ceil(filteredPics.length / perPage)
     const paginatedPics = filteredPics.slice(
         (currentPage - 1) * perPage,
         currentPage * perPage
-    );
+    )
 
-    // Jika ada PIC yang dipilih, tampilkan detail page
+    // DETAIL PAGE
     if (detailPic) {
         return (
-            <div className="space-y-6">
-                {/* Tombol kembali ke list */}
-                <div className="flex justify-between items-center">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDetailPic(null)}
-                        className="flex items-center gap-2"
-                    >
-                        <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            width="16" 
-                            height="16" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
-                        >
-                            <path d="m15 18-6-6 6-6"/>
-                        </svg>
-                        Back to PIC List
-                    </Button>
-                </div>
-                
-                {/* Detail PIC */}
-                <PicDetail 
-                    pic={detailPic} 
-                    onClose={() => setDetailPic(null)} 
-                />
-            </div>
-        );
+            <PicDetail
+                pic={detailPic}
+                onClose={() => setDetailPic(null)}
+            />
+        )
     }
-
-    // Tampilkan tabel jika tidak ada PIC yang dipilih
     return (
         <div className="space-y-4">
             {/* HEADER */}
@@ -83,15 +60,20 @@ export default function PicTable({ pics, onAddPic }) {
             </div>
 
             {/* SEARCH + SORT */}
-            <div className="flex items-center justify-between space-x-2">
+            <div className="flex items-center justify-between gap-2">
                 <Input
                     placeholder="Search PIC..."
                     value={search}
-                    onChange={e => setSearch(e.target.value)}
+                    onChange={(e) => setSearch(e.target.value)}
                     className="max-w-xs"
                 />
-                <Button variant="outline" size="sm" onClick={() => setSortAsc(!sortAsc)}>
-                    Sort by Time {sortAsc ? "↑" : "↓"}
+
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSortAsc(!sortAsc)}
+                >
+                    Sort Name {sortAsc ? "A–Z" : "Z–A"}
                 </Button>
             </div>
 
@@ -101,27 +83,32 @@ export default function PicTable({ pics, onAddPic }) {
                     <TableHeader>
                         <TableRow>
                             <TableHead>PIC Name</TableHead>
+                            <TableHead>Title</TableHead>
                             <TableHead>Phone</TableHead>
                             <TableHead>Email</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>Client ID</TableHead>
+                            <TableHead>Project ID</TableHead>
                             <TableHead className="text-right">Action</TableHead>
                         </TableRow>
                     </TableHeader>
 
                     <TableBody>
-                        {paginatedPics.map(pic => (
+                        {paginatedPics.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                                    No PIC found
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {paginatedPics.map((pic) => (
                             <TableRow key={pic.id}>
                                 <TableCell className="font-medium">{pic.name}</TableCell>
-                                <TableCell>{pic.phone}</TableCell>
-                                <TableCell>{pic.email}</TableCell>
-                                <TableCell>
-                                    <Badge
-                                        className="ml-2"
-                                        variant={pic.status === "active" ? "default" : "secondary"}
-                                    >
-                                        {pic.status}
-                                    </Badge>
-                                </TableCell>
+                                <TableCell>{pic.title || "-"}</TableCell>
+                                <TableCell>{pic.phone || "-"}</TableCell>
+                                <TableCell>{pic.email || "-"}</TableCell>
+                                <TableCell>{pic.client_id}</TableCell>
+                                <TableCell>{pic.project_id}</TableCell>
                                 <TableCell className="text-right space-x-2">
                                     <Button
                                         variant="outline"
@@ -141,7 +128,7 @@ export default function PicTable({ pics, onAddPic }) {
             </div>
 
             {/* PAGINATION */}
-            <div className="flex justify-between items-center mt-2">
+            <div className="flex justify-between items-center">
                 <span>
                     Page {currentPage} of {totalPages || 1}
                 </span>
@@ -149,7 +136,7 @@ export default function PicTable({ pics, onAddPic }) {
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
                     >
                         Prev
@@ -157,7 +144,7 @@ export default function PicTable({ pics, onAddPic }) {
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages}
                     >
                         Next
@@ -165,5 +152,5 @@ export default function PicTable({ pics, onAddPic }) {
                 </div>
             </div>
         </div>
-    );
+    )
 }

@@ -8,7 +8,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import ClientForm from "./ClientForm"
 
@@ -16,19 +15,20 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
   const [search, setSearch] = useState("")
   const [sortAsc, setSortAsc] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
-  const perPage = 10 // jumlah client per halaman
+  const perPage = 10
 
-  // filter + sort
+  // filter + sort (BY CLIENT NAME)
   const filteredClients = useMemo(() => {
     let filtered = clients.filter((c) =>
       c.name.toLowerCase().includes(search.toLowerCase())
     )
-    filtered.sort((a, b) => {
-      // jika createdAt tidak ada, tetap urut berdasarkan id
-      const dateA = a.createdAt ? new Date(a.createdAt) : a.id
-      const dateB = b.createdAt ? new Date(b.createdAt) : b.id
-      return sortAsc ? dateA - dateB : dateB - dateA
-    })
+
+    filtered.sort((a, b) =>
+      sortAsc
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name)
+    )
+
     return filtered
   }, [clients, search, sortAsc])
 
@@ -59,7 +59,7 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
           size="sm"
           onClick={() => setSortAsc(!sortAsc)}
         >
-          Sort by Time {sortAsc ? "↑" : "↓"}
+          Sort Name {sortAsc ? "A–Z" : "Z–A"}
         </Button>
       </div>
 
@@ -71,7 +71,6 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
               <TableHead>Client Name</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>NPWP</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -79,17 +78,11 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
           <TableBody>
             {paginatedClients.map((client) => (
               <TableRow key={client.id}>
-                <TableCell className="font-medium">{client.name}</TableCell>
+                <TableCell className="font-medium">
+                  {client.name}
+                </TableCell>
                 <TableCell>{client.phone}</TableCell>
                 <TableCell>{client.npwp}</TableCell>
-                <TableCell>
-                  <Badge
-                    className="ml-2"
-                    variant={client.status === "active" ? "default" : "secondary"}
-                  >
-                    {client.status}
-                  </Badge>
-                </TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button
                     variant="outline"

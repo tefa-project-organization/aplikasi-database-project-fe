@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import {
   Tabs,
   TabsContent,
@@ -35,10 +35,44 @@ const initialClients = [
   },
 ]
 
-// dummy PICs
+// dummy PICs - HARUS SAMA dengan di ClientDetail.jsx
 const initialPics = [
-  { id: 1, name: "Rina", phone: "0812-3456-7890", email: "rina@mail.com", status: "active" },
-  { id: 2, name: "Budi", phone: "0813-9876-5432", email: "budi@mail.com", status: "inactive" },
+  { 
+    id: 1, 
+    name: "John Doe", 
+    phone: "08123456789", 
+    email: "john@example.com", 
+    title: "Manager",
+    client_id: 1,  // Terhubung dengan PT Maju Jaya Abadi
+    project_id: 1
+  },
+  { 
+    id: 2, 
+    name: "Jane Smith", 
+    phone: "08987654321", 
+    email: "jane@example.com", 
+    title: "Supervisor",
+    client_id: 1,  // Juga terhubung dengan PT Maju Jaya Abadi
+    project_id: 2
+  },
+  { 
+    id: 3, 
+    name: "Bob Johnson", 
+    phone: "08765432109", 
+    email: "bob@example.com", 
+    title: "Staff",
+    client_id: 2,  // Terhubung dengan CV Sumber Rejeki
+    project_id: 3
+  },
+  { 
+    id: 4, 
+    name: "Alice Brown", 
+    phone: "08512345678", 
+    email: "alice@example.com", 
+    title: "Manager",
+    client_id: null,  // Belum ditugaskan ke client manapun
+    project_id: null
+  },
 ]
 
 export default function UserManagement() {
