@@ -98,6 +98,24 @@ export async function apiPost(path, payload, extraConfig = {}) {
   }
 }
 
+export async function apiPut(path, payload, extraConfig = {}) {
+  try {
+    const isForm = payload instanceof FormData
+    const config = {
+      ...(isForm
+        ? { headers: { "Content-Type": "multipart/form-data" } }
+        : {}),
+      ...extraConfig,
+    }
+
+    const res = await api.put(path, payload, config)
+    return formatSuccess(res)
+  } catch (err) {
+    return formatError(err)
+  }
+}
+
+
 export async function apiPatch(path, payload, extraConfig = {}) {
   try {
     const isForm = payload instanceof FormData

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { apiGet, apiDelete, apiPost, apiPatch } from "@/lib/api";
+import { apiGet, apiDelete, apiPost, apiPatch, apiPut } from "@/lib/api";
 import { SHOW_ALL_PROJECTS, SHOW_ONE_PROJECT, DELETE_PROJECT, CREATE_PROJECT, UPDATE_PROJECT } from "@/constants/api/project";
 
 // CHILD COMPONENTS
@@ -42,11 +42,12 @@ export default function Projects() {
     project_code: "",
     client_id: "",
     description: "",
-    contract_value: "",
     started_at: "",
     finished_at: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState(null);
+
 
   // fix duplicate client options
   const clientOptions = useMemo(() => {
@@ -126,19 +127,20 @@ export default function Projects() {
 
   const handleEdit = (project) => {
     setIsEdit(true);
+    setEditingProjectId(project.id); 
     setFormProject({
       project_name: project.project_name || "",
       project_type: project.project_type || "",
       project_code: project.project_code || "",
       client_id: project.client_id || "",
       description: project.description || "",
-      contract_value: project.contract_value || "",
       started_at: project.started_at?.split("T")[0] || "",
       finished_at: project.finished_at?.split("T")[0] || "",
     });
     setOpenForm(true);
-    setOpenDetail(false); // Tutup dialog detail saat buka edit
-  };
+    setOpenDetail(false);
+};
+
 
   const handleCreate = () => {
     setIsEdit(false);
@@ -148,7 +150,6 @@ export default function Projects() {
       project_code: "",
       client_id: "",
       description: "",
-      contract_value: "",
       started_at: "",
       finished_at: "",
     });
@@ -164,7 +165,6 @@ export default function Projects() {
         project_type: String(formData.project_type || ""),
         project_code: String(formData.project_code || "").trim(),
         client_id: parseInt(formData.client_id) || 0,
-        contract_value: String(formData.contract_value || ""),
         description: String(formData.description || ""),
         started_at: parseDate(formData.started_at),
         finished_at: parseDate(formData.finished_at),
@@ -173,11 +173,15 @@ export default function Projects() {
       console.log("Payload ke backend:", payload); // Untuk debugging
 
       let res;
-      if (isEdit && detailProject?.id) {
-        res = await apiPatch(UPDATE_PROJECT(detailProject.id), payload);
+      if (isEdit && editingProjectId) {
+        res = await apiPut(
+          UPDATE_PROJECT(editingProjectId),
+          payload
+        );
       } else {
         res = await apiPost(CREATE_PROJECT, payload);
       }
+
 
       if (!res.error) {
         await fetchProjects();

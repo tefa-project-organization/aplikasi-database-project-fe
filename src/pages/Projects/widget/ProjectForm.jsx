@@ -40,7 +40,6 @@ export default function ProjectForm({
         project_type: "",
         client_id: "",
         description: "",
-        contract_value: "",
         project_code: "",
         started_at: "",
         finished_at: "",
@@ -97,7 +96,6 @@ export default function ProjectForm({
                 : "",
             client_id: isValidClient ? clientId : "",
             description: initialData.description || "",
-            contract_value: initialData.contract_value || "",
             started_at: initialData.started_at?.split("T")[0] || "",
             finished_at: initialData.finished_at?.split("T")[0] || "",
         })
@@ -134,7 +132,6 @@ export default function ProjectForm({
             project_type: String(form.project_type),         // string
             client_id: parseInt(form.client_id) || 0,        // integer
             description: String(form.description || ""),     // string
-            contract_value: String(form.contract_value || ""), // string
             started_at: parseDate(form.started_at),          // ISO string / null
             finished_at: parseDate(form.finished_at),        // ISO string / null
         }
@@ -274,20 +271,7 @@ export default function ProjectForm({
                         />
                     </div>
 
-                    {/* Nilai Kontrak */}
-                    <div>
-                        <label className="block mb-1 font-medium">
-                            Nilai Kontrak (Rp)
-                        </label>
-                        <Input
-                            name="contract_value"
-                            value={form.contract_value}
-                            onChange={handleChange}
-                            type="number"
-                            placeholder="Masukkan nilai kontrak"
-                            readOnly={readOnly}
-                        />
-                    </div>
+                  
 
                     {/* Tanggal */}
                     <div>
