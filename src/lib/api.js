@@ -29,6 +29,27 @@ const api = axios.create({
   },
 })
 
+/* =========================================================
+   [ADDED] SAFE AUTH HEADER INTERCEPTOR (NON BREAKING)
+   - TIDAK mengganggu login/logout
+   - Cookie tetap dikirim
+   - Authorization hanya ditambah JIKA token ada
+========================================================= */
+api.interceptors.request.use(
+  (config) => {
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("access_token")
+
+    if (token && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+
+    return config
+  },
+  (error) => Promise.reject(error)
+)
+
 // FORMAT RESPONSE
 function formatError(err) {
   const status = err?.response?.status || 500
@@ -119,18 +140,18 @@ export async function apiLogout(path) {
   } catch (err) {
     // Untuk logout, jangan throw error khusus untuk 401
     const errorObj = formatError(err)
-    
+
     // Jika 401 (token expired), anggap normal untuk logout
     if (err.response?.status === 401) {
       console.log("Logout: Token sudah expired (expected)")
-      return { 
-        error: false, 
-        status: 200, 
+      return {
+        error: false,
+        status: 200,
         data: { message: "Token expired, local logout performed" },
-        message: "Local logout completed" 
+        message: "Local logout completed",
       }
     }
-    
+
     return errorObj
   }
 }

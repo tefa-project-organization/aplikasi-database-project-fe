@@ -1,383 +1,423 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useEffect, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
+import { apiGet, apiDelete, apiPost, apiPatch } from "@/lib/api";
+import { SHOW_ALL_PROJECTS, SHOW_ONE_PROJECT, DELETE_PROJECT, CREATE_PROJECT, UPDATE_PROJECT } from "@/constants/api/project";
 
-// shadcn UI
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription, // ✅ TAMBAHKAN
-} from "@/components/ui/dialog"
-import { Combobox } from "@/components/ui/combobox"
-
-// Field (custom)
-import {
-  Field,
-  FieldLabel,
-  FieldContent,
-} from "@/components/ui/field"
-
-// --- OPTIONS ---
-const STATUS_OPTIONS = [
-  { value: "All", label: "Semua Status" },
-  { value: "In Progress", label: "In Progress" },
-  { value: "Finished", label: "Finished" },
-  { value: "Overdue", label: "Overdue" },
-]
-
-const PM_OPTIONS = [
-  { value: "All PM", label: "Semua PM" },
-  { value: "Don Be", label: "Don Be" },
-  { value: "Narti", label: "Narti" },
-]
-
-// --- MOCK DATA ---
-const MOCK_PROJECTS = [
-  { id: 1, name: "Project 1", description: "lorem ipsum dolor sit amet.", status: "In Progress", pm: "Don Be" },
-  { id: 2, name: "Project 2", description: "lorem ipsum dolor sit amet.", status: "Finished", pm: "Narti" },
-  { id: 3, name: "Project 3", description: "lorem ipsum dolor sit amet.", status: "Overdue", pm: "Don Be" },
-  { id: 4, name: "Project 4", description: "Deskripsi proyek penting.", status: "In Progress", pm: "Narti" },
-]
+// CHILD COMPONENTS
+import FilterControls from "./widget/FilterControls";
+import ProjectCard from "./widget/ProjectCard";
+import ProjectForm from "./widget/ProjectForm";
 
 export default function Projects() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterStatus, setFilterStatus] = useState("All")
-  const [filterPm, setFilterPm] = useState("All PM")
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // dialog state
-  const [open, setOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterType, setFilterType] = useState("All Types");
+  const [filterClient, setFilterClient] = useState("All Clients");
 
-  // edit state
-  const [isEdit, setIsEdit] = useState(false)
-  const [selectedProject, setSelectedProject] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 6;
 
-  // detail dialog
-  const [openDetail, setOpenDetail] = useState(false)
-  const [detailProject, setDetailProject] = useState(null)
-  
-  const handleDetail = (project) => {
-    setDetailProject(project)
-    setOpenDetail(true)
-  }
+  const [openDetail, setOpenDetail] = useState(false);
+  const [detailProject, setDetailProject] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  // form state
-  const [form, setForm] = useState({
-    name: "",
-    pm: "",
+  const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d.toISOString();
+  };
+
+  const [openForm, setOpenForm] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [formProject, setFormProject] = useState({
+    project_name: "",
+    project_type: "",
+    client_id: "",
     description: "",
-    document: null,
-  })
+    contract_value: "",
+    started_at: "",
+    finished_at: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
 
-  // FILTER
-  const filteredProjects = useMemo(() => {
-    return MOCK_PROJECTS.filter((project) => {
-      const matchesSearch =
-        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchTerm.toLowerCase())
+  // fix duplicate client options
+  const clientOptions = useMemo(() => {
+    const map = new Map();
+    projects.forEach((p) => {
+      if (p.client_id && !map.has(p.client_id)) {
+        map.set(p.client_id, { id: p.client_id, name: `Client ${p.client_id}` });
+      }
+    });
+    return Array.from(map.values());
+  }, [projects]);
 
-      const matchesStatus =
-        filterStatus === "All" || project.status === filterStatus
+  const projectTypes = useMemo(() => {
+    const types = projects
+      .map((p) => p.project_type)
+      .filter(Boolean)
+      .filter((type, index, self) => self.indexOf(type) === index);
+    return types;
+  }, [projects]);
 
-      const matchesPm =
-        filterPm === "All PM" || project.pm === filterPm
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const res = await apiGet(SHOW_ALL_PROJECTS);
+      const items =
+        res?.data?.items || res?.data?.data?.items || res?.items || [];
+      setProjects(items);
+    } catch (err) {
+      setProjects([]);
+      console.error("Fetch projects error:", err);
+    }
+    setLoading(false);
+  };
 
-      return matchesSearch && matchesStatus && matchesPm
-    })
-  }, [searchTerm, filterStatus, filterPm])
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
-  // EDIT HANDLER
+  const handleDetail = async (id) => {
+    const localProject = projects.find((p) => p.id === id);
+    setDetailProject(localProject || null);
+    setOpenDetail(true);
+
+    // fetch detail only if description belum ada
+    if (!localProject?.description) {
+      setDetailLoading(true);
+      try {
+        const res = await apiGet(SHOW_ONE_PROJECT(id));
+        if (!res.error && res.data) {
+          setDetailProject(res.data);
+        }
+      } catch (err) {
+        console.error("Detail error:", err);
+      }
+      setDetailLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus proyek ini?")) return;
+    setDeleting(true);
+    try {
+      const res = await apiDelete(DELETE_PROJECT(id));
+      if (!res.error) {
+        await fetchProjects();
+        setOpenDetail(false);
+        alert("Proyek berhasil dihapus!");
+      } else {
+        alert(`Gagal menghapus: ${res.message}`);
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Terjadi kesalahan saat menghapus proyek");
+    }
+    setDeleting(false);
+  };
+
   const handleEdit = (project) => {
-    setIsEdit(true)
-    setSelectedProject(project)
-    setForm({
-      name: project.name,
-      pm: project.pm,
-      description: project.description,
-      document: null,
-    })
-    setOpen(true)
-  }
+    setIsEdit(true);
+    setFormProject({
+      project_name: project.project_name || "",
+      project_type: project.project_type || "",
+      client_id: project.client_id || "",
+      description: project.description || "",
+      contract_value: project.contract_value || "",
+      started_at: project.started_at?.split("T")[0] || "",
+      finished_at: project.finished_at?.split("T")[0] || "",
+    });
+    setOpenForm(true);
+    setOpenDetail(false); // Tutup dialog detail saat buka edit
+  };
 
-  // RESET FORM
-  const resetForm = () => {
-    setForm({
-      name: "",
-      pm: "",
+  const handleCreate = () => {
+    setIsEdit(false);
+    setFormProject({
+      project_name: "",
+      project_type: "",
+      client_id: "",
       description: "",
-      document: null,
-    })
-    setIsEdit(false)
-    setSelectedProject(null)
-  }
+      contract_value: "",
+      started_at: "",
+      finished_at: "",
+    });
+    setOpenForm(true);
+  };
+
+  const handleSubmit = async (formData) => {
+    setSubmitting(true);
+    try {
+      // Format data sesuai dengan yang diharapkan backend
+      const payload = {
+        project_name: String(formData.project_name || "").trim(),
+        project_type: String(formData.project_type || ""),
+        client_id: parseInt(formData.client_id) || 0,
+        contract_value: String(formData.contract_value || ""),
+        description: String(formData.description || ""),
+        started_at: parseDate(formData.started_at),
+        finished_at: parseDate(formData.finished_at),
+      };
+
+      console.log("Payload ke backend:", payload); // Untuk debugging
+
+      let res;
+      if (isEdit && detailProject?.id) {
+        res = await apiPatch(UPDATE_PROJECT(detailProject.id), payload);
+      } else {
+        res = await apiPost(CREATE_PROJECT, payload);
+      }
+
+      if (!res.error) {
+        await fetchProjects();
+        setOpenForm(false);
+        alert(`Proyek berhasil ${isEdit ? "diperbarui" : "ditambahkan"}!`);
+      } else {
+        alert(`Gagal: ${res.message}`);
+      }
+    } catch (err) {
+      console.error("Submit error:", err);
+      alert("Terjadi kesalahan");
+    }
+    setSubmitting(false);
+  };
+
+  const filteredProjects = useMemo(() => {
+    if (!Array.isArray(projects)) return [];
+
+    return projects.filter((p) => {
+      const name = p.project_name || "";
+      const desc = p.description || "";
+      const matchesSearch =
+        name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        desc.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesClient =
+        filterClient === "All Clients" || String(p.client_id) === filterClient;
+      const matchesType =
+        filterType === "All Types" || p.project_type === filterType;
+
+      let statusMatch = true;
+      if (filterStatus !== "All") {
+        const now = new Date();
+        const finishDate = p.finished_at ? new Date(p.finished_at) : null;
+
+        if (filterStatus === "Active") {
+          statusMatch = !finishDate || finishDate > now;
+        } else if (filterStatus === "Completed") {
+          statusMatch = finishDate && finishDate <= now;
+        }
+      }
+
+      return matchesSearch && matchesClient && matchesType && statusMatch;
+    });
+  }, [projects, searchTerm, filterClient, filterType, filterStatus]);
+
+  const totalPages = Math.ceil(filteredProjects.length / ITEMS_PER_PAGE);
+  const paginatedProjects = filteredProjects.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const formatCurrency = (value) => {
+    if (!value) return "Rp 0";
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(Number(value));
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-6">Daftar Proyek</h2>
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* HEADER PAGE */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-foreground">Projects</h1>
+        <p className="text-sm text-muted-foreground">
+          Kelola semua proyek, tambahkan, edit, lihat detail, atau hapus proyek di sini.
+        </p>
+      </div>
 
-      {/* TOOLBAR */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
-        <div className="flex-grow">
-          <Input
-            placeholder="Cari proyek..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+      {/* Toolbar & Filters */}
+      <div className="bg-card text-card-foreground rounded-xl p-4 shadow-sm mb-6">
+        <div className="flex flex-col lg:flex-row gap-4 items-center">
+          <div className="flex-1 w-full">
+            <Input
+              placeholder="Cari proyek..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-input text-foreground border-border"
+            />
+          </div>
+
+          <FilterControls
+            filterStatus={filterStatus}
+            filterType={filterType}
+            filterClient={filterClient}
+            clientOptions={clientOptions}
+            projectTypes={projectTypes}
+            onStatusChange={setFilterStatus}
+            onTypeChange={setFilterType}
+            onClientChange={setFilterClient}
           />
-        </div>
 
-        <Combobox
-          value={filterStatus}
-          onChange={setFilterStatus}
-          options={STATUS_OPTIONS}
-          placeholder="Status"
-          className="w-[180px]"
-        />
-
-        <Combobox
-          value={filterPm}
-          onChange={setFilterPm}
-          options={PM_OPTIONS}
-          placeholder="PM"
-          className="w-[180px]"
-        />
-
-        {/* DIALOG TAMBAH/EDIT */}
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                resetForm()
-              }}
-            >
+          <div className="flex gap-2">
+            <Button onClick={handleCreate} className="bg-primary text-primary-foreground hover:bg-primary-hover">
               + Tambah Proyek
             </Button>
-          </DialogTrigger>
-
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {isEdit ? "Edit Proyek" : "Tambah Proyek"}
-              </DialogTitle>
-              {/* ✅ TAMBAHKAN DIALOG DESCRIPTION */}
-              <DialogDescription className="sr-only">
-                {isEdit ? "Form untuk mengedit data proyek" : "Form untuk menambahkan proyek baru"}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              <Field>
-                <FieldLabel>Nama Proyek</FieldLabel>
-                <FieldContent>
-                  <Input
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
-                  />
-                </FieldContent>
-              </Field>
-
-              <Field>
-                <FieldLabel>Project Manager</FieldLabel>
-                <FieldContent>
-                  <Input
-                    value={form.pm}
-                    onChange={(e) =>
-                      setForm({ ...form, pm: e.target.value })
-                    }
-                  />
-                </FieldContent>
-              </Field>
-
-              <Field>
-                <FieldLabel>Deskripsi</FieldLabel>
-                <FieldContent>
-                  <Input
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm({ ...form, description: e.target.value })
-                    }
-                  />
-                </FieldContent>
-              </Field>
-
-              <Field>
-                <FieldLabel>Upload Dokumen</FieldLabel>
-                <FieldContent>
-                  <Input
-                    type="file"
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        document: e.target.files[0],
-                      })
-                    }
-                  />
-                </FieldContent>
-              </Field>
-            </div>
-
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setOpen(false)
-                  resetForm()
-                }}
-              >
-                Batal
-              </Button>
-              <Button
-                onClick={() => {
-                  if (isEdit) {
-                    console.log("UPDATE PROYEK:", {
-                      id: selectedProject.id,
-                      ...form,
-                    })
-                  } else {
-                    console.log("TAMBAH PROYEK:", form)
-                  }
-
-                  setOpen(false)
-                  resetForm()
-                }}
-              >
-                {isEdit ? "Update" : "Simpan"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            <Button variant="outline" onClick={fetchProjects}>
+              Refresh
+            </Button>
+          </div>
+        </div>
       </div>
-      
-      {/* DIALOG DETAIL PROYEK */}
+
+      {/* Loading */}
+      {loading && (
+        <div className="flex justify-center my-20">
+          <Spinner className="h-8 w-8 text-primary" />
+        </div>
+      )}
+
+      {/* Grid Projects */}
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {paginatedProjects.length > 0 ? (
+            paginatedProjects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onDetail={() => handleDetail(project.id)}
+                onEdit={() => handleEdit(project)}
+                onDelete={() => handleDelete(project.id)}
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12 text-muted-foreground">
+              <p>{projects.length === 0 ? "Belum ada proyek" : "Tidak ada proyek yang cocok"}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </Button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <Button
+              key={page}
+              size="sm"
+              variant={page === currentPage ? "default" : "outline"}
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </Button>
+          ))}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+
+      {/* Detail Dialog - TIDAK MENGGUNAKAN ProjectForm */}
       <Dialog open={openDetail} onOpenChange={setOpenDetail}>
-        <DialogContent className="max-w-9xl w-[98vw] px-18 py-16">
+        <DialogContent className="max-w-3xl bg-card text-card-foreground rounded-2xl shadow-2xl max-h-[70vh] overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-semibold">
-              Detail Proyek
-            </DialogTitle>
-            {/* ✅ TAMBAHKAN DIALOG DESCRIPTION */}
-            <DialogDescription className="sr-only">
-              Detail lengkap tentang proyek
-            </DialogDescription>
+            <DialogTitle>Detail Proyek</DialogTitle>
+            <DialogDescription>Informasi lengkap proyek (Read Only)</DialogDescription>
           </DialogHeader>
 
-          {detailProject && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mt-10">
-              {/* KIRI */}
-              <div className="space-y-6">
-                <div>
-                  <p className="text-base text-muted-foreground">Nama Proyek</p>
-                  <p className="text-lg font-medium">{detailProject.name}</p>
-                </div>
+          {detailLoading && (
+            <div className="flex justify-center py-10">
+              <Spinner className="h-8 w-8 text-primary" />
+            </div>
+          )}
 
+          {detailProject && !detailLoading && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-base text-muted-foreground">
-                    Project Manager
-                  </p>
-                  <p className="text-lg font-medium">{detailProject.pm}</p>
+                  <label className="text-sm font-medium text-muted-foreground">Nama Proyek</label>
+                  <p className="mt-1 text-base font-medium">{detailProject.project_name}</p>
                 </div>
-
                 <div>
-                  <p className="text-base text-muted-foreground">Status</p>
-                  <span
-                    className={`inline-block mt-2 px-4 py-1.5 rounded text-sm font-semibold
-                      ${
-                        detailProject.status === "In Progress"
-                          ? "bg-blue-100 text-blue-700"
-                          : detailProject.status === "Finished"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                  >
-                    {detailProject.status}
-                  </span>
+                  <label className="text-sm font-medium text-muted-foreground">Tipe Proyek</label>
+                  <p className="mt-1 text-base">{detailProject.project_type}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Klien</label>
+                  <p className="mt-1 text-base">Client {detailProject.client_id}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Nilai Kontrak</label>
+                  <p className="mt-1 text-base font-semibold">{formatCurrency(detailProject.contract_value)}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Tanggal Mulai</label>
+                  <p className="mt-1 text-base">{formatDate(detailProject.started_at)}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Tanggal Selesai</label>
+                  <p className="mt-1 text-base">{formatDate(detailProject.finished_at)}</p>
                 </div>
               </div>
-
-              {/* KANAN */}
-              <div className="space-y-6">
-                <div>
-                  <p className="text-base text-muted-foreground">Deskripsi</p>
-                  <p className="text-base leading-relaxed">
-                    {detailProject.description}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-base text-muted-foreground">Dokumen</p>
-                  <p className="text-base text-muted-foreground">
-                    Tidak ada dokumen
-                  </p>
-                </div>
+              <div className="pt-4 border-t border-border">
+                <label className="text-sm font-medium text-muted-foreground">Deskripsi</label>
+                <p className="mt-2 text-base leading-relaxed p-3 bg-muted/30 rounded-lg">
+                  {detailProject.description || "-"}
+                </p>
               </div>
             </div>
           )}
 
-          <DialogFooter className="mt-14">
-            <Button
-              className="px-8 py-3 text-base"
-              onClick={() => setOpenDetail(false)}
-            >
+          <DialogFooter className="flex gap-2 justify-end mt-6 pt-4 border-t border-border">
+            <Button onClick={() => setOpenDetail(false)}>
               Tutup
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* PROJECT LIST */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProjects.map((project) => (
-          <Card key={project.id} className="flex flex-col justify-between">
-            <CardHeader>
-              <CardTitle>{project.name}</CardTitle>
-              <CardDescription>PM: {project.pm}</CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                {project.description}
-              </p>
-
-              <span
-                className={`inline-block mt-3 text-xs font-medium px-2 py-1 rounded
-                  ${project.status === "Finished" && "bg-green-100 text-green-700"}
-                  ${project.status === "In Progress" && "bg-blue-100 text-blue-700"}
-                  ${project.status === "Overdue" && "bg-red-100 text-red-700"}
-                `}
-              >
-                {project.status}
-              </span>
-            </CardContent>
-
-            <CardFooter className="flex justify-end gap-2">
-              <Button size="sm"variant="outline"onClick={() => handleDetail(project)}>
-                Detail
-              </Button>
-              <Button size="sm" onClick={() => handleEdit(project)}>
-                Edit
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-
-        {filteredProjects.length === 0 && (
-          <p className="text-gray-500 col-span-full text-center">
-            Tidak ada proyek yang cocok dengan pencarian / filter.
-          </p>
-        )}
-      </div>
+      {/* Form Dialog - MENGGUNAKAN ProjectForm dengan Dialog sendiri */}
+      <ProjectForm
+        open={openForm}
+        setOpen={setOpenForm}
+        initialData={formProject}
+        onSubmit={handleSubmit}
+        submitting={submitting}
+        clientOptions={clientOptions}
+      />
     </div>
-  )
+  );
 }

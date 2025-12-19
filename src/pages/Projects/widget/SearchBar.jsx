@@ -1,12 +1,15 @@
+// src/pages/Projects/widget/SearchBar.jsx
+import { Input } from "@/components/ui/input"
+
 const SearchBar = ({ searchTerm, onSearchChange }) => {
-    return (
-      <input
-        type="text"
-        placeholder="Search Bar"
-        value={searchTerm}
-        onChange={(e) => onSearchChange(e.target.value)}
-        className="border border-gray-300 rounded-md p-2 w-full"
-      />
-    );
-  };
-  export default SearchBar;
+  return (
+    <Input
+      placeholder="Cari proyek..."
+      value={searchTerm}
+      onChange={(e) => onSearchChange(e.target.value)}
+      className="w-full"
+    />
+  )
+}
+
+export default SearchBar

@@ -1,28 +1,48 @@
-const FilterControls = ({ filterStatus, filterPm, onStatusChange, onPmChange }) => {
-    const statusOptions = ['All', 'Finished', 'In Progress', 'Overdue'];
-    // Dapatkan daftar PM unik dari data nyata
-    const pmOptions = ['All PM', 'Don Be', 'Narti', 'PM A', 'PM B']; 
-  
-    return (
-      <div className="flex gap-3">
-        {/* Filter by Status (Biru) */}
-        <select 
-          value={filterStatus} 
-          onChange={(e) => onStatusChange(e.target.value)}
-          className="border border-blue-400 text-blue-800 rounded-md p-2" // Contoh styling biru
-        >
-          {statusOptions.map(status => <option key={status} value={status}>{status}</option>)}
-        </select>
-        
-        {/* Filter by PM (Merah) */}
-        <select 
-          value={filterPm} 
-          onChange={(e) => onPmChange(e.target.value)}
-          className="border border-red-400 text-red-800 rounded-md p-2" // Contoh styling merah
-        >
-          {pmOptions.map(pm => <option key={pm} value={pm}>{pm}</option>)}
-        </select>
-      </div>
-    );
-  };
-  export default FilterControls;
+// widget/FilterControls.jsx
+import React from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+export default function FilterControls({ 
+  filterStatus, 
+  filterType, 
+  filterClient, 
+  clientOptions, 
+  projectTypes,
+  onStatusChange, 
+  onTypeChange,
+  onClientChange 
+}) {
+  return (
+    <div className="flex flex-wrap gap-2 items-center">
+      {/* Project Type Filter */}
+      <Select value={filterType} onValueChange={onTypeChange}>
+        <SelectTrigger className="w-40">
+          <SelectValue placeholder="Project Type" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="All Types">All Types</SelectItem>
+          {projectTypes.map(type => (
+            <SelectItem key={type} value={type}>
+              {type}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Client Filter */}
+      <Select value={filterClient} onValueChange={onClientChange}>
+        <SelectTrigger className="w-40">
+          <SelectValue placeholder="Client" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="All Clients">All Clients</SelectItem>
+          {clientOptions.map(c => (
+            <SelectItem key={c.id} value={String(c.id)}>
+              {c.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
