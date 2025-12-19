@@ -41,6 +41,7 @@ export default function ProjectForm({
         client_id: "",
         description: "",
         contract_value: "",
+        project_code: "",
         started_at: "",
         finished_at: "",
     })
@@ -90,6 +91,7 @@ export default function ProjectForm({
 
         setForm({
             project_name: initialData.project_name || "",
+            project_code: initialData.project_code || "",
             project_type: initialData.project_type
                 ? String(initialData.project_type)
                 : "",
@@ -112,6 +114,12 @@ export default function ProjectForm({
             return
         }
 
+        if (!form.project_code.trim()) {
+            alert("Kode Proyek wajib diisi")
+            return
+        }
+
+
         // Helper aman untuk konversi tanggal ke ISO, null jika invalid/empty
         const parseDate = (dateStr) => {
             if (!dateStr) return null
@@ -121,7 +129,8 @@ export default function ProjectForm({
 
         // Payload sesuai ekspektasi backend
         const payload = {
-            project_name: form.project_name.trim(),           // string
+            project_name: form.project_name.trim(),
+            project_code: form.project_code.trim(),           // string
             project_type: String(form.project_type),         // string
             client_id: parseInt(form.client_id) || 0,        // integer
             description: String(form.description || ""),     // string
@@ -159,6 +168,18 @@ export default function ProjectForm({
                             value={form.project_name}
                             onChange={handleChange}
                             placeholder="Masukkan nama proyek"
+                            readOnly={readOnly}
+                        />
+                    </div>
+
+                     {/* Kode Proyek */}
+                    <div>
+                        <label className="block mb-1 font-medium">Kode Proyek *</label>
+                        <Input
+                            name="project_code"
+                            value={form.project_code}
+                            onChange={handleChange}
+                            placeholder="Masukkan kode proyek"
                             readOnly={readOnly}
                         />
                     </div>

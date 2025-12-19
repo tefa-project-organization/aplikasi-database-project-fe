@@ -39,6 +39,7 @@ export default function Projects() {
   const [formProject, setFormProject] = useState({
     project_name: "",
     project_type: "",
+    project_code: "",
     client_id: "",
     description: "",
     contract_value: "",
@@ -128,6 +129,7 @@ export default function Projects() {
     setFormProject({
       project_name: project.project_name || "",
       project_type: project.project_type || "",
+      project_code: project.project_code || "",
       client_id: project.client_id || "",
       description: project.description || "",
       contract_value: project.contract_value || "",
@@ -143,6 +145,7 @@ export default function Projects() {
     setFormProject({
       project_name: "",
       project_type: "",
+      project_code: "",
       client_id: "",
       description: "",
       contract_value: "",
@@ -159,6 +162,7 @@ export default function Projects() {
       const payload = {
         project_name: String(formData.project_name || "").trim(),
         project_type: String(formData.project_type || ""),
+        project_code: String(formData.project_code || "").trim(),
         client_id: parseInt(formData.client_id) || 0,
         contract_value: String(formData.contract_value || ""),
         description: String(formData.description || ""),

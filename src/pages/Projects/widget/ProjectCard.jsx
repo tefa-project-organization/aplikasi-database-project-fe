@@ -78,7 +78,7 @@ export default function ProjectCard({ project, onDetail, onEdit, onDelete }) {
 
         {project.description && (
           <div className="flex items-start text-sm text-muted-foreground dark:text-muted-foreground">
-            <FileText className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground dark:text-muted-foreground flex-shrink-0" />
+            <FileText className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground dark:text-muted-foreground shrink-0" />
             <p className="line-clamp-2">{project.description}</p>
           </div>
         )}
