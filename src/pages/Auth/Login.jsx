@@ -81,13 +81,11 @@ export default function Login() {
 
         {/* RIGHT — FORM */}
         <div className="relative flex items-center justify-center px-6">
-          <div className="w-full max-w-md space-y-8">
-
-            <h1 className="text-2xl font-semibold text-foreground">
+          <div className="w-full max-w-md">
+            <h1 className="text-2xl font-semibold text-foreground mb-3">
               Login
             </h1>
-
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-5">
               Please sign in to continue
             </p>
 

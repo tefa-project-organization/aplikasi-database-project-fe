@@ -162,7 +162,7 @@ export default function Header() {
             sideOffset={8}
           >
             <div className="flex items-center gap-3 p-4 border-b bg-background">
-              <div className="w-10 h-10 rounded-full overflow-hidden">
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                 <Avatar
                   size={40}
                   name={userEmail}
@@ -170,8 +170,8 @@ export default function Header() {
                   colors={avatarColors}
                 />
               </div>
-              <div className="flex flex-col">
-                <span className="font-semibold text-foreground">
+              <div className="flex flex-col min-w-0">
+                <span className="font-semibold text-foreground truncate" title={userEmail}>
                   {userEmail}
                 </span>
               </div>

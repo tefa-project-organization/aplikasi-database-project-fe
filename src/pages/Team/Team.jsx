@@ -6,7 +6,7 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle,
-  DialogDescription // ✅ TAMBAHKAN
+  DialogDescription
 } from "@/components/ui/dialog";
 
 // Dummy data

@@ -70,7 +70,7 @@ export default function AppSidebar() {
         {open && (
           <div className="flex flex-col w-full">
             <span className="text-lg font-semibold tracking-wide text-foreground">
-              Database Project
+              Management Project
             </span>
             <span className="text-xs text-muted-foreground">
               Where work comes together
