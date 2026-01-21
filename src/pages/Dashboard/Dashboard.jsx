@@ -52,9 +52,9 @@ export default function Dashboard() {
       setRunningProjects([
         {
           id: 1,
-          title: "Running Projects",
+          title: "Dummy 1",
           description: `${d.running_projects ?? 0} project sedang berjalan`,
-          time: "-",
+          time: "67",
           type: "project",
         },
       ])

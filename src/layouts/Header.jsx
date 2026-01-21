@@ -176,7 +176,6 @@ export default function Header() {
                 </span>
               </div>
             </div>
-
             <div className="flex flex-col">
               <Button
                 variant="ghost"
