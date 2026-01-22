@@ -19,7 +19,7 @@ export default function TeamForm({ form, setForm }) {
             id="name" 
             value={form.name} 
             onChange={handleChange("name")} 
-            placeholder="Masukkan nama"
+            placeholder="Enter name"
             />
       </div>
 
@@ -28,7 +28,7 @@ export default function TeamForm({ form, setForm }) {
         <Input id="role" 
             value={form.role} 
             onChange={handleChange("role")} 
-            placeholder="Masukkan role"
+            placeholder="Enter role"
             />
       </div>
 
@@ -38,7 +38,7 @@ export default function TeamForm({ form, setForm }) {
             id="email" 
             value={form.email} 
             onChange={handleChange("email")} 
-            placeholder="Masukkan email"
+            placeholder="Enter email"
             />
       </div>
 
@@ -48,7 +48,7 @@ export default function TeamForm({ form, setForm }) {
             id="phone" 
             value={form.phone} 
             onChange={handleChange("phone")} 
-            placeholder="Masukkan nomor telepon"
+            placeholder="Enter phone number"
             />
       </div>
     </div>
