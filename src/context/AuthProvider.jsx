@@ -1,5 +1,5 @@
 // src\context\AuthProvider.jsx
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { AuthContext } from "./AuthContext";
 import { apiPost, apiLogout, onAuthFailure } from "@/lib/api";
 import { toast } from "sonner";
@@ -17,6 +17,9 @@ export default function AuthProvider({ children }) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Prevent multiple repeated auto-logout notifications
+  const notifiedRef = useRef(false);
 
   // LOGIN - stabilkan dengan useCallback
   const login = useCallback(async (payload) => {
@@ -40,6 +43,10 @@ export default function AuthProvider({ children }) {
     const userData = res.data?.data || null;
     setEmployees(userData);
     setIsAuthenticated(true);
+    // reset notification flag after successful login
+    try {
+      notifiedRef.current = false;
+    } catch (e) {}
     localStorage.setItem("employees", JSON.stringify(userData));
     setIsLoading(false);
 
@@ -74,6 +81,10 @@ export default function AuthProvider({ children }) {
   // Clean up on unmount
   useEffect(() => {
     const unregister = onAuthFailure(async () => {
+      // avoid spamming multiple notifications
+      if (notifiedRef.current) return;
+      notifiedRef.current = true;
+
       // perform local logout when API returns 401
       try {
         await logout();
@@ -81,7 +92,7 @@ export default function AuthProvider({ children }) {
         console.error("Auto-logout failed:", e);
       }
 
-      // show user-facing notification
+      // show user-facing notification once
       try {
         toast.error("Sesi login Anda telah berakhir. Silakan login kembali.");
       } catch (e) {
