@@ -144,8 +144,8 @@ export default function ProjectForm({
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent className="max-w-md bg-card text-card-foreground rounded-2xl shadow-2xl max-h-[70vh] overflow-y-auto px-4 py-4 scrollbar-none [&::-webkit-scrollbar]:hidden">
-                <DialogHeader>
+            <DialogContent className="max-w-md h-[80vh] bg-card text-card-foreground rounded-2xl shadow-2xl flex flex-col p-0">
+                 <DialogHeader className="px-4 py-3 border-b sticky top-0 bg-card z-10">
                     <DialogTitle>
                         {initialData && initialData.project_name ? "Edit Proyek" : "Tambah Proyek Baru"}
                     </DialogTitle>
@@ -156,7 +156,7 @@ export default function ProjectForm({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-3 mt-2">
+                <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 scrollbar-none [&::-webkit-scrollbar]:hidden">
                     {/* Nama Proyek */}
                     <div>
                         <label className="block mb-1 font-medium">Nama Proyek *</label>
@@ -299,7 +299,7 @@ export default function ProjectForm({
                     </div>
 
                     {!readOnly && (
-                        <div className="flex justify-end space-x-2 mt-4">
+                        <div className="px-4 py-3 border-t sticky bottom-0 bg-card flex justify-end space-x-2">
                             <Button
                                 variant="ghost"
                                 type="button"
