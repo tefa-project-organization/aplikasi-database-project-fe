@@ -1,7 +1,7 @@
 // src\context\AuthProvider.jsx
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
-import { apiPost, apiLogout } from "@/lib/api";
+import { apiPost, apiLogout, onAuthFailure } from "@/lib/api";
 import { CREATE_LOGIN, GET_LOGOUT } from "@/constants/api/auth";
 
 export default function AuthProvider({ children }) {
@@ -68,6 +68,19 @@ export default function AuthProvider({ children }) {
 
     return { success: true };
   }, []);
+
+  // REGISTER auth failure handler to auto logout on 401
+  // Clean up on unmount
+  useEffect(() => {
+    const unregister = onAuthFailure(() => {
+      // perform local logout when API returns 401
+      logout();
+    });
+
+    return () => {
+      if (typeof unregister === "function") unregister();
+    };
+  }, [logout]);
 
   return (
     <AuthContext.Provider

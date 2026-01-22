@@ -26,13 +26,13 @@ export default function Dashboard() {
     { label: "PIC", icon: UserCog, value: 0 },
     { label: "Employees", icon: User, value: 0 },
   ])
-  const [runningProjects, setRunningProjects] = useState([])
+  const [runningCount, setRunningCount] = useState(0)
   const [loadingStats, setLoadingStats] = useState(true)
-  const [loadingProjects, setLoadingProjects] = useState(true)
+  const [loadingRunning, setLoadingRunning] = useState(true)
 
   const fetchDashboard = async () => {
     setLoadingStats(true)
-    setLoadingProjects(true)
+    setLoadingRunning(true)
 
     const res = await apiGet(DASHBOARD_API)
     if (!res.error && res.data?.data) {
@@ -48,21 +48,13 @@ export default function Dashboard() {
       ])
       setLoadingStats(false)
 
-      // update running projects
-      setRunningProjects([
-        {
-          id: 1,
-          title: "Dummy 1",
-          description: `${d.running_projects ?? 0} project sedang berjalan`,
-          time: "67",
-          type: "project",
-        },
-      ])
-      setLoadingProjects(false)
+      // update running projects count (backend provides single number)
+      setRunningCount(d.running_projects ?? 0)
+      setLoadingRunning(false)
     } else {
       console.error("Gagal fetch dashboard:", res.message)
       setLoadingStats(false)
-      setLoadingProjects(false)
+      setLoadingRunning(false)
     }
   }
 
@@ -108,42 +100,26 @@ export default function Dashboard() {
             })}
       </div>
 
-      {/* RUNNING PROJECTS */}
+      {/* RUNNING PROJECTS (backend-provided single value) */}
       <Card>
         <CardHeader>
-          <CardTitle>Running Projects</CardTitle>
+          <CardTitle>Additional Details</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {loadingProjects ? (
+        <CardContent>
+          {loadingRunning ? (
             <div className="flex justify-center items-center h-20">
               <Spinner />
             </div>
-          ) : runningProjects.length > 0 ? (
-            runningProjects.map((item, index) => (
-              <div key={item.id}>
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <p className="font-medium">{item.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {item.description}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="secondary">{item.type}</Badge>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {item.time}
-                    </p>
-                  </div>
-                </div>
-                {index !== runningProjects.length - 1 && (
-                  <Separator className="my-3" />
-                )}
-              </div>
-            ))
           ) : (
-            <p className="text-center text-muted-foreground">
-              Belum ada project berjalan
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Active Project</p>
+                <p className="text-sm text-muted-foreground">Number of ongoing projects</p>
+              </div>
+              <div className="text-right">
+                <Badge>{runningCount}</Badge>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -29,7 +29,16 @@ const api = axios.create({
   },
 })
 
-/* =========================================================
+// Handler registration for auth failures (e.g. 401)
+let _authFailureHandler = null
+export function onAuthFailure(cb) {
+  _authFailureHandler = cb
+  return () => {
+    if (_authFailureHandler === cb) _authFailureHandler = null
+  }
+}
+
+ /* =========================================================
    [ADDED] SAFE AUTH HEADER INTERCEPTOR (NON BREAKING)
    - TIDAK mengganggu login/logout
    - Cookie tetap dikirim
@@ -48,6 +57,24 @@ api.interceptors.request.use(
     return config
   },
   (error) => Promise.reject(error)
+)
+
+// RESPONSE INTERCEPTOR: jika API merespons 401, panggil handler terdaftar
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    const status = err?.response?.status
+    if (status === 401) {
+      try {
+        if (typeof _authFailureHandler === "function") {
+          _authFailureHandler()
+        }
+      } catch (e) {
+        console.error("onAuthFailure handler error:", e)
+      }
+    }
+    return Promise.reject(err)
+  }
 )
 
 // FORMAT RESPONSE
