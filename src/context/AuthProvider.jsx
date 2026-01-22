@@ -2,6 +2,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
 import { apiPost, apiLogout, onAuthFailure } from "@/lib/api";
+import { toast } from "sonner";
 import { CREATE_LOGIN, GET_LOGOUT } from "@/constants/api/auth";
 
 export default function AuthProvider({ children }) {
@@ -72,9 +73,20 @@ export default function AuthProvider({ children }) {
   // REGISTER auth failure handler to auto logout on 401
   // Clean up on unmount
   useEffect(() => {
-    const unregister = onAuthFailure(() => {
+    const unregister = onAuthFailure(async () => {
       // perform local logout when API returns 401
-      logout();
+      try {
+        await logout();
+      } catch (e) {
+        console.error("Auto-logout failed:", e);
+      }
+
+      // show user-facing notification
+      try {
+        toast.error("Sesi login Anda telah berakhir. Silakan login kembali.");
+      } catch (e) {
+        // ignore toast errors
+      }
     });
 
     return () => {
