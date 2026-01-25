@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +27,6 @@ import TeamForm from "./widget/TeamForm";
 import TeamDetail from "./widget/TeamDetail";
 
 export default function Team() {
-  const [teams, setTeams] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("default");
@@ -151,8 +148,9 @@ const handleDetail = (id) => {
   };
 
   // ===============================
-  // RENDER
+  // FILTER
   // ===============================
+  
 
   // ===============================
   // RENDER
