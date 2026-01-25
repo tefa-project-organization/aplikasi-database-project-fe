@@ -2,9 +2,9 @@ import { Navigate } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext.jsx"
 
 export default function PublicRoute({ children }) {
-  const { employees } = useAuth()
+  const { isAuthenticated } = useAuth()
 
-  if (employees) {
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />
   }
 

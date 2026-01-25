@@ -44,7 +44,7 @@ export default function AppRoutes() {
         </Route>
 
         {/* NOT FOUND */}
-        <Route path="*" eleme nt={<ErrorPage />} />
+        <Route path="*" element={<ErrorPage />} />
       </Routes>
     </BrowserRouter>
   )

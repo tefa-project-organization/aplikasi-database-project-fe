@@ -2,6 +2,19 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import React, { useState, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Search, ArrowUpDown, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { apiGet, apiDelete } from "@/lib/api";
 
@@ -21,6 +34,25 @@ export default function Team() {
   const [teams, setTeams] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("default");
+
+  // Filter & sort teams
+  const filteredTeams = useMemo(() => {
+    let result = [...teams].filter((team) =>
+      team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      team.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (sortBy === "az") {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === "za") {
+      result.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    return result;
+  }, [searchTerm, sortBy]);
 
   const [search, setSearch] = useState("");
 
@@ -122,96 +154,74 @@ const handleDetail = (id) => {
     }
   };
 
-  // ===============================
-  // FILTER
-  // ===============================
-  const filteredTeams = useMemo(() => {
-    return teams.filter((t) =>
-      t.project_teams_name
-        ?.toLowerCase()
-        .includes(search.toLowerCase())
-    );
-  }, [teams, search]);
 
   // ===============================
   // RENDER
   // ===============================
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Project Teams</h1>
-        <p className="text-sm text-muted-foreground">
-          Kelola team project di sini
-        </p>
+    <div className="p-6 space-y-6">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl font-bold tracking-tight">Daftar Team</h2>
+        <p className="text-muted-foreground text-sm">Lihat dan kelola tim yang tersedia.</p>
       </div>
 
-      {/* TOOLBAR */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <Input
-          placeholder="Cari team..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="md:w-1/3"
-        />
-        <div className="flex gap-2">
-          <Button onClick={handleCreate}>+ Tambah Team</Button>
-          <Button variant="outline" onClick={fetchTeams}>
-            Refresh
-          </Button>
+      {/* Search & Filter */}
+      <div className="flex flex-col md:flex-row gap-4 items-center bg-card/40 p-3 rounded-xl border border-border/50">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Cari nama tim atau deskripsi..." 
+            className="pl-10 bg-background"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="flex items-center gap-2 w-full md:w-auto shrink-0">
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-full md:w-[180px] bg-background">
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Urutkan" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Default</SelectItem>
+              <SelectItem value="az">Nama A - Z</SelectItem>
+              <SelectItem value="za">Nama Z - A</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      {/* LOADING */}
-      {loading && (
-        <div className="flex justify-center py-20">
-          <Spinner className="h-8 w-8" />
-        </div>
-      )}
-
-      {/* GRID */}
-      {!loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTeams.length > 0 ? (
-            filteredTeams.map((team) => {
-              const projectName = projects.find(
-                (p) => p.id === team.project_id
-              )?.project_name;
-
-              return (
-                <TeamCard
-                  key={team.id}
-                  team={team}
-                  projectName={projectName}
-                  onDetail={() => handleDetail(team.id)}
-                  onEdit={() => handleEdit(team)}
-                  onDelete={() => handleDelete(team.id)}
-                />
-              );
-            })
-          ) : (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
-              Tidak ada team
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* FORM */}
-      <TeamForm
-        open={openForm}
-        setOpen={setOpenForm}
-        isEdit={isEdit}
-        initialData={editingTeam}
-        onSuccess={fetchTeams}
-      />
-
-      {/* DETAIL */}
-      <TeamDetail
-        open={openDetail}
-        setOpen={setOpenDetail}
-        teamId={detailTeamId}
-      />
+      {/* Grid Team */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {filteredTeams.length > 0 ? (
+          filteredTeams.map((team) => (
+            <Card key={team.id} className="w-full hover:shadow-md transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
+                  {team.name}
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">{team.description}</p>
+              </CardHeader>
+              <CardContent className="flex justify-between items-center border-t pt-4">
+                <span className="text-sm font-medium">{team.members.length} Anggota</span>
+                <Button size="sm" onClick={() => navigate(`/team/${team.id}`)}>
+                  Detail
+                </Button>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-full py-20 text-center border-2 border-dashed rounded-xl">
+            <p className="text-muted-foreground">Tidak ada tim yang ditemukan.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

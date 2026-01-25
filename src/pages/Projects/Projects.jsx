@@ -256,9 +256,9 @@ export default function Projects() {
     <div className="p-6 max-w-7xl mx-auto">
       {/* HEADER PAGE */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Projects</h1>
-        <p className="text-sm text-muted-foreground">
-          Kelola semua proyek, tambahkan, edit, lihat detail, atau hapus proyek di sini.
+        <h1 className="text-2xl font-bold">Projects</h1>
+        <p className="text-muted-foreground">
+          Kelola semua project di sini.
         </p>
       </div>
 
