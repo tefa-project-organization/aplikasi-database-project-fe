@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { Spinner } from "@/components/ui/spinner";
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,6 +150,9 @@ const handleDetail = (id) => {
     }
   };
 
+  // ===============================
+  // RENDER
+  // ===============================
 
   // ===============================
   // RENDER
