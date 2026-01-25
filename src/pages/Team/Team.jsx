@@ -39,19 +39,33 @@ export default function Team() {
 
   // 2️⃣ MEMO (SETELAH STATE)
   const filteredTeams = useMemo(() => {
-    let result = [...teams].filter((team) =>
-      team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      team.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const keyword = searchTerm.toLowerCase();
+
+  let result = teams.filter((team) => {
+    const name = team?.name?.toLowerCase() || "";
+    const description = team?.description?.toLowerCase() || "";
+
+    return (
+      name.includes(keyword) ||
+      description.includes(keyword)
     );
+  });
 
-    if (sortBy === "az") {
-      result.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortBy === "za") {
-      result.sort((a, b) => b.name.localeCompare(a.name));
-    }
+  if (sortBy === "az") {
+    result.sort((a, b) =>
+      (a?.name || "").localeCompare(b?.name || "")
+    );
+  }
 
-    return result;
-  }, [teams, searchTerm, sortBy]);
+  if (sortBy === "za") {
+    result.sort((a, b) =>
+      (b?.name || "").localeCompare(a?.name || "")
+    );
+  }
+
+  return result;
+}, [teams, searchTerm, sortBy]);
+
 
   const [search, setSearch] = useState("");
 
