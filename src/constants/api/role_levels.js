@@ -1,0 +1,1 @@
+export const SHOW_ALL_ROLE = '/role_levels/show-all';

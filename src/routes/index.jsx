@@ -10,7 +10,7 @@ import UserManagement from "@/pages/UserManagement/Hooks/UserManagement"
 import ErrorPage from "@/pages/ErrorPage/ErrorPage"
 import PrivateRoute from "./PrivateRoute"
 import PublicRoute from "./PublicRoute"
-import TeamDetail from "@/pages/Team/TeamDetail"
+import TeamDetail from "@/pages/Team/widget/TeamDetail"
 
 export default function AppRoutes() {
   return (
