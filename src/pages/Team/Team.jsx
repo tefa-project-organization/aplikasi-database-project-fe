@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,13 +26,18 @@ import { SHOW_ALL_PROJECTS } from "@/constants/api/project";
 import TeamCard from "./widget/TeamCard";
 import TeamForm from "./widget/TeamForm";
 import TeamDetail from "./widget/TeamDetail";
-
 export default function Team() {
   const navigate = useNavigate();
+
+  // 1️⃣ STATE
+  const [teams, setTeams] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("default");
 
-  // Filter & sort teams
+  // 2️⃣ MEMO (SETELAH STATE)
   const filteredTeams = useMemo(() => {
     let result = [...teams].filter((team) =>
       team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,7 +51,7 @@ export default function Team() {
     }
 
     return result;
-  }, [searchTerm, sortBy]);
+  }, [teams, searchTerm, sortBy]);
 
   const [search, setSearch] = useState("");
 
