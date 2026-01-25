@@ -2,8 +2,7 @@ import { useParams } from "react-router-dom"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import TeamForm, { TeamFormFooter } from "./TeamForm"
 import {
   Dialog,
   DialogTrigger,
@@ -107,59 +106,18 @@ export default function TeamDetail() {
             <Button>+ Tambah Member</Button>
           </DialogTrigger>
 
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Tambah Member</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              <div>
-                <Label>Nama</Label>
-                <Input
-                  value={form.name}
-                  onChange={(e) =>
-                    setForm({ ...form, name: e.target.value })
-                  }
-                />
+          <DialogContent className="max-w-sm sm:max-w-md p-0">
+            <div className="flex flex-col h-[min(70vh,560px)]">
+              <div className="p-4 border-b">
+                <h3 className="text-lg font-semibold">Tambah Member</h3>
               </div>
 
-              <div>
-                <Label>Role</Label>
-                <Input
-                  value={form.role}
-                  onChange={(e) =>
-                    setForm({ ...form, role: e.target.value })
-                  }
-                />
+              <div className="p-4 overflow-auto">
+                <TeamForm form={form} setForm={setForm} />
               </div>
 
-              <div>
-                <Label>Email</Label>
-                <Input
-                  value={form.email}
-                  onChange={(e) =>
-                    setForm({ ...form, email: e.target.value })
-                  }
-                />
-              </div>
-
-              <div>
-                <Label>Phone</Label>
-                <Input
-                  value={form.phone}
-                  onChange={(e) =>
-                    setForm({ ...form, phone: e.target.value })
-                  }
-                />
-              </div>
+              <TeamFormFooter onCancel={() => setOpen(false)} onSubmit={handleSubmit} />
             </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Batal
-              </Button>
-              <Button onClick={handleSubmit}>Simpan</Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
