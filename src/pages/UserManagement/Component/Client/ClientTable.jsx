@@ -27,100 +27,67 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-
 import ClientForm from "./ClientForm"
+import EditClientForm from "./EditClientForm"
 
-/**
- * ClientTable
- *
- * Menampilkan data client dalam bentuk tabel.
- * Fitur:
- * - Search berdasarkan nama
- * - Sorting (Nama A-Z, Z-A, Terbaru, Terlama)
- * - Pagination
- * - Detail & Delete action
- *
- * @param {Object[]} clients
- * @param {Function} onDetail
- * @param {Function} onAddClient
- * @param {Function} onDeleteClient
- */
 export default function ClientTable({
   clients = [],
   onDetail,
   onAddClient,
   onDeleteClient,
+  onUpdateClient,
+  getClientById,
 }) {
   const [search, setSearch] = useState("")
   const [sortBy, setSortBy] = useState("name_asc")
   const [currentPage, setCurrentPage] = useState(1)
-
   const perPage = 5
 
-  /**
-   * Filter + Sort data client
-   * useMemo untuk optimasi performa
-   */
   const filteredClients = useMemo(() => {
     let result = clients.filter((client) =>
       client.name.toLowerCase().includes(search.toLowerCase())
     )
-
     switch (sortBy) {
       case "name_asc":
         result.sort((a, b) => a.name.localeCompare(b.name))
         break
-
       case "name_desc":
         result.sort((a, b) => b.name.localeCompare(a.name))
         break
-
       case "latest":
         result.sort(
           (a, b) =>
             new Date(b.created_at) - new Date(a.created_at)
         )
         break
-
       case "oldest":
         result.sort(
           (a, b) =>
             new Date(a.created_at) - new Date(b.created_at)
         )
         break
-
       default:
         break
     }
-
     return result
   }, [clients, search, sortBy])
 
-  /**
-   * Pagination
-   */
   const totalPages = Math.ceil(filteredClients.length / perPage)
   const paginatedClients = filteredClients.slice(
     (currentPage - 1) * perPage,
     currentPage * perPage
   )
 
-  /**
-   * Handler delete client
-   */
   const handleDeleteClient = (client) => {
     onDeleteClient?.(client)
   }
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Client List</h2>
         <ClientForm onSubmit={onAddClient} />
       </div>
-
-      {/* Search & Sort */}
       <div className="flex flex-wrap items-center gap-2">
         <Input
           placeholder="Search client..."
@@ -131,7 +98,6 @@ export default function ClientTable({
           }}
           className="max-w-xs"
         />
-
         <Select
           value={sortBy}
           onValueChange={(value) => {
@@ -142,7 +108,6 @@ export default function ClientTable({
           <SelectTrigger className="w-[220px]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
-
           <SelectContent>
             <SelectItem value="name_asc">
               Name (A–Z)
@@ -159,8 +124,6 @@ export default function ClientTable({
           </SelectContent>
         </Select>
       </div>
-
-      {/* Table */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -173,7 +136,6 @@ export default function ClientTable({
               </TableHead>
             </TableRow>
           </TableHeader>
-
           <TableBody>
             {paginatedClients.map((client) => (
               <TableRow key={client.id}>
@@ -190,11 +152,11 @@ export default function ClientTable({
                   >
                     Detail
                   </Button>
-
-                  <Button variant="ghost" size="sm">
-                    Edit
-                  </Button>
-
+                  <EditClientForm
+                    client={client}
+                    onSubmit={onUpdateClient}
+                    getClientById={getClientById}
+                  />
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -204,7 +166,6 @@ export default function ClientTable({
                         Delete
                       </Button>
                     </AlertDialogTrigger>
-
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>
@@ -221,7 +182,6 @@ export default function ClientTable({
                           dibatalkan.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-
                       <AlertDialogFooter>
                         <AlertDialogCancel>
                           Cancel
@@ -242,13 +202,10 @@ export default function ClientTable({
           </TableBody>
         </Table>
       </div>
-
-      {/* Pagination */}
       <div className="flex items-center justify-between">
         <span>
           Page {currentPage} of {totalPages || 1}
         </span>
-
         <div className="space-x-2">
           <Button
             size="sm"
@@ -262,7 +219,6 @@ export default function ClientTable({
           >
             Prev
           </Button>
-
           <Button
             size="sm"
             variant="outline"
