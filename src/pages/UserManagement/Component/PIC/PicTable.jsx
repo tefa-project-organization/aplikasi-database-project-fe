@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import PicForm from "./PicForm"
 import PicDetail from "./PicDetail"
 
-export default function PicTable({ pics = [], clients = [], projects = [], onAddPic }) {
+export default function PicTable({ pics = [], clients = [], projects = [], onAddPic, onDeletePic }) {
     const [search, setSearch] = useState("")
     const [sortAsc, setSortAsc] = useState(true)
     const [currentPage, setCurrentPage] = useState(1)
@@ -140,6 +140,9 @@ export default function PicTable({ pics = [], clients = [], projects = [], onAdd
                                     </Button>
                                     <Button variant="ghost" size="sm">
                                         Edit
+                                    </Button>
+                                    <Button size="sm" variant="destructive" onClick={() => onDeletePic?.(pic)}>
+                                        Delete
                                     </Button>
                                 </TableCell>
                             </TableRow>

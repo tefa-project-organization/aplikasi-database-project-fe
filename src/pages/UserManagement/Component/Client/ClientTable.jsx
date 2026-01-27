@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"
+import React, { useMemo, useState } from "react"
 import {
   Table,
   TableBody,
@@ -7,63 +7,171 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
+
 import ClientForm from "./ClientForm"
 
-export default function ClientTable({ clients, onDetail, onAddClient }) {
+/**
+ * ClientTable
+ *
+ * Menampilkan data client dalam bentuk tabel.
+ * Fitur:
+ * - Search berdasarkan nama
+ * - Sorting (Nama A-Z, Z-A, Terbaru, Terlama)
+ * - Pagination
+ * - Detail & Delete action
+ *
+ * @param {Object[]} clients
+ * @param {Function} onDetail
+ * @param {Function} onAddClient
+ * @param {Function} onDeleteClient
+ */
+export default function ClientTable({
+  clients = [],
+  onDetail,
+  onAddClient,
+  onDeleteClient,
+}) {
   const [search, setSearch] = useState("")
-  const [sortAsc, setSortAsc] = useState(true)
+  const [sortBy, setSortBy] = useState("name_asc")
   const [currentPage, setCurrentPage] = useState(1)
+
   const perPage = 10
 
-  // filter + sort (BY CLIENT NAME)
+  /**
+   * Filter + Sort data client
+   * useMemo untuk optimasi performa
+   */
   const filteredClients = useMemo(() => {
-    let filtered = clients.filter((c) =>
-      c.name.toLowerCase().includes(search.toLowerCase())
+    let result = clients.filter((client) =>
+      client.name.toLowerCase().includes(search.toLowerCase())
     )
 
-    filtered.sort((a, b) =>
-      sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
-    )
+    switch (sortBy) {
+      case "name_asc":
+        result.sort((a, b) => a.name.localeCompare(b.name))
+        break
 
-    return filtered
-  }, [clients, search, sortAsc])
+      case "name_desc":
+        result.sort((a, b) => b.name.localeCompare(a.name))
+        break
 
+      case "latest":
+        result.sort(
+          (a, b) =>
+            new Date(b.created_at) - new Date(a.created_at)
+        )
+        break
+
+      case "oldest":
+        result.sort(
+          (a, b) =>
+            new Date(a.created_at) - new Date(b.created_at)
+        )
+        break
+
+      default:
+        break
+    }
+
+    return result
+  }, [clients, search, sortBy])
+
+  /**
+   * Pagination
+   */
   const totalPages = Math.ceil(filteredClients.length / perPage)
   const paginatedClients = filteredClients.slice(
     (currentPage - 1) * perPage,
     currentPage * perPage
   )
 
+  /**
+   * Handler delete client
+   */
+  const handleDeleteClient = async (client) => {
+    try {
+      await onDeleteClient?.(client)
+
+      toast.success("Client berhasil dihapus", {
+        description: client.name,
+      })
+    } catch (error) {
+      toast.error("Gagal menghapus client", {
+        description: "Silakan coba lagi",
+      })
+    }
+  }
+
   return (
     <div className="space-y-4">
-      {/* HEADER */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Client List</h2>
         <ClientForm onSubmit={onAddClient} />
       </div>
 
-      {/* SEARCH + SORT */}
-      <div className="flex items-center justify-between space-x-2">
+      {/* Search & Sort */}
+      <div className="flex flex-wrap items-center gap-2">
         <Input
           placeholder="Search client..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setCurrentPage(1)
+          }}
           className="max-w-xs"
         />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSortAsc(!sortAsc)}
+
+        <Select
+          value={sortBy}
+          onValueChange={(value) => {
+            setSortBy(value)
+            setCurrentPage(1)
+          }}
         >
-          Sort Name {sortAsc ? "A–Z" : "Z–A"}
-        </Button>
+          <SelectTrigger className="w-[220px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+
+          <SelectContent>
+            <SelectItem value="name_asc">
+              Name (A–Z)
+            </SelectItem>
+            <SelectItem value="name_desc">
+              Name (Z–A)
+            </SelectItem>
+            <SelectItem value="latest">
+              Terbaru Ditambahkan
+            </SelectItem>
+            <SelectItem value="oldest">
+              Terlama Ditambahkan
+            </SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* TABLE */}
+      {/* Table */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -71,7 +179,9 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
               <TableHead>Client Name</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>NPWP</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableHead className="text-right">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -91,9 +201,52 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
                   >
                     Detail
                   </Button>
+
                   <Button variant="ghost" size="sm">
                     Edit
                   </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                      >
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Hapus Client
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Apakah kamu yakin ingin
+                          menghapus client
+                          <strong>
+                            {" "}
+                            {client.name}
+                          </strong>
+                          ? Tindakan ini tidak dapat
+                          dibatalkan.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() =>
+                            handleDeleteClient(client)
+                          }
+                        >
+                          Hapus
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
               </TableRow>
             ))}
@@ -101,25 +254,35 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
         </Table>
       </div>
 
-      {/* PAGINATION */}
-      <div className="flex justify-between items-center mt-2">
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
         <span>
-          Page {currentPage} of {totalPages}
+          Page {currentPage} of {totalPages || 1}
         </span>
+
         <div className="space-x-2">
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
+            onClick={() =>
+              setCurrentPage((prev) =>
+                Math.max(prev - 1, 1)
+              )
+            }
           >
             Prev
           </Button>
+
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
+            onClick={() =>
+              setCurrentPage((prev) =>
+                Math.min(prev + 1, totalPages)
+              )
+            }
           >
             Next
           </Button>
