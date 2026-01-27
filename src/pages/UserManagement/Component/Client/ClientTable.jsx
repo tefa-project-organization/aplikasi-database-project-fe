@@ -56,7 +56,7 @@ export default function ClientTable({
   const [sortBy, setSortBy] = useState("name_asc")
   const [currentPage, setCurrentPage] = useState(1)
 
-  const perPage = 10
+  const perPage = 5
 
   /**
    * Filter + Sort data client
