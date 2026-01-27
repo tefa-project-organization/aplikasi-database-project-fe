@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { toast } from "sonner"
 
 import ClientForm from "./ClientForm"
 
@@ -109,18 +108,8 @@ export default function ClientTable({
   /**
    * Handler delete client
    */
-  const handleDeleteClient = async (client) => {
-    try {
-      await onDeleteClient?.(client)
-
-      toast.success("Client berhasil dihapus", {
-        description: client.name,
-      })
-    } catch (error) {
-      toast.error("Gagal menghapus client", {
-        description: "Silakan coba lagi",
-      })
-    }
+  const handleDeleteClient = (client) => {
+    onDeleteClient?.(client)
   }
 
   return (
