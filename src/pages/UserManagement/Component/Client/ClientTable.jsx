@@ -84,11 +84,15 @@ export default function ClientTable({
 
   return (
     <div className="space-y-4">
+      {/* HEADER + ADD BUTTON */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Client List</h2>
         <ClientForm onSubmit={onAddClient} />
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+
+      {/* SEARCH LEFT + FILTER + SORT RIGHT */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        {/* Search Input */}
         <Input
           placeholder="Search client..."
           value={search}
@@ -98,32 +102,27 @@ export default function ClientTable({
           }}
           className="max-w-xs"
         />
-        <Select
-          value={sortBy}
-          onValueChange={(value) => {
+
+        {/* Filter + Sort */}
+        <div className="flex flex-wrap gap-2">
+          <Select value={sortBy} onValueChange={(value) => {
             setSortBy(value)
             setCurrentPage(1)
-          }}
-        >
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name_asc">
-              Name (A–Z)
-            </SelectItem>
-            <SelectItem value="name_desc">
-              Name (Z–A)
-            </SelectItem>
-            <SelectItem value="latest">
-              Terbaru Ditambahkan
-            </SelectItem>
-            <SelectItem value="oldest">
-              Terlama Ditambahkan
-            </SelectItem>
-          </SelectContent>
-        </Select>
+          }}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name_asc">Name (A–Z)</SelectItem>
+              <SelectItem value="name_desc">Name (Z–A)</SelectItem>
+              <SelectItem value="latest">Terbaru Ditambahkan</SelectItem>
+              <SelectItem value="oldest">Terlama Ditambahkan</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
+
+      {/* TABLE */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -174,10 +173,7 @@ export default function ClientTable({
                         <AlertDialogDescription>
                           Apakah kamu yakin ingin
                           menghapus client
-                          <strong>
-                            {" "}
-                            {client.name}
-                          </strong>
+                          <strong> {client.name} </strong>
                           ? Tindakan ini tidak dapat
                           dibatalkan.
                         </AlertDialogDescription>
@@ -202,6 +198,8 @@ export default function ClientTable({
           </TableBody>
         </Table>
       </div>
+
+      {/* PAGINATION */}
       <div className="flex items-center justify-between">
         <span>
           Page {currentPage} of {totalPages || 1}
