@@ -38,27 +38,6 @@ export function onAuthFailure(cb) {
   }
 }
 
- /* =========================================================
-   [ADDED] SAFE AUTH HEADER INTERCEPTOR (NON BREAKING)
-   - TIDAK mengganggu login/logout
-   - Cookie tetap dikirim
-   - Authorization hanya ditambah JIKA token ada
-========================================================= */
-api.interceptors.request.use(
-  (config) => {
-    const token =
-      localStorage.getItem("token") ||
-      localStorage.getItem("access_token")
-
-    if (token && !config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-
-    return config
-  },
-  (error) => Promise.reject(error)
-)
-
 // RESPONSE INTERCEPTOR: jika API merespons 401, panggil handler terdaftar
 api.interceptors.response.use(
   (res) => res,
@@ -82,7 +61,7 @@ function formatError(err) {
   const status = err?.response?.status || 500
   const data = err?.response?.data
   const message =
-    data?.error?.message || // backend format error nested
+    data?.error?.message ||
     data?.message ||
     err.message ||
     "Terjadi kesalahan sistem"
@@ -142,7 +121,6 @@ export async function apiPut(path, payload, extraConfig = {}) {
   }
 }
 
-
 export async function apiPatch(path, payload, extraConfig = {}) {
   try {
     const isForm = payload instanceof FormData
@@ -183,7 +161,6 @@ export async function apiLogout(path) {
     const res = await api.post(path, {}) // cookie dikirim otomatis
     return formatSuccess(res)
   } catch (err) {
-    // Untuk logout, jangan throw error khusus untuk 401
     const errorObj = formatError(err)
 
     // Jika 401 (token expired), anggap normal untuk logout
