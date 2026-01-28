@@ -13,7 +13,16 @@ import {
   UPDATE_CLIENT,
   DELETE_CLIENT,
 } from "@/constants/api/clients"
+import {
+  CREATE_CLIENT_PIC,
+  SHOW_ALL_CLIENT_PICS,
+  SHOW_ONE_CLIENT_PIC,
+  UPDATE_CLIENT_PIC,
+  DELETE_CLIENT_PIC,
+} from "@/constants/api/client_pic"
+import { SHOW_ALL_PROJECTS } from "@/constants/api/project"
 import { toast } from "sonner"
+
 import ClientTable from "../Component/Client/ClientTable"
 import ClientDetail from "../Component/Client/ClientDetail"
 import PicTable from "../Component/PIC/PicTable"
@@ -21,31 +30,22 @@ import EmployeeTable from "../Component/Employee/EmployeeTable"
 
 export default function UserManagement() {
   const [selectedClient, setSelectedClient] = useState(null)
-  const [selectedPic, setSelectedPic] = useState(null)
-  const [selectedEmployee, setSelectedEmployee] = useState(null)
   const [clients, setClients] = useState([])
   const [clientsForCombo, setClientsForCombo] = useState([])
   const [projectsForCombo, setProjectsForCombo] = useState([])
+
   const [pics, setPics] = useState([])
   const [employees, setEmployees] = useState([])
 
+  /* ===================== CLIENT ===================== */
   const fetchClients = async () => {
     try {
       const res = await apiGet(SHOW_ALL_CLIENTS)
-      const items =
-        res?.data?.items ||
-        res?.data?.data?.items ||
-        res?.items ||
-        []
+      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
       setClients(items)
-      setClientsForCombo(
-        items.map((client) => ({
-          id: client.id,
-          name: client.name,
-        }))
-      )
-    } catch (error) {
-      console.error("Fetch clients error:", error)
+      setClientsForCombo(items.map((c) => ({ id: c.id, name: c.name })))
+    } catch (err) {
+      console.error(err)
       setClients([])
       setClientsForCombo([])
       toast.error("Gagal mengambil data client")
@@ -55,19 +55,9 @@ export default function UserManagement() {
   const getClientById = async (id) => {
     try {
       const res = await apiGet(SHOW_ONE_CLIENT(id))
-      if (!res?.error) {
-        return res.data
-      } else {
-        toast.error("Gagal mengambil detail client", {
-          description: res?.message,
-        })
-        return null
-      }
-    } catch (error) {
-      console.error("Get client by ID error:", error)
-      toast.error("Server error", {
-        description: "Terjadi kesalahan pada server",
-      })
+      return res?.data || null
+    } catch (err) {
+      toast.error("Gagal mengambil detail client")
       return null
     }
   }
@@ -76,20 +66,11 @@ export default function UserManagement() {
     try {
       const res = await apiPost(CREATE_CLIENT, payload)
       if (!res?.error) {
-        toast.success("Client berhasil ditambahkan", {
-          description: payload.name,
-        })
+        toast.success("Client berhasil ditambahkan")
         fetchClients()
-      } else {
-        toast.error("Gagal menambahkan client", {
-          description: res?.message,
-        })
       }
-    } catch (error) {
-      console.error("Create client error:", error)
-      toast.error("Server error", {
-        description: "Terjadi kesalahan pada server",
-      })
+    } catch {
+      toast.error("Gagal menambahkan client")
     }
   }
 
@@ -97,24 +78,12 @@ export default function UserManagement() {
     try {
       const res = await apiPut(UPDATE_CLIENT(id), payload)
       if (!res?.error) {
-        toast.success("Client berhasil diperbarui", {
-          description: payload.name,
-        })
+        toast.success("Client berhasil diperbarui")
         fetchClients()
         return true
-      } else {
-        toast.error("Gagal memperbarui client", {
-          description: res?.message,
-        })
-        return false
       }
-    } catch (error) {
-      console.error("Update client error:", error)
-      toast.error("Server error", {
-        description: "Terjadi kesalahan pada server",
-      })
-      return false
-    }
+    } catch { }
+    return false
   }
 
   const handleDeleteClient = async (client) => {
@@ -122,53 +91,112 @@ export default function UserManagement() {
     try {
       const res = await apiDelete(DELETE_CLIENT(client.id))
       if (!res?.error) {
-        toast.success("Client berhasil dihapus", {
-          description: client.name,
-        })
+        toast.success("Client berhasil dihapus")
         fetchClients()
-      } else {
-        toast.error("Gagal menghapus client", {
-          description: res?.message,
-        })
       }
-    } catch (error) {
-      console.error("Delete client error:", error)
-      toast.error("Server error", {
-        description: "Terjadi kesalahan pada server",
-      })
+    } catch {
+      toast.error("Gagal menghapus client")
     }
   }
 
-  const handleAddPic = (newPic) => {
-    setPics((prev) => [...prev, newPic])
+  /* ===================== PIC ===================== */
+  const fetchPics = async () => {
+    try {
+      const res = await apiGet(SHOW_ALL_CLIENT_PICS)
+      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
+      setPics(items)
+    } catch (err) {
+      console.error(err)
+      setPics([])
+      toast.error("Gagal mengambil data PIC")
+    }
   }
 
-  const handleAddEmployee = (newEmployee) => {
-    setEmployees((prev) => [...prev, newEmployee])
+  const getPicById = async (id) => {
+    try {
+      const res = await apiGet(SHOW_ONE_CLIENT_PIC(id))
+      return res?.data || null
+    } catch {
+      toast.error("Gagal mengambil detail PIC")
+      return null
+    }
   }
 
-  const getPicsForClient = (clientId) => {
-    return pics.filter((pic) => pic.client_id === clientId)
+  const handleAddPic = async (payload) => {
+    try {
+      const res = await apiPost(CREATE_CLIENT_PIC, payload)
+      if (!res?.error) {
+        toast.success("PIC berhasil ditambahkan")
+        fetchPics()
+      }
+    } catch {
+      toast.error("Gagal menambahkan PIC")
+    }
   }
 
+  const handleUpdatePic = async (id, payload) => {
+    try {
+      const res = await apiPut(UPDATE_CLIENT_PIC(id), payload)
+      if (!res?.error) {
+        toast.success("PIC berhasil diperbarui")
+        fetchPics()
+        return true
+      }
+    } catch { }
+    return false
+  }
+
+  const handleDeletePic = async (pic) => {
+    if (!pic?.id) return
+    try {
+      const res = await apiDelete(DELETE_CLIENT_PIC(pic.id))
+      if (!res?.error) {
+        toast.success("PIC berhasil dihapus")
+        fetchPics()
+      }
+    } catch {
+      toast.error("Gagal menghapus PIC")
+    }
+  }
+
+  /* ===================== PROJECT ===================== */
+  const fetchProjects = async () => {
+    try {
+      const res = await apiGet(SHOW_ALL_PROJECTS)
+      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
+      setProjectsForCombo(items.map((p) => ({
+        id: p.id,
+        name: p.project_name || p.project_name || "-"  // Perbaikan di sini
+      })))
+    } catch (err) {
+      console.error(err)
+      setProjectsForCombo([])
+      toast.error("Gagal mengambil data project")
+    }
+  }
+
+  /* ===================== EFFECT ===================== */
   useEffect(() => {
     fetchClients()
+    fetchPics()
+    fetchProjects()
   }, [])
 
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">User Management</h1>
+
       <Tabs defaultValue="client" className="space-y-6">
         <TabsList>
           <TabsTrigger value="client">Client</TabsTrigger>
           <TabsTrigger value="pic">PIC</TabsTrigger>
           <TabsTrigger value="employee">Employee</TabsTrigger>
         </TabsList>
+
         <TabsContent value="client">
           {selectedClient ? (
             <ClientDetail
               client={selectedClient}
-              allPics={getPicsForClient(selectedClient.id)}
               onClose={() => setSelectedClient(null)}
               onUpdateClient={handleUpdateClient}
               getClientById={getClientById}
@@ -184,20 +212,23 @@ export default function UserManagement() {
             />
           )}
         </TabsContent>
+
         <TabsContent value="pic">
           <PicTable
             pics={pics}
             clients={clientsForCombo}
             projects={projectsForCombo}
-            onDetail={setSelectedPic}
             onAddPic={handleAddPic}
+            onDeletePic={handleDeletePic}
+            onUpdatePic={handleUpdatePic}
+            getPicById={getPicById}
           />
         </TabsContent>
+
         <TabsContent value="employee">
           <EmployeeTable
             employees={employees}
-            onDetail={setSelectedEmployee}
-            onAddEmployee={handleAddEmployee}
+            onAddEmployee={(e) => setEmployees((p) => [...p, e])}
           />
         </TabsContent>
       </Tabs>
