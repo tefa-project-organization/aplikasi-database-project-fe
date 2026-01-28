@@ -52,7 +52,7 @@ export default function EditPicForm({
   const loadPicData = async () => {
     setLoading(true)
     try {
-      // Pertama coba gunakan data dari prop pic (data yang sudah ada di table)
+      // gunakan data dari prop pic (data yang sudah ada di table)
       if (pic && pic.id && pic.name) {
         setForm({
           name: pic.name || "",
@@ -62,9 +62,8 @@ export default function EditPicForm({
           client_id: pic.client_id || undefined,
           project_id: pic.project_id || undefined,
         })
-        setLoading(false)
       } 
-      // Jika perlu fetch data terbaru dari API (optional)
+      // fetch data terbaru dari API (optional)
       else if (pic?.id && getPicById) {
         const picData = await getPicById(pic.id)
         if (picData) {
@@ -131,8 +130,12 @@ export default function EditPicForm({
         style={{ scrollbarWidth: "none" }}
       >
         <div className="flex flex-col h-[min(60vh,480px)]">
+          {/* DIALOG HEADER DENGAN DESCRIPTION */}
           <DialogHeader className="p-4 border-b">
             <DialogTitle>Edit PIC</DialogTitle>
+            <DialogDescription>
+              Form untuk mengubah data PIC
+            </DialogDescription>
           </DialogHeader>
           
           {/* Loading state hanya muncul sebentar saat fetch data terbaru */}
