@@ -11,6 +11,7 @@ import ErrorPage from "@/pages/ErrorPage/ErrorPage"
 import PrivateRoute from "./PrivateRoute"
 import PublicRoute from "./PublicRoute"
 import TeamDetail from "@/pages/Team/widget/TeamDetail"
+import UploadDocuments from "@/pages/dokumen/UploadDocuments"
 
 export default function AppRoutes() {
   return (
@@ -40,6 +41,7 @@ export default function AppRoutes() {
             <Route path="/team" element={<Team />} />
             <Route path="/team/:id" element={<TeamDetail />} />
             <Route path="/usermanagement" element={<UserManagement />} />
+            <Route path="/upload-documents" element={<UploadDocuments />} />
           </Route>
         </Route>
 

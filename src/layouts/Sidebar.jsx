@@ -45,6 +45,10 @@ export default function AppSidebar() {
       href: "/usermanagement",
       icon: userManagementIcon,
     },
+    {
+      label: "Upload Dokumen",
+      href: "/upload-documents",
+    },
   ];
 
   return (

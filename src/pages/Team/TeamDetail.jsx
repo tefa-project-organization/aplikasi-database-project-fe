@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import TeamForm, { TeamFormFooter } from "./TeamForm"
+import TeamMemberForm, { TeamFormFooter } from "./TeamMemberForm"
 import {
   Dialog,
   DialogTrigger,
@@ -113,7 +113,7 @@ export default function TeamDetail() {
               </div>
 
               <div className="p-4 overflow-auto">
-                <TeamForm form={form} setForm={setForm} />
+                <TeamMemberForm form={form} setForm={setForm} />
               </div>
 
               <TeamFormFooter onCancel={() => setOpen(false)} onSubmit={handleSubmit} />
