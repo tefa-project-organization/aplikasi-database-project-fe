@@ -1,199 +1,186 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
+import { apiGet, apiPost, apiPut, apiDelete } from "@/lib/api"
+import {
+  CREATE_CLIENT,
+  SHOW_ALL_CLIENTS,
+  SHOW_ONE_CLIENT,
+  UPDATE_CLIENT,
+  DELETE_CLIENT,
+} from "@/constants/api/clients"
+import {
+  CREATE_CLIENT_PIC,
+  SHOW_ALL_CLIENT_PICS,
+  SHOW_ONE_CLIENT_PIC,
+  UPDATE_CLIENT_PIC,
+  DELETE_CLIENT_PIC,
+} from "@/constants/api/client_pic"
+import { SHOW_ALL_PROJECTS } from "@/constants/api/project"
+import { toast } from "sonner"
 
 import ClientTable from "../Component/Client/ClientTable"
 import ClientDetail from "../Component/Client/ClientDetail"
 import PicTable from "../Component/PIC/PicTable"
 import EmployeeTable from "../Component/Employee/EmployeeTable"
 
-// dummy clients (untuk Client tab)
-const initialClients = [
-  {
-    id: 1,
-    name: "PT Maju Jaya Abadi",
-    description: "Supplier alat tulis",
-    address: "Jl. Merdeka No.1",
-    phone: "021-88990011",
-    npwp: "01.234.567.8-999.000",
-    status: "active",
-  },
-  {
-    id: 2,
-    name: "CV Sumber Rejeki",
-    description: "Distributor makanan",
-    address: "Jl. Sudirman No.5",
-    phone: "022-77889900",
-    npwp: "02.987.654.3-888.000",
-    status: "inactive",
-  },
-]
-
-// dummy clients (untuk PIC form combo box)
-const initialClientsForCombo = [
-  { id: 1, name: "PT Maju Jaya Abadi" },
-  { id: 2, name: "CV Sumber Rejeki" },
-  { id: 3, name: "PT Sejahtera Sentosa" },
-]
-
-// dummy projects (untuk PIC form combo box)
-const initialProjectsForCombo = [
-  { id: 1, name: "Website Development" },
-  { id: 2, name: "Mobile App" },
-  { id: 3, name: "ERP System" },
-  { id: 4, name: "Cloud Migration" },
-]
-
-// dummy PICs - dengan nama client dan project
-const initialPics = [
-  {
-    id: 1,
-    name: "John Doe",
-    phone: "08123456789",
-    email: "john@example.com",
-    title: "Manager",
-    client_id: 1,
-    client_name: "PT Maju Jaya Abadi",
-    project_id: 1,
-    project_name: "Website Development"
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    phone: "08987654321",
-    email: "jane@example.com",
-    title: "Supervisor",
-    client_id: 1,
-    client_name: "PT Maju Jaya Abadi",
-    project_id: 2,
-    project_name: "Mobile App"
-  },
-  {
-    id: 3,
-    name: "Bob Johnson",
-    phone: "08765432109",
-    email: "bob@example.com",
-    title: "Staff",
-    client_id: 2,
-    client_name: "CV Sumber Rejeki",
-    project_id: 3,
-    project_name: "ERP System"
-  },
-  {
-    id: 4,
-    name: "Alice Brown",
-    phone: "08512345678",
-    email: "alice@example.com",
-    title: "Manager",
-    client_id: null,
-    client_name: null,
-    project_id: null,
-    project_name: null
-  },
-]
-
-// dummy employees
-const initialEmployees = [
-  {
-    id: 1,
-    nik: "32700001",
-    nip: "10001",
-    name: "Rafii",
-    email: "rafi1@mail.com",
-    password: "123456",
-    address: "Jl. Merdeka No. 10",
-    phone: "08220000001",
-    position: "Backend Developer",
-    status: "active"
-  },
-  {
-    id: 2,
-    nik: "32700002",
-    nip: "10002",
-    name: "Siti",
-    email: "siti@mail.com",
-    password: "123456",
-    address: "Jl. Sudirman No. 20",
-    phone: "08220000002",
-    position: "Frontend Developer",
-    status: "active"
-  },
-  {
-    id: 3,
-    nik: "32700003",
-    nip: "10003",
-    name: "Budi",
-    email: "budi@mail.com",
-    password: "123456",
-    address: "Jl. Gatot Subroto No. 30",
-    phone: "08220000003",
-    position: "UI/UX Designer",
-    status: "resigned"
-  },
-  {
-    id: 4,
-    nik: "32700004",
-    nip: "10004",
-    name: "Ani",
-    email: "ani@mail.com",
-    password: "123456",
-    address: "Jl. Thamrin No. 40",
-    phone: "08220000004",
-    position: "Project Manager",
-    status: "active"
-  },
-]
-
 export default function UserManagement() {
   const [selectedClient, setSelectedClient] = useState(null)
-  const [clients, setClients] = useState(initialClients)
-  const [clientsForCombo, setClientsForCombo] = useState(initialClientsForCombo)
-  const [projectsForCombo, setProjectsForCombo] = useState(initialProjectsForCombo)
+  const [clients, setClients] = useState([])
+  const [clientsForCombo, setClientsForCombo] = useState([])
+  const [projectsForCombo, setProjectsForCombo] = useState([])
 
-  const [pics, setPics] = useState(initialPics)
-  const [selectedPic, setSelectedPic] = useState(null)
+  const [pics, setPics] = useState([])
+  const [employees, setEmployees] = useState([])
 
-  const [employees, setEmployees] = useState(initialEmployees)
-  const [selectedEmployee, setSelectedEmployee] = useState(null)
-
-  const handleAddClient = (newClient) => {
-    const newId = clients.length > 0 ? Math.max(...clients.map(c => c.id)) + 1 : 1
-    setClients((prev) => [...prev, { ...newClient, id: newId }])
-
-    // Juga tambahkan ke clientsForCombo untuk PIC form
-    setClientsForCombo((prev) => [...prev, { id: newId, name: newClient.name }])
-  }
-
-  const handleAddPic = (newPic) => {
-    const newId = pics.length > 0 ? Math.max(...pics.map(p => p.id)) + 1 : 1
-
-    // Cari nama client dan project berdasarkan ID
-    const client = clientsForCombo.find(c => c.id === newPic.client_id)
-    const project = projectsForCombo.find(p => p.id === newPic.project_id)
-
-    const picWithNames = {
-      ...newPic,
-      id: newId,
-      client_name: client ? client.name : null,
-      project_name: project ? project.name : null
+  /* ===================== CLIENT ===================== */
+  const fetchClients = async () => {
+    try {
+      const res = await apiGet(SHOW_ALL_CLIENTS)
+      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
+      setClients(items)
+      setClientsForCombo(items.map((c) => ({ id: c.id, name: c.name })))
+    } catch (err) {
+      console.error(err)
+      setClients([])
+      setClientsForCombo([])
+      toast.error("Gagal mengambil data client")
     }
-
-    setPics((prev) => [...prev, picWithNames])
   }
 
-  const handleAddEmployee = (newEmployee) => {
-    const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1
-    setEmployees((prev) => [...prev, { ...newEmployee, id: newId }])
+  const getClientById = async (id) => {
+    try {
+      const res = await apiGet(SHOW_ONE_CLIENT(id))
+      return res?.data || null
+    } catch (err) {
+      toast.error("Gagal mengambil detail client")
+      return null
+    }
   }
 
-  // Fungsi untuk mendapatkan PIC yang terhubung dengan client
-  const getPicsForClient = (clientId) => {
-    return pics.filter(pic => pic.client_id === clientId)
+  const handleAddClient = async (payload) => {
+    try {
+      const res = await apiPost(CREATE_CLIENT, payload)
+      if (!res?.error) {
+        toast.success("Client berhasil ditambahkan")
+        fetchClients()
+      }
+    } catch {
+      toast.error("Gagal menambahkan client")
+    }
   }
+
+  const handleUpdateClient = async (id, payload) => {
+    try {
+      const res = await apiPut(UPDATE_CLIENT(id), payload)
+      if (!res?.error) {
+        toast.success("Client berhasil diperbarui")
+        fetchClients()
+        return true
+      }
+    } catch { }
+    return false
+  }
+
+  const handleDeleteClient = async (client) => {
+    if (!client?.id) return
+    try {
+      const res = await apiDelete(DELETE_CLIENT(client.id))
+      if (!res?.error) {
+        toast.success("Client berhasil dihapus")
+        fetchClients()
+      }
+    } catch {
+      toast.error("Gagal menghapus client")
+    }
+  }
+
+  /* ===================== PIC ===================== */
+  const fetchPics = async () => {
+    try {
+      const res = await apiGet(SHOW_ALL_CLIENT_PICS)
+      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
+      setPics(items)
+    } catch (err) {
+      console.error(err)
+      setPics([])
+      toast.error("Gagal mengambil data PIC")
+    }
+  }
+
+  const getPicById = async (id) => {
+    try {
+      const res = await apiGet(SHOW_ONE_CLIENT_PIC(id))
+      return res?.data || null
+    } catch {
+      toast.error("Gagal mengambil detail PIC")
+      return null
+    }
+  }
+
+  const handleAddPic = async (payload) => {
+    try {
+      const res = await apiPost(CREATE_CLIENT_PIC, payload)
+      if (!res?.error) {
+        toast.success("PIC berhasil ditambahkan")
+        fetchPics()
+      }
+    } catch {
+      toast.error("Gagal menambahkan PIC")
+    }
+  }
+
+  const handleUpdatePic = async (id, payload) => {
+    try {
+      const res = await apiPut(UPDATE_CLIENT_PIC(id), payload)
+      if (!res?.error) {
+        toast.success("PIC berhasil diperbarui")
+        fetchPics()
+        return true
+      }
+    } catch { }
+    return false
+  }
+
+  const handleDeletePic = async (pic) => {
+    if (!pic?.id) return
+    try {
+      const res = await apiDelete(DELETE_CLIENT_PIC(pic.id))
+      if (!res?.error) {
+        toast.success("PIC berhasil dihapus")
+        fetchPics()
+      }
+    } catch {
+      toast.error("Gagal menghapus PIC")
+    }
+  }
+
+  /* ===================== PROJECT ===================== */
+  const fetchProjects = async () => {
+    try {
+      const res = await apiGet(SHOW_ALL_PROJECTS)
+      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
+      setProjectsForCombo(items.map((p) => ({
+        id: p.id,
+        name: p.project_name || p.project_name || "-"  // Perbaikan di sini
+      })))
+    } catch (err) {
+      console.error(err)
+      setProjectsForCombo([])
+      toast.error("Gagal mengambil data project")
+    }
+  }
+
+  /* ===================== EFFECT ===================== */
+  useEffect(() => {
+    fetchClients()
+    fetchPics()
+    fetchProjects()
+  }, [])
 
   return (
     <div className="p-6 space-y-6">
@@ -210,14 +197,18 @@ export default function UserManagement() {
           {selectedClient ? (
             <ClientDetail
               client={selectedClient}
-              allPics={getPicsForClient(selectedClient.id)}
               onClose={() => setSelectedClient(null)}
+              onUpdateClient={handleUpdateClient}
+              getClientById={getClientById}
             />
           ) : (
             <ClientTable
               clients={clients}
               onDetail={setSelectedClient}
               onAddClient={handleAddClient}
+              onDeleteClient={handleDeleteClient}
+              onUpdateClient={handleUpdateClient}
+              getClientById={getClientById}
             />
           )}
         </TabsContent>
@@ -227,16 +218,17 @@ export default function UserManagement() {
             pics={pics}
             clients={clientsForCombo}
             projects={projectsForCombo}
-            onDetail={setSelectedPic}
             onAddPic={handleAddPic}
+            onDeletePic={handleDeletePic}
+            onUpdatePic={handleUpdatePic}
+            getPicById={getPicById}
           />
         </TabsContent>
 
         <TabsContent value="employee">
           <EmployeeTable
             employees={employees}
-            onDetail={setSelectedEmployee}
-            onAddEmployee={handleAddEmployee}
+            onAddEmployee={(e) => setEmployees((p) => [...p, e])}
           />
         </TabsContent>
       </Tabs>

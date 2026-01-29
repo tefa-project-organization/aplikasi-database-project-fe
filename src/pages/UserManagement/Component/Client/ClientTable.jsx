@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"
+import React, { useMemo, useState } from "react"
 import {
   Table,
   TableBody,
@@ -7,30 +7,70 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import ClientForm from "./ClientForm"
+import EditClientForm from "./EditClientForm"
 
-export default function ClientTable({ clients, onDetail, onAddClient }) {
+export default function ClientTable({
+  clients = [],
+  onDetail,
+  onAddClient,
+  onDeleteClient,
+  onUpdateClient,
+  getClientById,
+}) {
   const [search, setSearch] = useState("")
-  const [sortAsc, setSortAsc] = useState(true)
+  const [sortBy, setSortBy] = useState("name_asc")
   const [currentPage, setCurrentPage] = useState(1)
-  const perPage = 10
+  const perPage = 5
 
-  // filter + sort (BY CLIENT NAME)
   const filteredClients = useMemo(() => {
-    let filtered = clients.filter((c) =>
-      c.name.toLowerCase().includes(search.toLowerCase())
+    let result = clients.filter((client) =>
+      client.name.toLowerCase().includes(search.toLowerCase())
     )
-
-    filtered.sort((a, b) =>
-      sortAsc
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
-    )
-
-    return filtered
-  }, [clients, search, sortAsc])
+    switch (sortBy) {
+      case "name_asc":
+        result.sort((a, b) => a.name.localeCompare(b.name))
+        break
+      case "name_desc":
+        result.sort((a, b) => b.name.localeCompare(a.name))
+        break
+      case "latest":
+        result.sort(
+          (a, b) =>
+            new Date(b.created_at) - new Date(a.created_at)
+        )
+        break
+      case "oldest":
+        result.sort(
+          (a, b) =>
+            new Date(a.created_at) - new Date(b.created_at)
+        )
+        break
+      default:
+        break
+    }
+    return result
+  }, [clients, search, sortBy])
 
   const totalPages = Math.ceil(filteredClients.length / perPage)
   const paginatedClients = filteredClients.slice(
@@ -38,29 +78,48 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
     currentPage * perPage
   )
 
+  const handleDeleteClient = (client) => {
+    onDeleteClient?.(client)
+  }
+
   return (
     <div className="space-y-4">
-      {/* HEADER */}
+      {/* HEADER + ADD BUTTON */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Client List</h2>
         <ClientForm onSubmit={onAddClient} />
       </div>
 
-      {/* SEARCH + SORT */}
-      <div className="flex items-center justify-between space-x-2">
+      {/* SEARCH LEFT + FILTER + SORT RIGHT */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        {/* Search Input */}
         <Input
           placeholder="Search client..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setCurrentPage(1)
+          }}
           className="max-w-xs"
         />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSortAsc(!sortAsc)}
-        >
-          Sort Name {sortAsc ? "A–Z" : "Z–A"}
-        </Button>
+
+        {/* Filter + Sort */}
+        <div className="flex flex-wrap gap-2">
+          <Select value={sortBy} onValueChange={(value) => {
+            setSortBy(value)
+            setCurrentPage(1)
+          }}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name_asc">Name (A–Z)</SelectItem>
+              <SelectItem value="name_desc">Name (Z–A)</SelectItem>
+              <SelectItem value="latest">Terbaru Ditambahkan</SelectItem>
+              <SelectItem value="oldest">Terlama Ditambahkan</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* TABLE */}
@@ -71,10 +130,11 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
               <TableHead>Client Name</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>NPWP</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableHead className="text-right">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
-
           <TableBody>
             {paginatedClients.map((client) => (
               <TableRow key={client.id}>
@@ -91,9 +151,47 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
                   >
                     Detail
                   </Button>
-                  <Button variant="ghost" size="sm">
-                    Edit
-                  </Button>
+                  <EditClientForm
+                    client={client}
+                    onSubmit={onUpdateClient}
+                    getClientById={getClientById}
+                  />
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                      >
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Hapus Client
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Apakah kamu yakin ingin
+                          menghapus client
+                          <strong> {client.name} </strong>
+                          ? Tindakan ini tidak dapat
+                          dibatalkan.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() =>
+                            handleDeleteClient(client)
+                          }
+                        >
+                          Hapus
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TableCell>
               </TableRow>
             ))}
@@ -102,24 +200,32 @@ export default function ClientTable({ clients, onDetail, onAddClient }) {
       </div>
 
       {/* PAGINATION */}
-      <div className="flex justify-between items-center mt-2">
+      <div className="flex items-center justify-between">
         <span>
-          Page {currentPage} of {totalPages}
+          Page {currentPage} of {totalPages || 1}
         </span>
         <div className="space-x-2">
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
+            onClick={() =>
+              setCurrentPage((prev) =>
+                Math.max(prev - 1, 1)
+              )
+            }
           >
             Prev
           </Button>
           <Button
             size="sm"
             variant="outline"
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
+            onClick={() =>
+              setCurrentPage((prev) =>
+                Math.min(prev + 1, totalPages)
+              )
+            }
           >
             Next
           </Button>

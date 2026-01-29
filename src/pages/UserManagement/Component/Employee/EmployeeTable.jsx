@@ -145,9 +145,9 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail 
                                     >
                                         Detail
                                     </Button>
-                                    <Button variant="ghost" size="sm">
+                                    {/* <Button variant="ghost" size="sm">
                                         Edit
-                                    </Button>
+                                    </Button> */}
                                 </TableCell>
                             </TableRow>
                         ))}

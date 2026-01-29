@@ -49,6 +49,7 @@ export default function Team() {
   // ===============================
   const filteredTeams = useMemo(() => {
     const keyword = searchTerm.toLowerCase();
+    const keyword = searchTerm.toLowerCase();
 
     let result = teams.filter((team) => {
       const name = team?.project_teams_name?.toLowerCase() || "";
@@ -115,6 +116,35 @@ export default function Team() {
   // ===============================
   // DELETE
   // ===============================
+  const handleCreate = () => {
+    setOpenDetail(false);
+    setDetailTeamId(null);
+
+    setIsEdit(false);
+    setEditingTeam(null);
+    setOpenForm(true);
+  };
+
+  const handleEdit = (team) => {
+    setOpenDetail(false);
+    setDetailTeamId(null);
+
+    setIsEdit(true);
+    setEditingTeam(team);
+    setOpenForm(true);
+  };
+
+  const handleDetail = (id) => {
+    setOpenForm(false);        // ⬅️ INI KUNCI UTAMA
+    setIsEdit(false);
+    setEditingTeam(null);
+
+    setDetailTeamId(id);
+    setOpenDetail(true);
+  };
+
+
+
   const handleDelete = async (id) => {
     if (!confirm("Yakin ingin menghapus team ini?")) return;
 
@@ -213,6 +243,7 @@ export default function Team() {
                   <div className="p-2 bg-primary/10 rounded-lg">
                     <Users className="h-5 w-5 text-primary" />
                   </div>
+                  {team.project_teams_name}
                   {team.project_teams_name}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
