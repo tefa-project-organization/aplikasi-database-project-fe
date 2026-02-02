@@ -49,7 +49,6 @@ export default function Team() {
   // ===============================
   const filteredTeams = useMemo(() => {
     const keyword = searchTerm.toLowerCase();
-    const keyword = searchTerm.toLowerCase();
 
     let result = teams.filter((team) => {
       const name = team?.project_teams_name?.toLowerCase() || "";
