@@ -21,6 +21,10 @@ import {
   DELETE_CLIENT_PIC,
 } from "@/constants/api/client_pic"
 import { SHOW_ALL_PROJECTS } from "@/constants/api/project"
+import {
+  SHOW_ALL_EMPLOYEES,
+  CREATE_EMPLOYEES,
+} from "@/constants/api/employees"
 import { toast } from "sonner"
 
 import ClientTable from "../Component/Client/ClientTable"
@@ -41,7 +45,12 @@ export default function UserManagement() {
   const fetchClients = async () => {
     try {
       const res = await apiGet(SHOW_ALL_CLIENTS)
-      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
+      const items =
+        res?.data?.items ||
+        res?.data?.data?.items ||
+        res?.items ||
+        []
+
       setClients(items)
       setClientsForCombo(items.map((c) => ({ id: c.id, name: c.name })))
     } catch (err) {
@@ -56,7 +65,7 @@ export default function UserManagement() {
     try {
       const res = await apiGet(SHOW_ONE_CLIENT(id))
       return res?.data || null
-    } catch (err) {
+    } catch {
       toast.error("Gagal mengambil detail client")
       return null
     }
@@ -82,7 +91,7 @@ export default function UserManagement() {
         fetchClients()
         return true
       }
-    } catch { }
+    } catch {}
     return false
   }
 
@@ -103,7 +112,12 @@ export default function UserManagement() {
   const fetchPics = async () => {
     try {
       const res = await apiGet(SHOW_ALL_CLIENT_PICS)
-      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
+      const items =
+        res?.data?.items ||
+        res?.data?.data?.items ||
+        res?.items ||
+        []
+
       setPics(items)
     } catch (err) {
       console.error(err)
@@ -142,7 +156,7 @@ export default function UserManagement() {
         fetchPics()
         return true
       }
-    } catch { }
+    } catch {}
     return false
   }
 
@@ -163,15 +177,56 @@ export default function UserManagement() {
   const fetchProjects = async () => {
     try {
       const res = await apiGet(SHOW_ALL_PROJECTS)
-      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
-      setProjectsForCombo(items.map((p) => ({
-        id: p.id,
-        name: p.project_name || p.project_name || "-"  // Perbaikan di sini
-      })))
+      const items =
+        res?.data?.items ||
+        res?.data?.data?.items ||
+        res?.items ||
+        []
+
+      setProjectsForCombo(
+        items.map((p) => ({
+          id: p.id,
+          name: p.project_name || "-",
+        }))
+      )
     } catch (err) {
       console.error(err)
       setProjectsForCombo([])
       toast.error("Gagal mengambil data project")
+    }
+  }
+
+  /* ===================== EMPLOYEE ===================== */
+  const fetchEmployees = async () => {
+    try {
+      const res = await apiGet(SHOW_ALL_EMPLOYEES, {
+        limit: 100000,
+      })
+
+      const items =
+        res?.data?.items ||
+        res?.data?.data?.items ||
+        res?.items ||
+        []
+
+      setEmployees(items)
+    } catch (err) {
+      console.error(err)
+      setEmployees([])
+      toast.error("Gagal mengambil data employee")
+    }
+  }
+
+  const handleAddEmployee = async (payload) => {
+    try {
+      const res = await apiPost(CREATE_EMPLOYEES, payload)
+      if (!res?.error) {
+        toast.success("Employee berhasil ditambahkan")
+        fetchEmployees()
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error("Gagal menambahkan employee")
     }
   }
 
@@ -180,6 +235,7 @@ export default function UserManagement() {
     fetchClients()
     fetchPics()
     fetchProjects()
+    fetchEmployees()
   }, [])
 
   return (
@@ -228,7 +284,7 @@ export default function UserManagement() {
         <TabsContent value="employee">
           <EmployeeTable
             employees={employees}
-            onAddEmployee={(e) => setEmployees((p) => [...p, e])}
+            onAddEmployee={handleAddEmployee}
           />
         </TabsContent>
       </Tabs>

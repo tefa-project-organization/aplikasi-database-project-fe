@@ -26,10 +26,11 @@ export default function EmployeeForm({ onSubmit }) {
     name: "",
     email: "",
     password: "",
-    address: "",
     phone: "",
-    position: "",
-    status: "active"
+    address: "",
+    position_id: null,
+    department_id: null,
+    status_id: null,
   })
 
   const handleChange = (e) => {
@@ -38,25 +39,40 @@ export default function EmployeeForm({ onSubmit }) {
   }
 
   const handleSelectChange = (value) => {
-    setForm((prev) => ({ ...prev, status: value }))
+    const statusMap = {
+      active: 1,
+      resigned: 2,
+      inactive: 3,
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      status_id: statusMap[value] ?? null,
+    }))
   }
 
   const handleSubmit = () => {
-    if (!form.nik.trim() || !form.nip.trim() || !form.name.trim()) {
-      alert("NIK, NIP, and Name are required")
+    if (
+      !form.nik.trim() ||
+      !form.nip.trim() ||
+      !form.name.trim() ||
+      !form.password.trim()
+    ) {
+      alert("NIK, NIP, Name, and Password are required")
       return
     }
 
     const payload = {
-      nik: form.nik,
-      nip: form.nip,
-      name: form.name,
-      email: form.email,
-      password: form.password,
-      address: form.address,
-      phone: form.phone,
-      position: form.position,
-      status: form.status
+      nik: form.nik.trim(),
+      nip: form.nip.trim(),
+      name: form.name.trim(),
+      email: form.email.trim() || null,
+      password: form.password.trim(),
+      phone: form.phone.trim() || null,
+      address: form.address.trim() || null,
+      position_id: form.position_id,
+      department_id: form.department_id,
+      status_id: form.status_id,
     }
 
     onSubmit?.(payload)
@@ -67,10 +83,11 @@ export default function EmployeeForm({ onSubmit }) {
       name: "",
       email: "",
       password: "",
-      address: "",
       phone: "",
-      position: "",
-      status: "active"
+      address: "",
+      position_id: null,
+      department_id: null,
+      status_id: null,
     })
     setOpen(false)
   }
@@ -91,118 +108,67 @@ export default function EmployeeForm({ onSubmit }) {
           </DialogHeader>
 
           <div className="p-4 pt-0 overflow-y-auto space-y-3 max-h-[calc(60vh-120px)] pr-2 scrollbar-none [&::-webkit-scrollbar]:hidden">
-           {/* NIK */}
-           <div>
-             <label className="block mb-1 font-medium">NIK *</label>
-             <Input
-               name="nik"
-               value={form.nik}
-               onChange={handleChange}
-               placeholder="Enter NIK"
-               required
-             />
-           </div>
+            <div>
+              <label className="block mb-1 font-medium">NIK *</label>
+              <Input name="nik" value={form.nik} onChange={handleChange} placeholder="Enter NIK" />
+            </div>
 
-           {/* NIP */}
-           <div>
-             <label className="block mb-1 font-medium">NIP *</label>
-             <Input
-               name="nip"
-               value={form.nip}
-               onChange={handleChange}
-               placeholder="Enter NIP"
-               required
-             />
-           </div>
+            <div>
+              <label className="block mb-1 font-medium">NIP *</label>
+              <Input name="nip" value={form.nip} onChange={handleChange} placeholder="Enter NIP" />
+            </div>
 
-           {/* Name */}
-           <div>
-             <label className="block mb-1 font-medium">Name *</label>
-             <Input
-               name="name"
-               value={form.name}
-               onChange={handleChange}
-               placeholder="Enter employee name"
-               required
-             />
-           </div>
+            <div>
+              <label className="block mb-1 font-medium">Name *</label>
+              <Input name="name" value={form.name} onChange={handleChange} placeholder="Enter employee name" />
+            </div>
 
-           {/* Email */}
-           <div>
-             <label className="block mb-1 font-medium">Email</label>
-             <Input
-               name="email"
-               value={form.email}
-               onChange={handleChange}
-               type="email"
-               placeholder="Enter email address"
-             />
-           </div>
+            <div>
+              <label className="block mb-1 font-medium">Email</label>
+              <Input name="email" value={form.email} onChange={handleChange} placeholder="Enter email address" />
+            </div>
 
-           {/* Password */}
-           <div>
-             <label className="block mb-1 font-medium">Password</label>
-             <Input
-               name="password"
-               value={form.password}
-               onChange={handleChange}
-               type="password"
-               placeholder="Enter password"
-             />
-           </div>
+            <div>
+              <label className="block mb-1 font-medium">Password *</label>
+              <Input
+                name="password"
+                type="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Enter password"
+              />
+            </div>
 
-           {/* Phone */}
-           <div>
-             <label className="block mb-1 font-medium">Phone</label>
-             <Input
-               name="phone"
-               value={form.phone}
-               onChange={handleChange}
-               placeholder="Enter phone number"
-             />
-           </div>
+            <div>
+              <label className="block mb-1 font-medium">Phone</label>
+              <Input name="phone" value={form.phone} onChange={handleChange} placeholder="Enter phone number" />
+            </div>
 
-           {/* Position */}
-           <div>
-             <label className="block mb-1 font-medium">Position</label>
-             <Input
-               name="position"
-               value={form.position}
-               onChange={handleChange}
-               placeholder="Enter position"
-             />
-           </div>
+            <div>
+              <label className="block mb-1 font-medium">Address</label>
+              <Textarea
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+                rows={2}
+                className="resize-none"
+                placeholder="Enter address"
+              />
+            </div>
 
-           {/* Address */}
-           <div>
-             <label className="block mb-1 font-medium">Address</label>
-             <Textarea
-               name="address"
-               value={form.address}
-               onChange={handleChange}
-               rows={2}
-               className="resize-none"
-               placeholder="Enter address"
-             />
-           </div>
-
-           {/* Status */}
-           <div>
-             <label className="block mb-1 font-medium">Status</label>
-             <Select
-               value={form.status}
-               onValueChange={handleSelectChange}
-             >
-               <SelectTrigger>
-                 <SelectValue placeholder="Select status" />
-               </SelectTrigger>
-               <SelectContent>
-                 <SelectItem value="active">Active</SelectItem>
-                 <SelectItem value="resigned">Resigned</SelectItem>
-                 <SelectItem value="inactive">Inactive</SelectItem>
-               </SelectContent>
-             </Select>
-           </div>
+            <div>
+              <label className="block mb-1 font-medium">Status</label>
+              <Select onValueChange={handleSelectChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="resigned">Resigned</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="p-4 border-t bg-background flex justify-end gap-2">
