@@ -20,6 +20,7 @@ import teamIcon from "@/assets/icon/team-icons.svg";
 import userManagementIcon from "@/assets/icon/usermanagement-icon.svg";
 import circleHeadlineIcon from "@/assets/icon/circle-headline.svg";
 import uploadicon from "@/assets/icon/lets-icons--upload.svg";
+import historyIcon from "@/assets/icon/material-symbols--history.svg";
 
 export default function AppSidebar() {
   const { open, isMobile, setOpenMobile } = useSidebar();
@@ -50,6 +51,11 @@ export default function AppSidebar() {
       label: "Upload Dokumen",
       href: "/upload-documents",
       icon: uploadicon,
+    },
+    {
+      label: "History",
+      href: "/history",
+      icon: historyIcon,
     },
   ];
 
@@ -110,6 +116,7 @@ export default function AppSidebar() {
                         alt={item.label}
                         className={`
                         transition-all duration-200
+                        filter brightness-0
                         ${open ? "h-4 w-4" : "h-3 w-3"}
                         ${theme === "dark" ? "invert" : ""}
                         `}

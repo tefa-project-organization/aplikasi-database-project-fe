@@ -10,7 +10,7 @@ import UserManagement from "@/pages/UserManagement/Hooks/UserManagement"
 import ErrorPage from "@/pages/ErrorPage/ErrorPage"
 import PrivateRoute from "./PrivateRoute"
 import PublicRoute from "./PublicRoute"
-import TeamDetail from "@/pages/Team/widget/TeamDetail"
+import History from "@/pages/History/History"
 import UploadDocuments from "@/pages/dokumen/UploadDocuments"
 import TeamDetailPage from "@/pages/Team/TeamDetail"
 
@@ -42,6 +42,7 @@ export default function AppRoutes() {
             <Route path="/team" element={<Team />} />
             <Route path="/team/:id" element={<TeamDetailPage />} />
             <Route path="/usermanagement" element={<UserManagement />} />
+            <Route path="/history" element={<History />} />
             <Route path="/upload-documents" element={<UploadDocuments />} />
           </Route>
         </Route>
