@@ -298,8 +298,10 @@ export default function ProjectForm({
                         />
                     </div>
 
-                    {!readOnly && (
-                        <div className="px-4 py-3 border-t sticky bottom-0 bg-card flex justify-end space-x-2">
+                    
+                </div>
+                {!readOnly && (
+                        <div className="px-4 py-3 border-t bg-card flex justify-end space-x-2">
                             <Button
                                 variant="ghost"
                                 type="button"
@@ -316,7 +318,6 @@ export default function ProjectForm({
                             </Button>
                         </div>
                     )}
-                </div>
             </DialogContent>
         </Dialog>
     )

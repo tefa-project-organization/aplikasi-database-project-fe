@@ -1,1 +1,1 @@
-export const SHOW_ALL_ROLE = '/role_levels/show-all';
+export const SHOW_ALL_ROLE_LEVELS = '/role_levels/show-all';

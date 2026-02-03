@@ -12,6 +12,7 @@ import PrivateRoute from "./PrivateRoute"
 import PublicRoute from "./PublicRoute"
 import TeamDetail from "@/pages/Team/widget/TeamDetail"
 import UploadDocuments from "@/pages/dokumen/UploadDocuments"
+import TeamDetailPage from "@/pages/Team/TeamDetail"
 
 export default function AppRoutes() {
   return (
@@ -39,7 +40,7 @@ export default function AppRoutes() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/team" element={<Team />} />
-            <Route path="/team/:id" element={<TeamDetail />} />
+            <Route path="/team/:id" element={<TeamDetailPage />} />
             <Route path="/usermanagement" element={<UserManagement />} />
             <Route path="/upload-documents" element={<UploadDocuments />} />
           </Route>

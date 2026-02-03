@@ -71,7 +71,7 @@ export default function UploadDocumentModal({onSuccess}) {
     formData.append("document", file);
 
     try {
-      const res = await fetch("http://localhost:8000/api/documents/create", {
+      const res = await fetch("https://backend-database-two.vercel.app/api/v1/documents/create", {
         method: "POST",
         body: formData,
       });

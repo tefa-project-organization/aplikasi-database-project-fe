@@ -43,7 +43,7 @@ export default function DocumentTable({ refresh }) {
   const fetchDocuments = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/v1/documents/show-all");
+      const res = await fetch("https://backend-database-two.vercel.app/api/v1/documents/show-all");
 
       if (!res.ok) {
         throw new Error("Gagal fetch data");

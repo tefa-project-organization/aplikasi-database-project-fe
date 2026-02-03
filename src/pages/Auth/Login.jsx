@@ -47,7 +47,7 @@ export default function Login() {
         // pakai pesan asli dari backend, misal 403
         setLoginError(err.error.message);
       } else {
-        setLoginError("Email / Username atau password salah.");
+        setLoginError("Email / identifier atau password salah.");
       }
     } finally {
       setSubmitting(false)
@@ -108,7 +108,7 @@ export default function Login() {
                         <FieldContent>
                           <Input
                             {...field}
-                            placeholder="Masukkan email atau username"
+                            placeholder="Masukkan email atau identifier"
                             autoComplete="off"
                           />
                         </FieldContent>

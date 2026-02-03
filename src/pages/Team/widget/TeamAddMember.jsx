@@ -7,7 +7,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -20,12 +19,12 @@ import { Spinner } from "@/components/ui/spinner";
 
 import { apiGet, apiPost, apiPut } from "@/lib/api";
 
-// API CONSTANTS
 import {
   CREATE_TEAM_MEMBER,
   UPDATE_TEAM_MEMBER,
 } from "@/constants/api/project_team_members";
 import { SHOW_ALL_EMPLOYEES } from "@/constants/api/employees";
+import { SHOW_ALL_ROLE_LEVELS } from "@/constants/api/role_levels";
 
 export default function TeamAddMember({
   open,
@@ -37,49 +36,51 @@ export default function TeamAddMember({
   const editData = isEdit ? open.data : null;
 
   const [employees, setEmployees] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     employee_id: "",
-    role: "",
+    role_id: "",
   });
 
   // ===============================
-  // FETCH EMPLOYEES
+  // FETCH DATA
   // ===============================
-  const fetchEmployees = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await apiGet(SHOW_ALL_EMPLOYEES);
-      setEmployees(
-        res?.data?.items ||
-        res?.data?.data?.items ||
-        res?.items ||
-        []
-      );
+      const [empRes, roleRes] = await Promise.all([
+        apiGet(SHOW_ALL_EMPLOYEES),
+        apiGet(SHOW_ALL_ROLE_LEVELS),
+      ]);
+
+      setEmployees(empRes?.data?.data?.employees || []);
+      setRoles(roleRes?.data?.data?.items || []);
     } catch (err) {
-      console.error("Fetch employees error:", err);
+      console.error("Fetch data error:", err);
       setEmployees([]);
+      setRoles([]);
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    if (open) {
-      fetchEmployees();
+    if (!open) return;
 
-      if (isEdit && editData) {
-        setForm({
-          employee_id: String(editData.employee_id),
-          role: editData.role || "",
-        });
-      } else {
-        setForm({
-          employee_id: "",
-          role: "",
-        });
-      }
+    fetchData();
+
+    if (isEdit && editData) {
+      setForm({
+        employee_id: String(editData.employee_id),
+        role_id: String(editData.role_id),
+      });
+    } else {
+      setForm({
+        employee_id: "",
+        role_id: "",
+      });
     }
   }, [open]);
 
@@ -87,8 +88,8 @@ export default function TeamAddMember({
   // SUBMIT
   // ===============================
   const handleSubmit = async () => {
-    if (!form.employee_id) {
-      alert("Employee wajib dipilih");
+    if (!form.employee_id || !form.role_id) {
+      alert("Employee dan Role wajib dipilih");
       return;
     }
 
@@ -97,18 +98,15 @@ export default function TeamAddMember({
       const payload = {
         project_teams_id: teamId,
         employee_id: Number(form.employee_id),
-        role: String(form.role || ""),
+        role_id: Number(form.role_id),
       };
 
-      let res;
-      if (isEdit && editData?.id) {
-        res = await apiPut(
-          UPDATE_TEAM_MEMBER(editData.id),
-          payload
-        );
-      } else {
-        res = await apiPost(CREATE_TEAM_MEMBER, payload);
-      }
+      const res = isEdit
+        ? await apiPut(
+            UPDATE_TEAM_MEMBER(editData.id),
+            payload
+          )
+        : await apiPost(CREATE_TEAM_MEMBER, payload);
 
       if (!res?.error) {
         onSuccess?.();
@@ -117,10 +115,10 @@ export default function TeamAddMember({
           `Member berhasil ${isEdit ? "diupdate" : "ditambahkan"}`
         );
       } else {
-        alert(res.message || "Gagal menyimpan member");
+        alert(res?.message || "Gagal menyimpan member");
       }
     } catch (err) {
-      console.error("Submit member error:", err);
+      console.error("Submit error:", err);
       alert("Terjadi kesalahan server");
     }
     setSubmitting(false);
@@ -158,8 +156,11 @@ export default function TeamAddMember({
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map((e) => (
-                    <SelectItem key={e.id} value={String(e.id)}>
-                      {e.employee_name}
+                    <SelectItem
+                      key={e.id}
+                      value={String(e.id)}
+                    >
+                      {e.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -169,13 +170,26 @@ export default function TeamAddMember({
             {/* ROLE */}
             <div>
               <Label>Role</Label>
-              <Input
-                placeholder="Contoh: Frontend Developer"
-                value={form.role}
-                onChange={(e) =>
-                  setForm({ ...form, role: e.target.value })
+              <Select
+                value={form.role_id}
+                onValueChange={(v) =>
+                  setForm({ ...form, role_id: v })
                 }
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.map((r) => (
+                    <SelectItem
+                      key={r.id}
+                      value={String(r.id)}
+                    >
+                      {r.role_name} — {r.level}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         )}
