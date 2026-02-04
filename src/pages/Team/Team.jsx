@@ -214,6 +214,7 @@ export default function Team() {
       <TeamForm
        open={openForm}
        onClose={() => setOpenForm(false)}
+       setOpen={setOpenForm}
        projects={projects}
        onSuccess={() => {
        setOpenForm(false);

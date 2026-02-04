@@ -8,7 +8,6 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,10 +18,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UploadCloud, Loader2 } from "lucide-react";
+import { DialogClose } from "@/components/ui/dialog";
 
-export default function UploadDocumentModal({onSuccess}) { 
+export default function UploadDocumentModal({ onSuccess }) {
+  /* ================= STATE ================= */
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(""); 
+  const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
 
   const [file, setFile] = useState(null);
@@ -71,27 +72,20 @@ export default function UploadDocumentModal({onSuccess}) {
     formData.append("document", file);
 
     try {
-      const res = await fetch("https://backend-database-two.vercel.app/api/v1/documents/create", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        "https://backend-database-two.vercel.app/api/v1/documents/create",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!res.ok) throw new Error();
 
       setStatus("success");
       setMessage("Dokumen berhasil diupload");
-
       onSuccess?.();
-
-      setForm({
-        number: "",
-        project_id: "",
-        client_id: "",
-        client_pic_id: "",
-        document_types: "",
-        date_signed: "",
-      });
-      setFile(null);
+      resetForm();
     } catch {
       setStatus("error");
       setMessage("Gagal upload dokumen");
@@ -100,12 +94,13 @@ export default function UploadDocumentModal({onSuccess}) {
     }
   };
 
-  const handleCancel = () => {
+  /* ================= RESET ================= */
+  const resetForm = () => {
     setFile(null);
     setStatus("");
     setMessage("");
     setLoading(false);
-  
+
     setForm({
       number: "",
       project_id: "",
@@ -115,213 +110,226 @@ export default function UploadDocumentModal({onSuccess}) {
       date_signed: "",
     });
   };
-  
 
+  /* ================= UI ================= */
   return (
-    <div className="p-6">
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button>+ Upload Dokumen</Button>
-        </DialogTrigger>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>+ Upload Dokumen</Button>
+      </DialogTrigger>
 
-        <DialogContent className="max-w-xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Upload Dokumen</DialogTitle>
+      <DialogContent className="max-w-xl overflow-hidden">
+        <div className="flex flex-col h-[min(90vh,700px)]">
+          {/* HEADER */}
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle className="text-lg">Upload Dokumen</DialogTitle>
             <DialogDescription>
               Lengkapi data sebelum mengunggah dokumen
             </DialogDescription>
           </DialogHeader>
 
-          <Card>
-          <CardContent
-            className="space-y-6 pt-6 overflow-y-auto pr-2 no-scrollbar"
-            style={{ maxHeight: "65vh" }}
-          >
-              {/* Number */}
-              <div className="space-y-1.5">
+          {/* BODY */}
+          <div className="flex-1 overflow-y-auto space-y-6 p-6 scrollbar-none [&::-webkit-scrollbar]:hidden">
+            {/* Nomor Dokumen */}
+            <div className="space-y-2">
               <Label>Nomor Dokumen</Label>
               <Input
-               placeholder="DOC-010"
-               value={form.number}
-               onChange={(e) =>
-               setForm({ ...form, number: e.target.value })
-               }
+                placeholder="DOC-010"
+                value={form.number}
+                onChange={(e) =>
+                  setForm({ ...form, number: e.target.value })
+                }
               />
             </div>
 
-              {/* Project */}
-              <div>
-                <Label>Project</Label>
-                <Select
-                  onValueChange={(v) =>
-                    setForm({ ...form, project_id: v })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Project" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="24">Project A</SelectItem>
-                    <SelectItem value="25">Project B</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Project */}
+            <div className="space-y-2">
+              <Label>Project</Label>
+              <Select
+                onValueChange={(v) =>
+                  setForm({ ...form, project_id: v })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih Project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="24">Project A</SelectItem>
+                  <SelectItem value="25">Project B</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              {/* Client */}
-              <div>
-                <Label>Client</Label>
-                <Select
-                  onValueChange={(v) =>
-                    setForm({ ...form, client_id: v })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Client" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2">Client ABC</SelectItem>
-                    <SelectItem value="3">Client XYZ</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Client */}
+            <div className="space-y-2">
+              <Label>Client</Label>
+              <Select
+                onValueChange={(v) =>
+                  setForm({ ...form, client_id: v })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih Client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">Client ABC</SelectItem>
+                  <SelectItem value="3">Client XYZ</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              {/* Client PIC */}
-              <div>
-                <Label>Client PIC</Label>
-                <Select
-                  onValueChange={(v) =>
-                    setForm({ ...form, client_pic_id: v })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih PIC" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2">John Doe</SelectItem>
-                    <SelectItem value="3">Jane Smith</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Client PIC */}
+            <div className="space-y-2">
+              <Label>Client PIC</Label>
+              <Select
+                onValueChange={(v) =>
+                  setForm({ ...form, client_pic_id: v })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih PIC" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2">John Doe</SelectItem>
+                  <SelectItem value="3">Jane Smith</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              {/* Document Type */}
-              <div>
-                <Label>Tipe Dokumen</Label>
-                <Select
-                  onValueChange={(v) =>
-                    setForm({ ...form, document_types: v })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Tipe Dokumen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BAST">BAST</SelectItem>
-                    <SelectItem value="MOU">MOU</SelectItem>
-                    <SelectItem value="CONTRACT">Contract</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Document Type */}
+            <div className="space-y-2">
+              <Label>Tipe Dokumen</Label>
+              <Select
+                onValueChange={(v) =>
+                  setForm({ ...form, document_types: v })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih Tipe Dokumen" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BAST">BAST</SelectItem>
+                  <SelectItem value="MOU">MOU</SelectItem>
+                  <SelectItem value="CONTRACT">Contract</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-              {/* Date */}
-              <div>
-                <Label>Tanggal Ditandatangani</Label>
-                <Input
-                  type="date"
-                  value={form.date_signed}
-                  onChange={(e) =>
-                    setForm({ ...form, date_signed: e.target.value })
-                  }
-                />
-              </div>
+            {/* Date */}
+            <div className="space-y-2">
+              <Label>Tanggal Ditandatangani</Label>
+              <Input
+                type="date"
+                value={form.date_signed}
+                onChange={(e) =>
+                  setForm({ ...form, date_signed: e.target.value })
+                }
+              />
+            </div>
 
-              {/* UPLOAD – KLIK + DRAG */}
-              <div className="space-y-2 pt-2">
+            <div className="space-y-2 pt-2">
               <Label>File Dokumen</Label>
 
-               <label
+              <div
                 onDragOver={(e) => {
-                e.preventDefault();
-                setDragActive(true);
-              }}
-               onDragLeave={() => setDragActive(false)}
-               onDrop={(e) => {
-               e.preventDefault();
-               setDragActive(false);
-               handleFile(e.dataTransfer.files[0]);
-              }}
-              className={`flex flex-col items-center justify-center gap-2
-              border border-dashed rounded-lg px-6 py-7 cursor-pointer
-              transition text-center
-             ${
-              dragActive
-              ? "bg-muted border-primary"
-              : "hover:bg-muted"
-             }
-           `}
-           >
-           <UploadCloud className="h-8 w-8 text-muted-foreground" />
+                  e.preventDefault();
+                  setDragActive(true);
+                }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragActive(false);
+                  handleFile(e.dataTransfer.files[0]);
+                }}
+                className={`relative flex flex-col items-center justify-center gap-2
+                  border border-dashed rounded-lg px-6 py-7 cursor-pointer
+                  transition text-center
+                  ${
+                    dragActive
+                      ? "bg-muted border-primary"
+                      : "hover:bg-muted"
+                  }`}
+                onClick={() => document.getElementById("file-upload").click()}
+              >
+                {/* TOMBOL X */}
+                {file && (
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="absolute top-2 right-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      resetForm();
+                    }}
+                  >
+                    ✕
+                  </Button>
+                )}
 
-           <p className="text-sm font-medium">
-           {file ? file.name : "Klik atau drag file ke sini"}
-           </p>
+                <UploadCloud className="h-8 w-8 text-muted-foreground" />
 
-           <p className="text-xs text-muted-foreground">
-              PDF, DOCX, JPG (Max 5MB)
-           </p>
+                <p className="text-sm font-medium">
+                  {file ? file.name : "Klik atau drag file ke sini"}
+                </p>
 
-           <Input
-            type="file"
-            className="hidden"
-            onChange={(e) =>
-            handleFile(e.target.files[0])
-          }
-          />
-          </label>
-           </div>
+                <p className="text-xs text-muted-foreground">
+                  PDF, DOCX, JPG (Max 5MB)
+                </p>
 
-              {/* STATUS */}
-              {message && (
-               <p
-               className={`text-sm text-center ${
-               status === "success"
-               ? "text-green-500"
-               : "text-red-500"
-               }`}
-               >
-               {message}
+                <Input
+                  id="file-upload"
+                  type="file"
+                  className="hidden"
+                  onChange={(e) => handleFile(e.target.files[0])}
+                />
+              </div>
+            </div>
+
+            {/* STATUS */}
+            {message && (
+              <p
+                className={`text-sm text-center ${
+                  status === "success"
+                    ? "text-green-500"
+                    : "text-red-500"
+                }`}
+              >
+                {message}
               </p>
-               )}
+            )}
+          </div>
 
-             {/* ACTION */}
-             <div className="flex gap-3 pt-2">
-             <Button
+          {/* FOOTER */}
+          <div className="p-4 border-t bg-background flex gap-3">
+            <Button
               className="flex-1"
               onClick={handleSubmit}
               disabled={loading}
             >
-            {loading ? (
-            <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Uploading...
-             </>
-            ) : (
-            "Upload Dokumen"
-            )}
-           </Button>
-           
-           <Button
-            variant="outline"
-            className="flex-1"
-            onClick={handleCancel}
-            disabled={loading}
-          >
-           Batal
-          </Button>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                "Upload Dokumen"
+              )}
+            </Button>
+
+            <DialogClose asChild>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={resetForm}
+              disabled={loading}
+            >
+              Batal
+            </Button>
+          </DialogClose>
           </div>
-            </CardContent>
-          </Card>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

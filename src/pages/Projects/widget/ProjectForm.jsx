@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { DialogClose } from "@/components/ui/dialog"
+import { X } from "lucide-react"
 import {
     Dialog,
     DialogContent,
@@ -9,7 +11,7 @@ import {
     DialogTitle,
     DialogDescription,
 } from "@/components/ui/dialog"
-import {
+import {    
     Select,
     SelectContent,
     SelectTrigger,
@@ -145,16 +147,27 @@ export default function ProjectForm({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent className="max-w-md h-[80vh] bg-card text-card-foreground rounded-2xl shadow-2xl flex flex-col p-0">
-                 <DialogHeader className="px-4 py-3 border-b sticky top-0 bg-card z-10">
-                    <DialogTitle>
-                        {initialData && initialData.project_name ? "Edit Proyek" : "Tambah Proyek Baru"}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {initialData
-                            ? "Perbarui informasi proyek"
-                            : "Isi data proyek baru"}
-                    </DialogDescription>
-                </DialogHeader>
+            <DialogHeader className="px-4 py-3 border-b sticky top-0 bg-card z-10 relative">
+            <DialogTitle>
+                {initialData && initialData.project_name
+                ? "Edit Proyek"
+                : "Tambah Proyek Baru"}
+            </DialogTitle>
+
+            <DialogDescription>
+                {initialData ? "Perbarui informasi proyek" : "Isi data proyek baru"}
+            </DialogDescription>
+
+            {/* TOMBOL X */}
+            <DialogClose asChild>
+                <button
+                className="absolute right-4 top-4 rounded-md opacity-70 hover:opacity-100"
+                aria-label="Close"
+                >
+                <X className="h-4 w-4" />
+                </button>
+            </DialogClose>
+            </DialogHeader>
 
                 <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 scrollbar-none [&::-webkit-scrollbar]:hidden">
                     {/* Nama Proyek */}
