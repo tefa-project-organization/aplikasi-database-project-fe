@@ -13,6 +13,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import PicForm from "./PicForm"
 import PicDetail from "./PicDetail"
 import EditPicForm from "./EditPicForm"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export default function PicTable({
     pics = [],
@@ -58,6 +69,10 @@ export default function PicTable({
 
     const getClientName = (id) => clients.find((c) => c.id === id)?.name || "-"
     const getProjectName = (id) => projects.find((p) => p.id === id)?.name || "-"
+
+    const handleDeletePic = (pic) => {
+        onDeletePic?.(pic)
+    }
 
     if (detailPic) {
         return <PicDetail pic={detailPic} clients={clients} projects={projects} onClose={() => setDetailPic(null)} />
@@ -142,9 +157,23 @@ export default function PicTable({
                                         clients={clients}
                                         projects={projects}
                                     />
-                                    <Button size="sm" variant="destructive" onClick={() => onDeletePic?.(pic)}>
-                                        Delete
-                                    </Button>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button size="sm" variant="destructive">Delete</Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Hapus PIC</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Apakah kamu yakin ingin menghapus PIC <strong>{pic.name}</strong>? Tindakan ini tidak dapat dibatalkan.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDeletePic(pic)}>Hapus</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </TableCell>
                             </TableRow>
                         ))}

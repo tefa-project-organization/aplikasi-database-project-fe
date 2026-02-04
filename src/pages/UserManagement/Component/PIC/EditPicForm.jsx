@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -21,6 +21,17 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
+import * as Yup from "yup"
+import { toast } from "sonner"
+
+const picSchema = Yup.object().shape({
+  name: Yup.string().required("Name is required"),
+  email: Yup.string().email("Invalid email format").required("Email is required"),
+  phone: Yup.string().required("Phone is required"),
+  title: Yup.string().required("Title is required"),
+  client_id: Yup.number().required("Client is required"),
+  project_id: Yup.number().required("Project is required"),
+})
 
 export default function EditPicForm({ 
   pic, 

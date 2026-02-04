@@ -5,6 +5,7 @@ import App from "./App.jsx";
 
 import AuthProvider from "@/context/AuthProvider";
 import { ThemeProvider } from "@/context/ThemeContext";
+import '@lottiefiles/lottie-player';
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
