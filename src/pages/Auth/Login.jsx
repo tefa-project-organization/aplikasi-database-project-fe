@@ -14,7 +14,7 @@ import {
 
 import LoginHeader from "./LoginHeader"
 import LoginValidate from "./LoginValidate"
-import loginAsset from "@/assets/img/login-asset.svg"
+import loginLottie from "@/assets/img/Data Animation.json"
 
 import { useAuth } from "@/context/AuthContext.jsx"
 import LoginFailed from "./LoginFailed"
@@ -63,11 +63,14 @@ export default function Login() {
         {/* LEFT — IMAGE */}
         <div className="hidden lg:flex items-center justify-center relative">
           <div className="max-w-sm text-center px-6">
-            <img
-              src={loginAsset}
-              alt="Login Illustration"
+            <lottie-player
+              src={loginLottie}
+              background="transparent"
+              speed="1"
+              loop
+              autoplay
               className="w-full h-auto mb-6 opacity-90"
-            />
+            ></lottie-player>
 
             <h2 className="text-3xl font-semibold mb-3 text-foreground">
               Good to see you
