@@ -1,8 +1,20 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, DollarSign, User, FileText, Trash2, Edit3, Eye } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
-export default function ProjectCard({ project, onDetail, onEdit, onDelete }) {
+
+export default function ProjectCard({ project, clientOptions = [], onDetail, onEdit, onDelete }) {
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("id-ID", {
@@ -11,6 +23,11 @@ export default function ProjectCard({ project, onDetail, onEdit, onDelete }) {
       year: "numeric",
     });
   };
+
+  const clientName =
+  clientOptions.find(
+    (c) => String(c.id) === String(project.client_id)
+  )?.name || "-";
 
   const formatCurrency = (value) => {
     if (!value) return "Rp 0";
@@ -62,7 +79,7 @@ export default function ProjectCard({ project, onDetail, onEdit, onDelete }) {
             <div className="flex flex-col min-w-0">
               <span className="text-[10px] text-muted-foreground leading-none mb-0.5">Client</span>
               <span className="font-medium truncate uppercase text-xs">
-                {project.client_name || `ID: ${project.client_id}`}
+              {clientName}
               </span>
             </div>
           </div>
@@ -118,14 +135,39 @@ export default function ProjectCard({ project, onDetail, onEdit, onDelete }) {
           >
             Edit
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            className="w-full text-[11px] font-medium"
-            onClick={onDelete}
-          >
-            Delete
-          </Button>
+          <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="w-full text-[11px] font-medium"
+            >
+              Delete
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent className="rounded-xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Hapus Proyek?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Proyek <b>{project.project_name}</b> akan dihapus permanen dan
+                tidak bisa dikembalikan.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel>
+                Batal
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={onDelete}
+                className="bg-background text-foreground border border-border hover:bg-muted hover:text-foreground rounded-md">
+                Ya, Hapus
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         </div>
       </div>
     </div>

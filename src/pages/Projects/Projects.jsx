@@ -107,7 +107,6 @@ export default function Projects() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus proyek ini?")) return;
     setDeleting(true);
     try {
       const res = await apiDelete(DELETE_PROJECT(id));
@@ -124,6 +123,7 @@ export default function Projects() {
     }
     setDeleting(false);
   };
+    
 
   const handleEdit = (project) => {
     setIsEdit(true);
@@ -314,6 +314,7 @@ export default function Projects() {
                 onDetail={() => handleDetail(project.id)}
                 onEdit={() => handleEdit(project)}
                 onDelete={() => handleDelete(project.id)}
+                clientOptions={clientOptions}
               />
             ))
           ) : (

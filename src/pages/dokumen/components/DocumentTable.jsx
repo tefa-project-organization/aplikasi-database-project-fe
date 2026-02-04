@@ -7,6 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+
 
 /* ✅ DUMMY DATA (tidak mengganggu API asli) */
 const dummyDocuments = [
@@ -79,6 +81,31 @@ export default function DocumentTable({ refresh }) {
     );
   }
 
+  const handleDelete = async (id) => {
+    const confirmDelete = confirm("Yakin ingin menghapus dokumen ini?");
+    if (!confirmDelete) return;
+  
+    try {
+      const res = await fetch(
+        `https://backend-database-two.vercel.app/api/v1/documents/delete/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+  
+      if (!res.ok) {
+        throw new Error("Gagal menghapus data");
+      }
+  
+      // refresh data setelah delete
+      fetchDocuments();
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Gagal menghapus dokumen");
+    }
+  };
+  
+
   return (
     <div className="mt-6 rounded-lg border">
       <Table>
@@ -89,6 +116,7 @@ export default function DocumentTable({ refresh }) {
             <TableHead>Project</TableHead>
             <TableHead>Client</TableHead>
             <TableHead>File</TableHead>
+            <TableHead className="text-center">Action</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -105,21 +133,31 @@ export default function DocumentTable({ refresh }) {
           ) : (
             documents.map((doc) => (
               <TableRow key={doc.id}>
-                <TableCell>{doc.number}</TableCell>
-                <TableCell>{doc.document_types ?? "-"}</TableCell>
-                <TableCell>{doc.project_id}</TableCell>
-                <TableCell>{doc.client_id}</TableCell>
-                <TableCell>
-                  <a
-                    href={doc.document_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary underline underline-offset-4"
-                  >
-                    Lihat
-                  </a>
-                </TableCell>
-              </TableRow>
+            <TableCell>{doc.number}</TableCell>
+            <TableCell>{doc.document_types ?? "-"}</TableCell>
+            <TableCell>{doc.project_id}</TableCell>
+            <TableCell>{doc.client_id}</TableCell>
+            <TableCell>
+            <Button asChild size="sm" variant="outline">
+              <a
+                href={doc.document_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Detail
+              </a>
+            </Button>
+          </TableCell>
+
+            <TableCell className="text-center">
+              <button
+                onClick={() => handleDelete(doc.id)}
+                className="rounded-md bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
+              >
+                Hapus
+              </button>
+            </TableCell>
+          </TableRow>
             ))
           )}
         </TableBody>

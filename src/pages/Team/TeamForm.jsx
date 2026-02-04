@@ -223,8 +223,6 @@ export default function TeamForm({
             </option>
           ))}
         </select> 
-
-
           <DialogFooter className="pt-4">
             <Button
               type="button"
