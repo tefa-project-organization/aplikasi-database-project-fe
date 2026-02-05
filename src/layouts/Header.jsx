@@ -121,7 +121,7 @@ export default function Header() {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="hover:bg-muted p-0 h-8 w-8 flex items-center justify-center"
+          className="hover:bg-muted text-foreground p-0 h-8 w-8 flex items-center justify-center"
         >
           {open ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
         </Button>
@@ -159,7 +159,7 @@ export default function Header() {
 
       {/* KANAN - THEME & USER PROFILE */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={toggleTheme}>
+        <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-foreground">
           {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
         </Button>
 
