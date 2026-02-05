@@ -130,7 +130,7 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
       toast.error("All fields are required")
 
       if (firstErrorField && fieldRefs[firstErrorField]?.current) {
-        try { fieldRefs[firstErrorField].current.focus() } catch (e) {}
+        try { fieldRefs[firstErrorField].current.focus() } catch (e) { }
       }
     }
   }
@@ -153,6 +153,9 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
         <div className="flex flex-col h-[min(60vh,480px)]">
           <DialogHeader className="p-4 border-b">
             <DialogTitle>Add New PIC</DialogTitle>
+            <DialogDescription>
+              Form untuk menambahkan PIC
+            </DialogDescription>
           </DialogHeader>
 
           <div className="p-4 pt-0 overflow-y-auto space-y-3 max-h-[calc(60vh-120px)] pr-2 scrollbar-none [&::-webkit-scrollbar]:hidden">
@@ -225,7 +228,7 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
                     variant="outline"
                     role="combobox"
                     aria-expanded={openClientCombobox}
-                    className={`w-full justify-between ${errors.client_id ? "border-red-500" : ""}`} 
+                    className={`w-full justify-between ${errors.client_id ? "border-red-500" : ""}`}
                   >
                     {selectedClient ? selectedClient.name : "Select client..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
