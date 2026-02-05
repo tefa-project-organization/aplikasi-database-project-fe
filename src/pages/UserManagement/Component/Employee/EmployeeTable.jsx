@@ -113,14 +113,6 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail 
                     </TableHeader>
 
                     <TableBody>
-                        {paginatedEmployees.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={8} className="text-center text-muted-foreground">
-                                    No employee found
-                                </TableCell>
-                            </TableRow>
-                        )}
-
                         {paginatedEmployees.map((employee) => (
                             <TableRow key={employee.id}>
                                 <TableCell className="font-medium">{employee.nik?.trim()}</TableCell>
