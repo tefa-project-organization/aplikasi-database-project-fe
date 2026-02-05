@@ -66,7 +66,7 @@ export default function AppSidebar() {
     >
       {/* HEADER */}
       <div
-        className={`flex items-center border-b border-black/5 dark:border-white/10 transition-all duration-200 bg-gradient-to-b from-white/40 to-transparent dark:from-white/10
+        className={`flex items-center border-b border-black/5 dark:border-white/10 transition-all duration-200 bg-gradient-to-b from-white/40 to-transparent dark:from-white/5
         ${open ? "px-4 py-4 justify-start gap-3" : "px-3 py-4 justify-center"}`}
       >
         <img
