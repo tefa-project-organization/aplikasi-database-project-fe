@@ -244,7 +244,6 @@ export default function Team() {
                     <Users className="h-5 w-5 text-primary" />
                   </div>
                   {team.project_teams_name}
-                  {team.project_teams_name}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   {team.project_teams_email}

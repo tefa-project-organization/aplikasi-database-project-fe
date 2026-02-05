@@ -8,6 +8,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+
 
 
 /* ✅ DUMMY DATA (tidak mengganggu API asli) */
@@ -41,6 +53,13 @@ const dummyDocuments = [
 export default function DocumentTable({ refresh }) {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -71,20 +90,31 @@ export default function DocumentTable({ refresh }) {
     fetchDocuments();
   }, [refresh]);
 
-  if (loading) {
+  function LoadingScreen() {
     return (
-      <div className="mt-6 flex justify-center rounded-lg border p-6">
-        <p className="text-sm text-muted-foreground">
-          Memuat data dokumen...
-        </p>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <h1 className="text-xl font-semibold tracking-wide">
+            Document Manager
+          </h1>
+  
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-white border-t-transparent"/>
+  
+          <p className="text-sm text-muted-foreground">
+            Memuat data dokumen...
+          </p>
+        </div>
       </div>
     );
   }
+  
+  
+
+  if (loading) {
+    return <LoadingScreen />;
+  }  
 
   const handleDelete = async (id) => {
-    const confirmDelete = confirm("Yakin ingin menghapus dokumen ini?");
-    if (!confirmDelete) return;
-  
     try {
       const res = await fetch(
         `https://backend-database-two.vercel.app/api/v1/documents/delete/${id}`,
@@ -97,17 +127,17 @@ export default function DocumentTable({ refresh }) {
         throw new Error("Gagal menghapus data");
       }
   
-      // refresh data setelah delete
       fetchDocuments();
     } catch (error) {
       console.error("Delete error:", error);
-      alert("Gagal menghapus dokumen");
+      setErrorMessage("Dokumen tidak dapat dihapus. Silakan coba beberapa saat lagi.");
+      setErrorOpen(true); 
     }
-  };
+  };  
   
 
   return (
-    <div className="mt-6 rounded-lg border">
+    <div className="mt-10 rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -149,19 +179,77 @@ export default function DocumentTable({ refresh }) {
             </Button>
           </TableCell>
 
-            <TableCell className="text-center">
-              <button
-                onClick={() => handleDelete(doc.id)}
-                className="rounded-md bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600"
-              >
-                Hapus
-              </button>
+
+            <TableCell className="text-center space-x-2">
+            <button
+              onClick={() => {
+                setSelectedDoc(doc);
+                setOpenEdit(true);
+              }}
+              className="rounded-md bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+            >
+              Edit
+            </button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  className="bg-red-600 text-white hover:bg-red-700"
+                  onClick={() => setDeleteId(doc.id)}
+                >
+                  Hapus
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    Hapus dokumen ini?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Tindakan ini tidak dapat dibatalkan.
+                    Dokumen akan dihapus permanen.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleDelete(deleteId)}
+                    className="bg-red-600 text-white hover:bg-red-700"
+                  >
+                    Ya, Hapus
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             </TableCell>
           </TableRow>
             ))
           )}
         </TableBody>
       </Table>
+      {openEdit && selectedDoc && (
+      <EditDocumentModal
+        open={openEdit}
+        onOpenChange={setOpenEdit}
+        document={selectedDoc}
+        onSuccess={fetchDocuments}
+      />
+    )}
+    <AlertDialog open={errorOpen} onOpenChange={setErrorOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Gagal Menghapus Dokumen</AlertDialogTitle>
+          <AlertDialogDescription>
+            {errorMessage}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <AlertDialogFooter>
+          <AlertDialogAction>OK</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     </div>
   );
 }
