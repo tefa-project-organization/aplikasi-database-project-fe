@@ -22,7 +22,27 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 
 function formatBreadcrumb(name) {
-  return name.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const map = {
+    usermanagement: "User Management",
+    "upload-documents": "Upload Documents",
+    pic: "PIC",
+    employee: "Employee",
+    projects: "Projects",
+    dashboard: "Dashboard",
+    team: "Team",
+    history: "History",
+  };
+
+  const key = String(name).toLowerCase();
+  if (map[key]) return map[key];
+
+  // convert kebab-case and camelCase to spaced words, then Title Case
+  const spaced = name
+    .replace(/-/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2");
+
+  return spaced.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default function Header() {
