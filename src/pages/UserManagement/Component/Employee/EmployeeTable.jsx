@@ -26,7 +26,7 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail 
         let filtered = employees.filter((emp) =>
             emp.name?.toLowerCase().includes(search.toLowerCase()) ||
             emp.nip?.toLowerCase().includes(search.toLowerCase()) ||
-            emp.position?.toLowerCase().includes(search.toLowerCase())
+            emp.position?.position_name?.toLowerCase().includes(search.toLowerCase())
         )
 
         filtered.sort((a, b) =>
@@ -46,17 +46,17 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail 
 
     // Fungsi untuk menentukan warna badge
     const getBadgeStyles = (status) => {
-        const baseStyle = "font-medium text-black dark:text-black" // TEXT HITAM SELALU
+        const baseStyle = "font-medium text-black"
 
-        switch (status) {
+        switch (status?.toLowerCase()) {
             case "active":
-                return `${baseStyle} bg-blue-400 hover:bg-blue-500 border-blue-500`
+                return `${baseStyle} bg-emerald-400 hover:bg-emerald-500 border-emerald-500`
             case "resigned":
-                return `${baseStyle} bg-red-400 hover:bg-red-500 border-red-500`
-            case "inactive":
-                return `${baseStyle} bg-gray-300 hover:bg-gray-400 border-gray-400`
+                return `${baseStyle} bg-red-700 hover:bg-red-800 border-red-800`
+            case "freelance":
+                return `${baseStyle} bg-blue-500 hover:bg-blue-600 border-blue-600`
             default:
-                return `${baseStyle} bg-gray-200 hover:bg-gray-300 border-gray-300`
+                return `${baseStyle} bg-gray-300 hover:bg-gray-400 border-gray-400`
         }
     }
 
@@ -113,28 +113,20 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail 
                     </TableHeader>
 
                     <TableBody>
-                        {paginatedEmployees.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={8} className="text-center text-muted-foreground">
-                                    No employee found
-                                </TableCell>
-                            </TableRow>
-                        )}
-
                         {paginatedEmployees.map((employee) => (
                             <TableRow key={employee.id}>
-                                <TableCell className="font-medium">{employee.nik}</TableCell>
-                                <TableCell>{employee.nip}</TableCell>
+                                <TableCell className="font-medium">{employee.nik?.trim()}</TableCell>
+                                <TableCell>{employee.nip?.trim()}</TableCell>
                                 <TableCell className="font-medium">{employee.name}</TableCell>
-                                <TableCell>{employee.position || "-"}</TableCell>
+                                <TableCell>{employee.position?.position_name || "-"}</TableCell>
                                 <TableCell>{employee.email || "-"}</TableCell>
                                 <TableCell>{employee.phone || "-"}</TableCell>
                                 <TableCell>
                                     <Badge
                                         variant="outline"
-                                        className={getBadgeStyles(employee.status)}
+                                        className={getBadgeStyles(employee.status?.status_name?.toLowerCase())}
                                     >
-                                        {employee.status}
+                                        {employee.status?.status_name || "-"}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right space-x-2">

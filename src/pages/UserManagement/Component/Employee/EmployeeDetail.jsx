@@ -20,14 +20,16 @@ export default function EmployeeDetail({ employee, onClose }) {
           <Badge
             variant="outline"
             className={
-              employee.status === "active"
-                ? "bg-blue-400 hover:bg-blue-500 border-blue-500 text-black dark:text-black font-medium"
-                : employee.status === "resigned"
-                  ? "bg-red-400 hover:bg-red-500 border-red-500 text-black dark:text-black font-medium"
-                  : "bg-gray-300 hover:bg-gray-400 border-gray-400 text-black dark:text-black font-medium"
+              employee.status?.status_name?.toLowerCase() === "active"
+                ? "bg-emerald-400 hover:bg-emerald-500 border-emerald-500 text-black font-medium"
+                : employee.status?.status_name?.toLowerCase() === "resigned"
+                  ? "bg-red-700 hover:bg-red-800 border-red-800 text-black font-medium"
+                  : employee.status?.status_name?.toLowerCase() === "freelance"
+                    ? "bg-blue-500 hover:bg-blue-600 border-blue-600 text-black font-medium"
+                    : "bg-gray-300 hover:bg-gray-400 border-gray-400 text-black font-medium"
             }
           >
-            {employee.status}
+            {employee.status?.status_name || "-"}
           </Badge>
         </div>
 
@@ -56,7 +58,7 @@ export default function EmployeeDetail({ employee, onClose }) {
               <strong className="block text-sm text-muted-foreground">
                 NIK
               </strong>
-              <span className="font-medium">{employee.nik}</span>
+              <span className="font-medium">{employee.nik?.trim()}</span>
             </div>
 
             {/* NIP */}
@@ -64,7 +66,7 @@ export default function EmployeeDetail({ employee, onClose }) {
               <strong className="block text-sm text-muted-foreground">
                 NIP
               </strong>
-              <span className="font-medium">{employee.nip}</span>
+              <span className="font-medium">{employee.nip?.trim()}</span>
             </div>
 
             {/* Position */}
@@ -72,7 +74,7 @@ export default function EmployeeDetail({ employee, onClose }) {
               <strong className="block text-sm text-muted-foreground">
                 Position
               </strong>
-              <span>{employee.position || "-"}</span>
+              <span>{employee.position?.position_name || "-"}</span>
             </div>
 
             {/* Email */}
@@ -96,7 +98,15 @@ export default function EmployeeDetail({ employee, onClose }) {
               <strong className="block text-sm text-muted-foreground">
                 Status
               </strong>
-              <span className="capitalize">{employee.status}</span>
+              <span className="capitalize">{employee.status?.status_name || "-"}</span>
+            </div>
+
+            {/* Department */}
+            <div>
+              <strong className="block text-sm text-muted-foreground">
+                Department
+              </strong>
+              <span>{employee.department?.department_name || "-"}</span>
             </div>
           </div>
 

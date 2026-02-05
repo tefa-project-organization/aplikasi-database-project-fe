@@ -204,9 +204,9 @@ export default function UserManagement() {
       })
 
       const items =
-        res?.data?.items ||
-        res?.data?.data?.items ||
-        res?.items ||
+        res?.data?.employees ||
+        res?.data?.data?.employees ||
+        res?.employees ||
         []
 
       setEmployees(items)

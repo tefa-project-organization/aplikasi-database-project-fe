@@ -22,7 +22,27 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 
 function formatBreadcrumb(name) {
-  return name.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  const map = {
+    usermanagement: "User Management",
+    "upload-documents": "Upload Documents",
+    pic: "PIC",
+    employee: "Employee",
+    projects: "Projects",
+    dashboard: "Dashboard",
+    team: "Team",
+    history: "History",
+  };
+
+  const key = String(name).toLowerCase();
+  if (map[key]) return map[key];
+
+  // convert kebab-case and camelCase to spaced words, then Title Case
+  const spaced = name
+    .replace(/-/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2");
+
+  return spaced.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default function Header() {
@@ -101,7 +121,7 @@ export default function Header() {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="hover:bg-muted p-0 h-8 w-8 flex items-center justify-center"
+          className="hover:bg-muted text-foreground p-0 h-8 w-8 flex items-center justify-center"
         >
           {open ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
         </Button>
@@ -139,7 +159,7 @@ export default function Header() {
 
       {/* KANAN - THEME & USER PROFILE */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={toggleTheme}>
+        <Button variant="ghost" size="icon" onClick={toggleTheme} className="text-foreground">
           {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
         </Button>
 
