@@ -6,11 +6,17 @@ export default function UploadDocuments() {
   const [refresh, setRefresh] = useState(0);
 
   return (
-    <div className="space-y-6">
-      {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Dokumen</h1>
+    <div className="p-6 space-y-6">
+      {/* HEADER + ACTION */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        {/* HEADER */}
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight">
+            Upload Dokumen
+          </h2>
+        </div>
 
+        {/* BUTTON KE KANAN */}
         <UploadDocumentModal
           onSuccess={() => setRefresh((r) => r + 1)}
         />
