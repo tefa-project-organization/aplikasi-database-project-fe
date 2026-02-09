@@ -180,49 +180,56 @@ export default function DocumentTable({ refresh }) {
           </TableCell>
 
 
-            <TableCell className="text-center space-x-2">
-            <button
-              onClick={() => {
-                setSelectedDoc(doc);
-                setOpenEdit(true);
-              }}
-              className="rounded-md bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
-            >
-              Edit
-            </button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  size="sm"
-                  className="bg-red-600 text-white hover:bg-red-700"
-                  onClick={() => setDeleteId(doc.id)}
-                >
-                  Hapus
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Hapus dokumen ini?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tindakan ini tidak dapat dibatalkan.
-                    Dokumen akan dihapus permanen.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
+          <TableCell className="text-right">
+            <div className="flex justify-end gap-2">
+              {/* EDIT */}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {  
+                  setSelectedDoc(doc);
+                  setOpenEdit(true);
+                }}
+              >
+                Edit
+              </Button>
 
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Batal</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handleDelete(deleteId)}
-                    className="bg-red-600 text-white hover:bg-red-700"
+              {/* DELETE */}
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => setDeleteId(doc.id)}
                   >
-                    Ya, Hapus
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            </TableCell>
+                    Hapus
+                  </Button>
+                </AlertDialogTrigger>
+
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Hapus dokumen ini?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tindakan ini tidak dapat dibatalkan.
+                      Dokumen akan dihapus permanen.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(deleteId)}
+                      className="bg-red-600 text-white hover:bg-red-700"
+                    >
+                      Ya, Hapus
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </TableCell>
           </TableRow>
             ))
           )}

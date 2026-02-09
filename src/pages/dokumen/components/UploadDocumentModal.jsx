@@ -20,11 +20,12 @@ import {
 import { UploadCloud, Loader2 } from "lucide-react";
 import { DialogClose } from "@/components/ui/dialog";
 
-export default function UploadDocumentModal({ onSuccess }) {
+export default function UploadDocumentModal({ onSuccess, onError }) {
   /* ================= STATE ================= */
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
+  const [open, setOpen] = useState(false);
 
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
@@ -60,17 +61,17 @@ export default function UploadDocumentModal({ onSuccess }) {
       setMessage("File belum dipilih");
       return;
     }
-
+  
     setLoading(true);
     setStatus("");
     setMessage("");
-
+  
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) =>
       formData.append(key, value)
     );
     formData.append("document", file);
-
+  
     try {
       const res = await fetch(
         "https://backend-database-two.vercel.app/api/v1/documents/create",
@@ -79,21 +80,32 @@ export default function UploadDocumentModal({ onSuccess }) {
           body: formData,
         }
       );
-
-      if (!res.ok) throw new Error();
-
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        throw new Error(data.message || "Gagal upload dokumen");
+      }
+  
       setStatus("success");
       setMessage("Dokumen berhasil diupload");
-      onSuccess?.();
-      resetForm();
-    } catch {
+
+      onSuccess?.("Dokumen berhasil disimpan");
+
+      // tutup modal
+      setTimeout(() => {
+        setOpen(false);
+        resetForm();
+      }, 300);
+
+    } catch (err) {
       setStatus("error");
-      setMessage("Gagal upload dokumen");
+      setMessage(err.message || "Gagal upload dokumen");
     } finally {
       setLoading(false);
     }
   };
-
+  
   /* ================= RESET ================= */
   const resetForm = () => {
     setFile(null);
@@ -113,7 +125,7 @@ export default function UploadDocumentModal({ onSuccess }) {
 
   /* ================= UI ================= */
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>+ Upload Dokumen</Button>
       </DialogTrigger>
