@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EditDocumentModal from "./EditDocumentModal";
 import {
   Table,
   TableBody,
@@ -19,8 +20,6 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-
-
 
 /* ✅ DUMMY DATA (tidak mengganggu API asli) */
 const dummyDocuments = [
@@ -120,22 +119,25 @@ export default function DocumentTable({ refresh }) {
         `https://backend-database-two.vercel.app/api/v1/documents/delete/${id}`,
         {
           method: "DELETE",
+          credentials: "include", // ⬅️ WAJIB kalau pakai cookie
         }
       );
   
       if (!res.ok) {
+        const text = await res.text();
+        console.error("API RESPONSE:", text);
         throw new Error("Gagal menghapus data");
       }
   
       fetchDocuments();
     } catch (error) {
       console.error("Delete error:", error);
-      setErrorMessage("Dokumen tidak dapat dihapus. Silakan coba beberapa saat lagi.");
-      setErrorOpen(true); 
+      setErrorMessage("Dokumen tidak dapat dihapus.");
+      setErrorOpen(true);
     }
-  };  
+  };
   
-
+  
   return (
     <div className="mt-10 rounded-lg border">
       <Table>
