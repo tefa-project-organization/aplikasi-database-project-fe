@@ -12,14 +12,40 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import EmployeeForm from "./EmployeeForm"
 import EmployeeDetail from "./EmployeeDetail"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { toast } from "sonner"
 
-export default function EmployeeTable({ employees = [], onAddEmployee, onDetail }) {
+export default function EmployeeTable({ employees = [], onAddEmployee, onDetail, onDeleteEmployee }) {
     const [search, setSearch] = useState("")
     const [sortAsc, setSortAsc] = useState(true)
     const [currentPage, setCurrentPage] = useState(1)
     const [detailEmployee, setDetailEmployee] = useState(null)
+    const [employeeToDelete, setEmployeeToDelete] = useState(null)
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
     const perPage = 10
+
+    const handleDelete = async () => {
+        if (!employeeToDelete) return
+        try {
+            await onDeleteEmployee(employeeToDelete)
+            toast.success("Employee berhasil dihapus")
+        } catch (error) {
+            toast.error("Gagal menghapus employee")
+        }
+        setIsDeleteDialogOpen(false)
+        setEmployeeToDelete(null)
+    }
 
     // filter + sort by name
     const filteredEmployees = useMemo(() => {
@@ -137,9 +163,34 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail 
                                     >
                                         Detail
                                     </Button>
-                                    {/* <Button variant="ghost" size="sm">
-                                        Edit
-                                    </Button> */}
+                                    <AlertDialog open={isDeleteDialogOpen && employeeToDelete?.id === employee.id} onOpenChange={(open) => {
+                                        setIsDeleteDialogOpen(open)
+                                        if (!open) setEmployeeToDelete(null)
+                                    }}>
+                                        <AlertDialogTrigger asChild>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => setEmployeeToDelete(employee)}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Apakah Anda yakin ingin menghapus employee "{employee.name}"? Tindakan ini tidak dapat dibatalkan.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel onClick={() => setEmployeeToDelete(null)}>Batal</AlertDialogCancel>
+                                                <AlertDialogAction onClick={handleDelete}>
+                                                    Hapus
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </TableCell>
                             </TableRow>
                         ))}

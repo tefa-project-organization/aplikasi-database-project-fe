@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { apiGet } from "@/lib/api"
 import { SHOW_ALL_HISTORY } from "@/constants/api/history"
-import { SHOW_ALL_CLIENTS } from "@/constants/api/clients"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -16,15 +16,13 @@ import {
 
 export default function History() {
   const [logs, setLogs] = useState([])
-  const [clientsMap, setClientsMap] = useState({})
   const [detailLog, setDetailLog] = useState(null)
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [limit] = useState(10)
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [sortBy, setSortBy] = useState("latest") // latest, oldest, az, za
-  const [projectType, setProjectType] = useState("ALL") // 'ALL' means all types
+  const [sortBy, setSortBy] = useState("latest")
 
   const fetchLogs = async (p = 1) => {
     setLoading(true)
@@ -43,51 +41,37 @@ export default function History() {
     setLoading(false)
   }
 
-  const fetchClients = async () => {
-    try {
-      const res = await apiGet(SHOW_ALL_CLIENTS)
-      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
-      const map = {}
-      items.forEach((c) => (map[c.id] = c.name))
-      setClientsMap(map)
-    } catch (err) {
-      console.error("Fetch clients error:", err)
-      setClientsMap({})
-    }
-  }
-
   useEffect(() => {
     fetchLogs()
-    fetchClients()
   }, [])
 
-  // attach client_name and apply search + sort
-  const processed = logs.map((l) => ({ ...l, client_name: clientsMap[l.client_id] || (l.client_id ? `ID: ${l.client_id}` : '-') }))
-
-  // compute unique project types for the filter select
-  const projectTypes = Array.from(new Set(processed.map((p) => p.project_type).filter(Boolean))).sort()
+  // Map log data to table structure
+  const processed = logs.map((l) => {
+    return {
+      ...l,
+      id: l.log_id,
+      entity: l.event_description || '-',
+      action: l.action,
+      timestamp: l.log_dates,
+      raw_data: l
+    }
+  })
 
   const searched = processed.filter((l) => {
-    // filter by selected project type first (projectType === 'ALL' means no filter)
-    if (projectType && projectType !== 'ALL') {
-      if ((l.project_type || "") !== projectType) return false
-    }
-
     const q = search.toLowerCase()
     return (
-      String(l.client_name || "").toLowerCase().includes(q) ||
-      (l.project_name || "").toLowerCase().includes(q) ||
-      (l.project_code || "").toLowerCase().includes(q) ||
-      String(l.client_id).includes(q)
+      String(l.entity).toLowerCase().includes(q) ||
+      String(l.action).toLowerCase().includes(q) ||
+      String(l.id).includes(q)
     )
   })
 
   const sorted = [...searched].sort((a, b) => {
     if (sortBy === "latest") {
-      return new Date(b.deleted_at || b.updated_at || b.started_at || 0) - new Date(a.deleted_at || a.updated_at || a.started_at || 0)
+      return new Date(b.timestamp || 0) - new Date(a.timestamp || 0)
     }
     if (sortBy === "oldest") {
-      return new Date(a.deleted_at || a.updated_at || a.started_at || 0) - new Date(b.deleted_at || b.updated_at || b.started_at || 0)
+      return new Date(a.timestamp || 0) - new Date(b.timestamp || 0)
     }
     return 0
   })
@@ -101,18 +85,7 @@ export default function History() {
         <div className="flex items-center gap-2">
           <Input placeholder="Search log..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-sm" />
 
-          {/* Project Type Filter */}
-          <Select onValueChange={setProjectType} value={projectType}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Tipe Project" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={"ALL"}>Semua Tipe</SelectItem>
-              {projectTypes.map((t) => (
-                <SelectItem key={t} value={t}>{t}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
 
           <Select onValueChange={setSortBy} value={sortBy}>
             <SelectTrigger className="w-36">
@@ -131,26 +104,20 @@ export default function History() {
           <TableHeader>
             <TableRow>
               <TableHead>No.</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>Project Name</TableHead>
-              <TableHead>Project Code</TableHead>
-              <TableHead>Project Type</TableHead>
-              <TableHead>Finished At</TableHead>
-              <TableHead>Deleted At</TableHead>
+              <TableHead>Entity</TableHead>
+              <TableHead>Action</TableHead>
+              <TableHead>Timestamp</TableHead>
               <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {displayed.map((log, i) => (
-              <TableRow key={log.id}>
+              <TableRow key={`${log.id}-${i}`}>
                 <TableCell className="font-medium">{(i + 1) + (page - 1) * limit}</TableCell>
-                <TableCell>{log.client_name}</TableCell>
-                <TableCell>{log.project_name}</TableCell>
-                <TableCell>{log.project_code}</TableCell>
-                <TableCell>{log.project_type}</TableCell>
-                <TableCell>{log.finished_at ? new Date(log.finished_at).toLocaleString() : "-"}</TableCell>
-                <TableCell>{log.deleted_at ? new Date(log.deleted_at).toLocaleString() : "-"}</TableCell>
+                <TableCell>{log.entity}</TableCell>
+                <TableCell>{log.action}</TableCell>
+                <TableCell>{log.timestamp ? new Date(log.timestamp).toLocaleString() : "-"}</TableCell>
                 <TableCell className="text-right">
                   <Button size="sm" variant="outline" onClick={() => setDetailLog(log)}>Detail</Button>
                 </TableCell>
@@ -159,7 +126,7 @@ export default function History() {
 
             {displayed.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">{loading ? "Loading..." : "No logs found"}</TableCell>
+                <TableCell colSpan={5} className="text-center text-muted-foreground">{loading ? "Loading..." : "No logs found"}</TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -179,21 +146,48 @@ export default function History() {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Log Detail</DialogTitle>
+            <DialogDescription>
+              Detail perubahan data untuk log ID {detailLog?.id}
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="p-2">
+          <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar">
             {detailLog ? (
-              <div className="grid grid-cols-2 gap-2">
-                <div className="font-medium">ID</div><div>{detailLog.id}</div>
-                <div className="font-medium">Client ID</div><div>{detailLog.client_id}</div>
-                <div className="font-medium">Client Name</div><div>{detailLog.client_name}</div>
-                <div className="font-medium">Project Name</div><div>{detailLog.project_name}</div>
-                <div className="font-medium">Project Code</div><div>{detailLog.project_code}</div>
-                <div className="font-medium">Project Type</div><div>{detailLog.project_type}</div>
-                <div className="font-medium">Contract Value</div><div>{detailLog.contract_value ?? '-'}</div>
-                <div className="font-medium">Started At</div><div>{detailLog.started_at ? new Date(detailLog.started_at).toLocaleString() : '-'}</div>
-                <div className="font-medium">Finished At</div><div>{detailLog.finished_at ? new Date(detailLog.finished_at).toLocaleString() : '-'}</div>
-                <div className="font-medium">Deleted At</div><div>{detailLog.deleted_at ? new Date(detailLog.deleted_at).toLocaleString() : '-'}</div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">Log ID</div><div>{detailLog.id}</div>
+                  <div className="font-medium">Entity</div><div>{detailLog.raw_data?.event_description}</div>
+                  <div className="font-medium">Action</div><div>{detailLog.action}</div>
+                  <div className="font-medium">Timestamp</div><div>{detailLog.raw_data?.log_dates ? new Date(detailLog.raw_data.log_dates).toLocaleString() : '-'}</div>
+                </div>
+
+                {detailLog.raw_data?.old_data_change && Object.keys(detailLog.raw_data.old_data_change).length > 0 && (
+                  <div>
+                    <div className="font-medium mb-2">Old Data:</div>
+                    <div className="text-sm space-y-1">
+                      {Object.entries(detailLog.raw_data.old_data_change).map(([key, value]) => (
+                        <div key={key} className="grid grid-cols-2 gap-2">
+                          <span className="text-muted-foreground">{key}:</span>
+                          <span>{value === null ? 'null' : String(value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {detailLog.raw_data?.new_data_change && Object.keys(detailLog.raw_data.new_data_change).length > 0 && (
+                  <div>
+                    <div className="font-medium mb-2">New Data:</div>
+                    <div className="text-sm space-y-1">
+                      {Object.entries(detailLog.raw_data.new_data_change).map(([key, value]) => (
+                        <div key={key} className="grid grid-cols-2 gap-2">
+                          <span className="text-muted-foreground">{key}:</span>
+                          <span>{value === null ? 'null' : String(value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : null}
           </div>
