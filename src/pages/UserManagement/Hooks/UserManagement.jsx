@@ -24,6 +24,7 @@ import { SHOW_ALL_PROJECTS } from "@/constants/api/project"
 import {
   SHOW_ALL_EMPLOYEES,
   CREATE_EMPLOYEES,
+  DELETE_EMPLOYEES,
 } from "@/constants/api/employees"
 import { toast } from "sonner"
 
@@ -230,6 +231,15 @@ export default function UserManagement() {
     }
   }
 
+  const handleDeleteEmployee = async (employee) => {
+    if (!employee?.id) return
+    const res = await apiDelete(DELETE_EMPLOYEES(employee.id))
+    if (res?.error) {
+      throw new Error(res.message || "Gagal menghapus employee")
+    }
+    fetchEmployees()
+  }
+
   /* ===================== EFFECT ===================== */
   useEffect(() => {
     fetchClients()
@@ -285,6 +295,7 @@ export default function UserManagement() {
           <EmployeeTable
             employees={employees}
             onAddEmployee={handleAddEmployee}
+            onDeleteEmployee={handleDeleteEmployee}
           />
         </TabsContent>
       </Tabs>
