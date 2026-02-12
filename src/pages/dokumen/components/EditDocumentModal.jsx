@@ -17,6 +17,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UploadCloud } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+
 
 export default function EditDocumentModal({ open, onOpenChange, onSuccess, initialData }) {
   /* ================= STATE ================= */
@@ -26,40 +36,85 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
   const [projects, setProjects] = useState([]);
   const [clients, setClients] = useState([]);
   const [clientPics, setClientPics] = useState([]);
+  const [status, setStatus] = useState("");
+  const [message, setMessage] = useState("");
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [errors, setErrors] = useState({});
+
+
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        project_id: initialData.project_id || "",
+        client_id: initialData.client_id || "",
+        client_pic_id: initialData.client_pic_id || "",
+        document_types: initialData.document_types || "",
+        date_signed: initialData.date_signed || "",
+      });
+    }
+  }, [initialData]);
 
   const [form, setForm] = useState({
-    project_id: initialData?.project_id || "",
-    client_id: initialData?.client_id || "",
-    client_pic_id: initialData?.client_pic_id || "",
-    document_types: initialData?.document_types || "",
-    date_signed: initialData?.date_signed || "",
+    project_id: "",
+    client_id: "",
+    client_pic_id: "",
+    document_types: "",
+    date_signed: "",
   });
+  
 
   /* ================= FILE HANDLER ================= */
   const handleFile = (selected) => {
     if (!selected) return;
 
     if (selected.size > 5 * 1024 * 1024) {
-      alert("Ukuran file maksimal 5MB");
+      setStatus("error");
+      setMessage("Ukuran file maksimal 5MB");
       return;
-    }
+    }    
 
     setFile(selected);
   };
 
+  const validateForm = () => {
+    let newErrors = {};
+  
+    if (!form.project_id) newErrors.project_id = "Project wajib diisi";
+    if (!form.client_id) newErrors.client_id = "Client wajib diisi";
+    if (!form.client_pic_id) newErrors.client_pic_id = "Client PIC wajib diisi";
+    if (!form.document_types) newErrors.document_types = "Tipe dokumen wajib diisi";
+    if (!form.date_signed) newErrors.date_signed = "Tanggal wajib diisi";
+  
+    setErrors(newErrors);
+  
+    return Object.keys(newErrors).length === 0;
+  };
+  
+
   /* ================= SUBMIT ================= */
   const handleSubmit = async () => {
+    if (!validateForm()) return;
+    
+    if (!initialData?.id) {
+      setErrorMessage("ID dokumen tidak ditemukan");
+      setErrorOpen(true);
+      return;
+    }
+    
     setLoading(true);
-
+  
     const formData = new FormData();
     formData.append("project_id", form.project_id);
     formData.append("client_id", form.client_id);
     formData.append("client_pic_id", form.client_pic_id);
     formData.append("document_types", form.document_types);
     formData.append("date_signed", form.date_signed);
-    formData.append("document", file);
-    if (file) formData.append("document", file);
-
+  
+    if (file) {
+      formData.append("document", file);
+    }
+  
     try {
       const res = await fetch(
         `https://backend-database-two.vercel.app/api/v1/documents/update/${initialData.id}`,
@@ -69,17 +124,25 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
           credentials: "include",
         }
       );
-
-      if (!res.ok) throw new Error();
-
+  
+      const result = await res.json();
+      console.log(result);
+  
+      if (!res.ok) {
+        throw new Error(result.message || "Update gagal");
+      }
+  
       onSuccess?.();
       onOpenChange(false);
-    } catch {
-      alert("Gagal update dokumen");
+    } catch (err) {
+      console.error(err);
+      setErrorMessage(err.message || "Gagal update dokumen");
+      setErrorOpen(true);
     } finally {
       setLoading(false);
     }
   };
+  
 
   // FETCH API PROJECT
   useEffect(() => {
@@ -141,8 +204,21 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
     fetchClientPics();
   }, []);
 
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage("");
+        setStatus("");
+      }, 5000);
+  
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+  
+
   /* ================= UI ================= */
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl overflow-hidden">
         <div className="flex flex-col h-[min(90vh,700px)]">
@@ -172,6 +248,9 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
                   ))}
                 </SelectContent>
               </Select>
+              {errors.project_id && (
+                  <p className="text-sm text-red-500">{errors.project_id}</p>
+                )}
             </div>
 
            {/* Client */}
@@ -192,6 +271,9 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
                   ))}
                 </SelectContent>
               </Select>
+              {errors.client_id && (
+                  <p className="text-sm text-red-500">{errors.client_id}</p>
+                )}
             </div>
 
            {/* Client PIC */}
@@ -212,6 +294,9 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
                   ))}
                 </SelectContent>
               </Select>
+              {errors.client_pic_id && (
+                  <p className="text-sm text-red-500">{errors.client_pic_id}</p>
+                )}
             </div>
 
             {/* Document Type */}
@@ -232,6 +317,9 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
                   <SelectItem value="CONTRACT">Contract</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.document_types && (
+                  <p className="text-sm text-red-500">{errors.document_types}</p>
+                )}
             </div>
 
             {/* Date */}
@@ -293,7 +381,7 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
                 </p>
 
                 <p className="text-xs text-muted-foreground">
-                  PDF, DOCX, JPG (Max 5MB)
+                  PDF, DOCX, (Max 5MB)
                 </p>
 
                 <Input
@@ -328,5 +416,23 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
         </div>
       </DialogContent>
     </Dialog>
-  );
+    {/* ================= ERROR ALERT ================= */}
+    <AlertDialog open={errorOpen} onOpenChange={setErrorOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Gagal Update Dokumen</AlertDialogTitle>
+          <AlertDialogDescription>
+            {errorMessage}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <AlertDialogFooter>
+          <AlertDialogAction onClick={() => setErrorOpen(false)}>
+            OK
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
+);
 }

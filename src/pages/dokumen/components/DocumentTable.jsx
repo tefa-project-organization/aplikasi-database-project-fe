@@ -63,7 +63,7 @@ export default function DocumentTable({ refresh }) {
   const fetchDocuments = async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://backend-database-two.vercel.app/api/v1/documents/show-all");
+      const res = await fetch("https://backend-database-two.vercel.app/api/v1/documents/show-all?limit=100000");
 
       if (!res.ok) {
         throw new Error("Gagal fetch data");
@@ -84,6 +84,33 @@ export default function DocumentTable({ refresh }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchProjectsAndClients = async () => {
+      try {
+        const [projectRes, clientRes] = await Promise.all([
+          fetch("https://backend-database-two.vercel.app/api/v1/projects/show-all"),
+          fetch("https://backend-database-two.vercel.app/api/v1/clients/show-all"),
+        ]);
+  
+        const projectData = await projectRes.json();
+        const clientData = await clientRes.json();
+  
+        setProjects(projectData.data?.items || []);
+        setClients(clientData.data?.items || []);
+      } catch (error) {
+        console.error("Error fetching project/client:", error);
+        setProjects([]);
+        setClients([]);
+      }
+    };
+  
+    fetchProjectsAndClients();
+  }, []);
+  
+const [projects, setProjects] = useState([]);
+const [clients, setClients] = useState([]);
+
 
   useEffect(() => {
     fetchDocuments();
@@ -167,8 +194,12 @@ export default function DocumentTable({ refresh }) {
               <TableRow key={doc.id}>
             <TableCell>{doc.number}</TableCell>
             <TableCell>{doc.document_types ?? "-"}</TableCell>
-            <TableCell>{doc.project_id}</TableCell>
-            <TableCell>{doc.client_id}</TableCell>
+            <TableCell>
+            {projects.find(p => String(p.id) === String(doc.project_id))?.project_name ?? "-"}
+            </TableCell>
+            <TableCell>
+            {clients.find(c => String(c.id) === String(doc.client_id))?.name ?? "-"}
+            </TableCell>
             <TableCell>
             <Button asChild size="sm" variant="outline">
               <a
@@ -241,7 +272,7 @@ export default function DocumentTable({ refresh }) {
       <EditDocumentModal
         open={openEdit}
         onOpenChange={setOpenEdit}
-        document={selectedDoc}
+        initialData={selectedDoc} 
         onSuccess={fetchDocuments}
       />
     )}

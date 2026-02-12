@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UploadDocumentModal from "./components/UploadDocumentModal";
 import DocumentTable from "./components/DocumentTable";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +8,18 @@ export default function UploadDocuments() {
   const [refresh, setRefresh] = useState(0);
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage("");
+        setStatus("");
+      }, 5000); // 5 detik
+  
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+  
 
   return (
     <div className="p-6 space-y-6">
@@ -33,12 +45,13 @@ export default function UploadDocuments() {
       {/* STATUS CARD DI LUAR MODAL */}
       {message && (
         <Card
-          className={`border max-w-xl ${
+          className={`border max-w-xl transition-all duration-300 ${
             status === "success"
               ? "border-green-500 bg-green-50"
               : "border-red-500 bg-red-50"
           }`}
         >
+
           <CardContent className="flex items-center gap-3 p-4">
             {status === "success" ? (
               <CheckCircle2 className="h-5 w-5 text-green-600" />

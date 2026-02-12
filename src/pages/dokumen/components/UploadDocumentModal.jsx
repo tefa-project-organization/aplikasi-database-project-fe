@@ -64,7 +64,19 @@ export default function UploadDocumentModal({ onSuccess, onError }) {
       setMessage("File belum dipilih");
       return;
     }
-  
+
+    if (
+      !form.project_id ||
+      !form.client_id ||
+      !form.client_pic_id ||
+      !form.document_types ||
+      !form.date_signed
+    ) {
+      setStatus("error");
+      setMessage("Semua field wajib diisi");
+      return;
+    }
+    
     setLoading(true);
     setStatus("");
     setMessage("");
@@ -75,7 +87,6 @@ export default function UploadDocumentModal({ onSuccess, onError }) {
     formData.append("document_types", form.document_types);
     formData.append("date_signed", form.date_signed);
     formData.append("document", file);
-  formData.append("document", file);
   
     try {
       const res = await fetch(
@@ -187,6 +198,18 @@ useEffect(() => {
   fetchClientPics();
 }, []);
 
+useEffect(() => {
+  if (message) {
+    const timer = setTimeout(() => {
+      setMessage("");
+      setStatus("");
+    }, 5000); // 5000ms = 5 detik
+
+    return () => clearTimeout(timer);
+  }
+}, [message]);
+
+
   /* ================= UI ================= */
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -219,9 +242,10 @@ useEffect(() => {
                 </SelectTrigger>
                 <SelectContent>
                   {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id}>
-                      {project.project_name} ({project.project_code})
-                    </SelectItem>
+                 <SelectItem key={project.id} value={project.id}>
+                   {project.project_name} ({project.project_code})
+                 </SelectItem>
+                 
                   ))}
                 </SelectContent>
               </Select>
@@ -344,7 +368,7 @@ useEffect(() => {
                 </p>
 
                 <p className="text-xs text-muted-foreground">
-                  PDF, DOCX, JPG (Max 5MB)
+                  PDF, DOCX, (Max 5MB)
                 </p>
 
                 <Input
