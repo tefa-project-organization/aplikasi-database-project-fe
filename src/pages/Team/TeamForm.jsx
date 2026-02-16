@@ -42,7 +42,8 @@ export default function TeamForm({
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const [employees, setEmployees] = useState([]);
+  const [managers, setManagers] = useState([]);
+  const [auditors, setAuditors] = useState([]);
   const [projects, setProjects] = useState([]);
 
   const [form, setForm] = useState({
@@ -74,17 +75,25 @@ export default function TeamForm({
   const fetchEmployees = async () => {
     try {
       const res = await apiGet(SHOW_ALL_EMPLOYEES);
-      setEmployees(
-        res?.data?.items ||
-        res?.data?.data?.items ||
-        res?.items ||
-        []
+  
+      const allEmployees =
+        res?.data?.data?.employees || [];
+  
+      const employeesWithPosition = allEmployees.filter(
+        (emp) => emp.position
       );
+  
+      setManagers(employeesWithPosition);
+      setAuditors(employeesWithPosition);
+  
     } catch (err) {
       console.error("Fetch employees error:", err);
-      setEmployees([]);
+      setManagers([]);
+      setAuditors([]);
     }
   };
+  
+  
 
   const fetchProjects = async () => {
     try {
@@ -103,7 +112,7 @@ export default function TeamForm({
 
   // ===============================
   // INIT FORM
-  // ===============================
+  // ============const fetch===================
   useEffect(() => {
     if (open) {
       fetchEmployees();
@@ -252,7 +261,7 @@ export default function TeamForm({
               onChange={(e) => handleChange("manager_id", e.target.value)}
             >
               <option value="">Pilih Manager</option>
-              {employees.map((emp) => (
+              {managers.map((emp) => (
                 <option key={emp.id} value={emp.id}>
                   {emp.name}
                 </option>
@@ -286,7 +295,7 @@ export default function TeamForm({
               onChange={(e) => handleChange("auditor_id", e.target.value)}
             >
               <option value="">Pilih Auditor</option>
-              {employees.map((emp) => (
+              {auditors.map((emp) => (
                 <option key={emp.id} value={emp.id}>
                   {emp.name}
                 </option>
