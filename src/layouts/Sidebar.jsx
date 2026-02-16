@@ -116,9 +116,7 @@ export default function AppSidebar() {
                         alt={item.label}
                         className={`
                         transition-all duration-200
-                        filter brightness-0
                         ${open ? "h-4 w-4" : "h-3 w-3"}
-                        ${theme === "dark" ? "invert" : ""}
                         `}
                       />
 
