@@ -11,12 +11,23 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Search,
   ArrowUpDown,
   Users,
   Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner"
 
 import { apiGet, apiDelete } from "@/lib/api";
 
@@ -42,6 +53,8 @@ export default function Team() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [openForm, setOpenForm] = useState(false); // State untuk mengontrol form
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [teamToDelete, setTeamToDelete] = useState(null);
   
 
   // ===============================
@@ -144,21 +157,28 @@ export default function Team() {
 
 
 
-  const handleDelete = async (id) => {
-    if (!confirm("Yakin ingin menghapus team ini?")) return;
+  const handleDeleteClick = (team) => {
+    setTeamToDelete(team);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!teamToDelete) return;
 
     try {
-      const res = await apiDelete(DELETE_PROJECT_TEAM(id));
+      const res = await apiDelete(DELETE_PROJECT_TEAM(teamToDelete.id));
       if (!res?.error) {
         fetchTeams();
-        alert("Team berhasil dihapus");
+        toast.success("Team berhasil dihapus");
       } else {
-        alert(res.message || "Gagal menghapus team");
+        toast.error(res.message || "Gagal menghapus team");
       }
     } catch (err) {
       console.error(err);
-      alert("Terjadi kesalahan server");
+      toast.error("Terjadi kesalahan server");
     }
+    setDeleteDialogOpen(false);
+    setTeamToDelete(null);
   };
 
   // ===============================
@@ -269,6 +289,24 @@ export default function Team() {
           </div>
         )}
       </div>
+
+      {/* DELETE CONFIRMATION DIALOG */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus team "{teamToDelete?.project_teams_name}"? Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setTeamToDelete(null)}>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

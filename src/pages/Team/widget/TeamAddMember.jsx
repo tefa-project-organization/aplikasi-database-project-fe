@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
+import { toast } from "sonner"
 
 import { apiGet, apiPost, apiPut } from "@/lib/api"
 import {
@@ -88,7 +90,7 @@ export default function TeamAddMember({
   // ===============================
   const handleSubmit = async () => {
     if (!form.employee_id || !form.role_id) {
-      alert("Employee dan Role wajib dipilih")
+      toast.error("Employee dan Role wajib dipilih")
       return
     }
 
@@ -107,13 +109,13 @@ export default function TeamAddMember({
       if (!res?.error) {
         onSuccess?.()
         setOpen(false)
-        alert(`Member berhasil ${isEdit ? "diupdate" : "ditambahkan"}`)
+        toast.success(`Member berhasil ${isEdit ? "diupdate" : "ditambahkan"}`)
       } else {
-        alert(res?.message || "Gagal menyimpan member")
+        toast.error(res?.message || "Gagal menyimpan member")
       }
     } catch (err) {
       console.error(err)
-      alert("Terjadi kesalahan server")
+      toast.error("Terjadi kesalahan server")
     }
     setSubmitting(false)
   }
@@ -128,6 +130,9 @@ export default function TeamAddMember({
           <DialogTitle className="text-base font-semibold">
             {isEdit ? "Edit Anggota Team" : "Tambah Anggota Team"}
           </DialogTitle>
+          <DialogDescription>
+            {isEdit ? "Perbarui data anggota team yang sudah ada." : "Tambahkan anggota baru ke dalam team."}
+          </DialogDescription>
         </DialogHeader>
 
         {loading ? (
