@@ -35,6 +35,7 @@ export default function EditClientForm({
     phone: "",
     npwp: "",
   })
+  const [originalForm, setOriginalForm] = useState(null)
   const [errors, setErrors] = useState({})
   
   const nameRef = useRef(null)
@@ -60,31 +61,41 @@ export default function EditClientForm({
   const loadClientData = async () => {
     setLoading(true)
     try {
+      let clientData = null
       if (client && client.id && client.name) {
-        setForm({
+        clientData = {
           name: client.name || "",
           masked_description: client.masked_description || "",
           address: client.address || "",
           phone: client.phone || "",
           npwp: client.npwp || "",
-        })
+        }
       } else if (client?.id && getClientById) {
-        const clientData = await getClientById(client.id)
+        clientData = await getClientById(client.id)
         if (clientData) {
-          setForm({
+          clientData = {
             name: clientData.name || "",
             masked_description: clientData.masked_description || "",
             address: clientData.address || "",
             phone: clientData.phone || "",
             npwp: clientData.npwp || "",
-          })
+          }
         }
+      }
+      if (clientData) {
+        setForm(clientData)
+        setOriginalForm(clientData)
       }
     } catch (error) {
       console.error("Error loading client data:", error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const hasFormChanged = () => {
+    if (!originalForm) return true
+    return JSON.stringify(form) !== JSON.stringify(originalForm)
   }
 
   const handleChange = (e) => {
@@ -224,7 +235,12 @@ export default function EditClientForm({
                 <Button variant="ghost" type="button" onClick={() => setOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="button" onClick={handleSubmit}>
+                <Button 
+                  type="button" 
+                  onClick={handleSubmit}
+                  disabled={!hasFormChanged()}
+                  title={!hasFormChanged() ? "Tidak ada perubahan data" : ""}
+                >
                   Update
                 </Button>
               </div>

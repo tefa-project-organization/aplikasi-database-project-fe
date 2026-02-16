@@ -27,6 +27,18 @@ import {
 } from "@/components/ui/command"
 import api from "@/lib/api"
 import { SHOW_ALL_PROJECTS } from "@/constants/api/project"
+import * as Yup from "yup"
+import { toast } from "sonner"
+
+const projectSchema = Yup.object().shape({
+    project_name: Yup.string().required("Nama proyek wajib diisi"),
+    project_code: Yup.string().required("Kode proyek wajib diisi"),
+    project_type: Yup.string().required("Tipe proyek wajib dipilih"),
+    client_id: Yup.string().required("Client wajib dipilih"),
+    description: Yup.string(),
+    started_at: Yup.date().nullable(),
+    finished_at: Yup.date().nullable().min(Yup.ref('started_at'), "Tanggal selesai harus setelah tanggal mulai"),
+})
 
 export default function ProjectForm({
     open,
@@ -46,6 +58,8 @@ export default function ProjectForm({
         started_at: "",
         finished_at: "",
     })
+    const [originalForm, setOriginalForm] = useState(null)
+    const [errors, setErrors] = useState({})
 
     const [projectTypeOptions, setProjectTypeOptions] = useState([])
 
@@ -80,7 +94,21 @@ export default function ProjectForm({
 
     /* INIT EDIT DATA */
     useEffect(() => {
-        if (!initialData) return
+        if (!initialData) {
+            // Reset form and errors when opening create mode
+            setForm({
+                project_name: "",
+                project_type: "",
+                client_id: "",
+                description: "",
+                project_code: "",
+                started_at: "",
+                finished_at: "",
+            })
+            setOriginalForm(null)
+            setErrors({})
+            return
+        }
 
         const clientId = initialData.client_id
             ? String(initialData.client_id)
@@ -90,7 +118,7 @@ export default function ProjectForm({
             (c) => String(c.id) === clientId
         )
 
-        setForm({
+        const initialFormData = {
             project_name: initialData.project_name || "",
             project_code: initialData.project_code || "",
             project_type: initialData.project_type
@@ -100,48 +128,75 @@ export default function ProjectForm({
             description: initialData.description || "",
             started_at: initialData.started_at?.split("T")[0] || "",
             finished_at: initialData.finished_at?.split("T")[0] || "",
-        })
-    }, [initialData, clientOptions])
+        }
+
+        setForm(initialFormData)
+        setOriginalForm(initialFormData)
+        setErrors({})
+    }, [initialData, clientOptions, open])
 
     const handleChange = (e) => {
         const { name, value } = e.target
         setForm((prev) => ({ ...prev, [name]: value }))
+        if (errors[name]) {
+            setErrors((prev) => ({ ...prev, [name]: null }))
+        }
     }
 
-    const handleSubmit = () => {
-        if (!form.project_name.trim() || !form.project_type || !form.client_id) {
-            alert("Nama Proyek, Tipe Proyek, dan Client wajib diisi")
-            return
+    const handleSelectChange = (field, value) => {
+        setForm((prev) => ({ ...prev, [field]: value }))
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: null }))
         }
+    }
 
-        if (!form.project_code.trim()) {
-            alert("Kode Proyek wajib diisi")
-            return
+    const hasFormChanged = () => {
+        if (!initialData || !originalForm) return true
+        return JSON.stringify(form) !== JSON.stringify(originalForm)
+    }
+
+    const handleSubmit = async () => {
+        try {
+            await projectSchema.validate(form, { abortEarly: false })
+            setErrors({})
+
+            // Helper aman untuk konversi tanggal ke ISO, null jika invalid/empty
+            const parseDate = (dateStr) => {
+                if (!dateStr) return null
+                const d = new Date(dateStr)
+                return isNaN(d.getTime()) ? null : d.toISOString()
+            }
+
+            // Payload sesuai ekspektasi backend
+            const payload = {
+                project_name: form.project_name.trim(),
+                project_code: form.project_code.trim(),
+                project_type: String(form.project_type),
+                client_id: parseInt(form.client_id) || 0,
+                description: String(form.description || ""),
+                started_at: parseDate(form.started_at),
+                finished_at: parseDate(form.finished_at),
+            }
+
+            console.log("Payload dikirim ke backend:", payload)
+
+            try {
+                await onSubmit?.(payload)
+                setOpen(false)
+                toast.success(`Proyek berhasil ${initialData ? "diperbarui" : "ditambahkan"}`)
+            } catch (error) {
+                toast.error(error?.message || "Gagal menyimpan proyek")
+            }
+        } catch (validationError) {
+            if (validationError.inner) {
+                const newErrors = {}
+                validationError.inner.forEach((err) => {
+                    newErrors[err.path] = err.message
+                })
+                setErrors(newErrors)
+                toast.error("Semua field wajib diisi dengan benar")
+            }
         }
-
-
-        // Helper aman untuk konversi tanggal ke ISO, null jika invalid/empty
-        const parseDate = (dateStr) => {
-            if (!dateStr) return null
-            const d = new Date(dateStr)
-            return isNaN(d.getTime()) ? null : d.toISOString()
-        }
-
-        // Payload sesuai ekspektasi backend
-        const payload = {
-            project_name: form.project_name.trim(),
-            project_code: form.project_code.trim(),           // string
-            project_type: String(form.project_type),         // string
-            client_id: parseInt(form.client_id) || 0,        // integer
-            description: String(form.description || ""),     // string
-            started_at: parseDate(form.started_at),          // ISO string / null
-            finished_at: parseDate(form.finished_at),        // ISO string / null
-        }
-
-        console.log("Payload dikirim ke backend:", payload) // debug
-
-        onSubmit?.(payload)
-        setOpen(false)
     }
 
     return (
@@ -179,7 +234,9 @@ export default function ProjectForm({
                             onChange={handleChange}
                             placeholder="Masukkan nama proyek"
                             readOnly={readOnly}
+                            className={errors.project_name ? "border-red-500 focus-visible:ring-red-500" : ""}
                         />
+                        {errors.project_name && <p className="text-red-500 text-xs mt-1">{errors.project_name}</p>}
                     </div>
 
                      {/* Kode Proyek */}
@@ -191,7 +248,9 @@ export default function ProjectForm({
                             onChange={handleChange}
                             placeholder="Masukkan kode proyek"
                             readOnly={readOnly}
+                            className={errors.project_code ? "border-red-500 focus-visible:ring-red-500" : ""}
                         />
+                        {errors.project_code && <p className="text-red-500 text-xs mt-1">{errors.project_code}</p>}
                     </div>
 
                     {/* Tipe Proyek */}
@@ -199,12 +258,10 @@ export default function ProjectForm({
                         <label className="block mb-1 font-medium">Tipe Proyek *</label>
                         <Select
                             value={form.project_type}
-                            onValueChange={(val) =>
-                                setForm((prev) => ({ ...prev, project_type: val }))
-                            }
+                            onValueChange={(val) => handleSelectChange("project_type", val)}
                             disabled={readOnly}
                         >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className={`w-full ${errors.project_type ? "border-red-500 focus:ring-red-500" : ""}`}>
                                 <SelectValue placeholder="Pilih tipe proyek">
                                     {form.project_type &&
                                         projectTypeOptions.find(
@@ -225,6 +282,7 @@ export default function ProjectForm({
                                 ))}
                             </SelectContent>
                         </Select>
+                        {errors.project_type && <p className="text-red-500 text-xs mt-1">{errors.project_type}</p>}
                     </div>
 
                     {/* Client */}
@@ -232,12 +290,10 @@ export default function ProjectForm({
                         <label className="block mb-1 font-medium">Client *</label>
                         <Select
                             value={form.client_id}
-                            onValueChange={(val) =>
-                                setForm((prev) => ({ ...prev, client_id: val }))
-                            }
+                            onValueChange={(val) => handleSelectChange("client_id", val)}
                             disabled={readOnly}
                         >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className={`w-full ${errors.client_id ? "border-red-500 focus:ring-red-500" : ""}`}>
                                 <SelectValue placeholder="Pilih client">
                                     {form.client_id &&
                                         clientOptions.find(
@@ -255,10 +311,7 @@ export default function ProjectForm({
                                             <CommandItem
                                                 key={client.id}
                                                 onSelect={() =>
-                                                    setForm((prev) => ({
-                                                        ...prev,
-                                                        client_id: String(client.id),
-                                                    }))
+                                                    handleSelectChange("client_id", String(client.id))
                                                 }
                                             >
                                                 {client.name}
@@ -268,6 +321,7 @@ export default function ProjectForm({
                                 </Command>
                             </SelectContent>
                         </Select>
+                        {errors.client_id && <p className="text-red-500 text-xs mt-1">{errors.client_id}</p>}
                     </div>
 
                     {/* Deskripsi */}
@@ -295,7 +349,9 @@ export default function ProjectForm({
                             onChange={handleChange}
                             type="date"
                             readOnly={readOnly}
+                            className={errors.started_at ? "border-red-500 focus-visible:ring-red-500" : ""}
                         />
+                        {errors.started_at && <p className="text-red-500 text-xs mt-1">{errors.started_at}</p>}
                     </div>
 
                     <div>
@@ -308,7 +364,9 @@ export default function ProjectForm({
                             onChange={handleChange}
                             type="date"
                             readOnly={readOnly}
+                            className={errors.finished_at ? "border-red-500 focus-visible:ring-red-500" : ""}
                         />
+                        {errors.finished_at && <p className="text-red-500 text-xs mt-1">{errors.finished_at}</p>}
                     </div>
 
                     
@@ -325,7 +383,8 @@ export default function ProjectForm({
                             <Button
                                 type="button"
                                 onClick={handleSubmit}
-                                disabled={submitting}
+                                disabled={submitting || (initialData && !hasFormChanged())}
+                                title={initialData && !hasFormChanged() ? "Tidak ada perubahan data" : ""}
                             >
                                 {submitting ? "Menyimpan..." : "Simpan"}
                             </Button>

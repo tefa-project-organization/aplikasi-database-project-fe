@@ -50,6 +50,7 @@ export default function EditPicForm({
     client_id: undefined,
     project_id: undefined,
   })
+  const [originalForm, setOriginalForm] = useState(null)
 
   const [openClientCombobox, setOpenClientCombobox] = useState(false)
   const [openProjectCombobox, setOpenProjectCombobox] = useState(false)
@@ -63,36 +64,46 @@ export default function EditPicForm({
   const loadPicData = async () => {
     setLoading(true)
     try {
+      let picData = null
       // gunakan data dari prop pic (data yang sudah ada di table)
       if (pic && pic.id && pic.name) {
-        setForm({
+        picData = {
           name: pic.name || "",
           email: pic.email || "",
           phone: pic.phone || "",
           title: pic.title || "",
           client_id: pic.client_id || undefined,
           project_id: pic.project_id || undefined,
-        })
+        }
       } 
       // fetch data terbaru dari API (optional)
       else if (pic?.id && getPicById) {
-        const picData = await getPicById(pic.id)
-        if (picData) {
-          setForm({
-            name: picData.name || "",
-            email: picData.email || "",
-            phone: picData.phone || "",
-            title: picData.title || "",
-            client_id: picData.client_id || undefined,
-            project_id: picData.project_id || undefined,
-          })
+        const fetchedData = await getPicById(pic.id)
+        if (fetchedData) {
+          picData = {
+            name: fetchedData.name || "",
+            email: fetchedData.email || "",
+            phone: fetchedData.phone || "",
+            title: fetchedData.title || "",
+            client_id: fetchedData.client_id || undefined,
+            project_id: fetchedData.project_id || undefined,
+          }
         }
+      }
+      if (picData) {
+        setForm(picData)
+        setOriginalForm(picData)
       }
     } catch (error) {
       console.error("Error loading PIC data:", error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const hasFormChanged = () => {
+    if (!originalForm) return true
+    return JSON.stringify(form) !== JSON.stringify(originalForm)
   }
 
   const handleChange = (e) => {
@@ -313,6 +324,8 @@ export default function EditPicForm({
                 <Button 
                   type="button" 
                   onClick={handleSubmit}
+                  disabled={!hasFormChanged()}
+                  title={!hasFormChanged() ? "Tidak ada perubahan data" : ""}
                 >
                   Update
                 </Button>

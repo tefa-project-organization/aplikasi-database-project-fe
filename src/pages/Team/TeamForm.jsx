@@ -52,6 +52,7 @@ export default function TeamForm({
     project_id: "",
     auditor_id: "",
   });
+  const [originalForm, setOriginalForm] = useState(null);
 
   const nameRef = useRef(null);
   const emailRef = useRef(null);
@@ -109,13 +110,15 @@ export default function TeamForm({
       fetchProjects();
 
       if (isEdit && initialData) {
-        setForm({
+        const initialFormData = {
           project_teams_name: initialData.project_teams_name || "",
           project_teams_email: initialData.project_teams_email || "",
           manager_id: initialData.manager_id || "",
           project_id: initialData.project_id || "",
           auditor_id: initialData.auditor_id || "",
-        });
+        };
+        setForm(initialFormData);
+        setOriginalForm(initialFormData);
       } else {
         setForm({
           project_teams_name: "",
@@ -124,6 +127,7 @@ export default function TeamForm({
           project_id: "",
           auditor_id: "",
         });
+        setOriginalForm(null);
       }
     }
   }, [open, isEdit, initialData]);
@@ -194,6 +198,11 @@ export default function TeamForm({
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: null }));
     }
+  };
+
+  const hasFormChanged = () => {
+    if (!isEdit || !originalForm) return true;
+    return JSON.stringify(form) !== JSON.stringify(originalForm);
   };
 
   // ===============================
@@ -295,7 +304,11 @@ export default function TeamForm({
               Batal
             </Button>
 
-            <Button type="submit" disabled={submitting}>
+            <Button 
+              type="submit" 
+              disabled={submitting || (isEdit && !hasFormChanged())}
+              title={isEdit && !hasFormChanged() ? "Tidak ada perubahan data" : ""}
+            >
               {submitting ? (
                 <Spinner className="h-4 w-4" />
               ) : isEdit ? (
