@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import EditDocumentModal from "./EditDocumentModal";
 import {
   Table,
   TableBody,
@@ -19,8 +20,6 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-
-
 
 /* ✅ DUMMY DATA (tidak mengganggu API asli) */
 const dummyDocuments = [
@@ -58,13 +57,13 @@ export default function DocumentTable({ refresh }) {
   const [deleteId, setDeleteId] = useState(null);
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; 
 
   const fetchDocuments = async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://backend-database-two.vercel.app/api/v1/documents/show-all");
+      const res = await fetch("https://backend-database-two.vercel.app/api/v1/documents/show-all?limit=100000");
 
       if (!res.ok) {
         throw new Error("Gagal fetch data");
@@ -85,6 +84,33 @@ export default function DocumentTable({ refresh }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchProjectsAndClients = async () => {
+      try {
+        const [projectRes, clientRes] = await Promise.all([
+          fetch("https://backend-database-two.vercel.app/api/v1/projects/show-all"),
+          fetch("https://backend-database-two.vercel.app/api/v1/clients/show-all"),
+        ]);
+  
+        const projectData = await projectRes.json();
+        const clientData = await clientRes.json();
+  
+        setProjects(projectData.data?.items || []);
+        setClients(clientData.data?.items || []);
+      } catch (error) {
+        console.error("Error fetching project/client:", error);
+        setProjects([]);
+        setClients([]);
+      }
+    };
+  
+    fetchProjectsAndClients();
+  }, []);
+  
+const [projects, setProjects] = useState([]);
+const [clients, setClients] = useState([]);
+
 
   useEffect(() => {
     fetchDocuments();
@@ -120,136 +146,194 @@ export default function DocumentTable({ refresh }) {
         `https://backend-database-two.vercel.app/api/v1/documents/delete/${id}`,
         {
           method: "DELETE",
+          credentials: "include", 
         }
       );
   
       if (!res.ok) {
+        const text = await res.text();
+        console.error("API RESPONSE:", text);
         throw new Error("Gagal menghapus data");
       }
   
       fetchDocuments();
     } catch (error) {
       console.error("Delete error:", error);
-      setErrorMessage("Dokumen tidak dapat dihapus. Silakan coba beberapa saat lagi.");
-      setErrorOpen(true); 
+      setErrorMessage("Dokumen tidak dapat dihapus.");
+      setErrorOpen(true);
     }
-  };  
-  
+  };
 
-  return (
-    <div className="mt-10 rounded-lg border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nomor</TableHead>
-            <TableHead>Tipe</TableHead>
-            <TableHead>Project</TableHead>
-            <TableHead>Client</TableHead>
-            <TableHead>File</TableHead>
-            <TableHead className="text-center">Action</TableHead>
-          </TableRow>
-        </TableHeader>
+ 
+    const totalPages = Math.ceil(documents.length / itemsPerPage);
 
-        <TableBody>
-          {documents.length === 0 ? (
-            <TableRow>
-              <TableCell
-                colSpan={5}
-                className="text-center text-muted-foreground"
-              >
-                Tidak ada data
-              </TableCell>
-            </TableRow>
-          ) : (
-            documents.map((doc) => (
-              <TableRow key={doc.id}>
-            <TableCell>{doc.number}</TableCell>
-            <TableCell>{doc.document_types ?? "-"}</TableCell>
-            <TableCell>{doc.project_id}</TableCell>
-            <TableCell>{doc.client_id}</TableCell>
-            <TableCell>
-            <Button asChild size="sm" variant="outline">
-              <a
-                href={doc.document_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Detail
-              </a>
-            </Button>
-          </TableCell>
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
 
+    const currentDocuments = documents.slice(startIndex, endIndex);
 
-            <TableCell className="text-center space-x-2">
-            <button
-              onClick={() => {
-                setSelectedDoc(doc);
-                setOpenEdit(true);
-              }}
-              className="rounded-md bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
-            >
-              Edit
-            </button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  size="sm"
-                  className="bg-red-600 text-white hover:bg-red-700"
-                  onClick={() => setDeleteId(doc.id)}
-                >
-                  Hapus
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    Hapus dokumen ini?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tindakan ini tidak dapat dibatalkan.
-                    Dokumen akan dihapus permanen.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Batal</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handleDelete(deleteId)}
-                    className="bg-red-600 text-white hover:bg-red-700"
+    return (
+      <div className="mt-10">
+    
+        {/* TABLE WRAPPER */}
+        <div className="rounded-lg border overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nomor</TableHead>
+                <TableHead>Tipe</TableHead>
+                <TableHead>Project</TableHead>
+                <TableHead>Client</TableHead>
+                <TableHead>File</TableHead>
+                <TableHead className="text-center">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+    
+            <TableBody>
+              {documents.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center text-muted-foreground"
                   >
-                    Ya, Hapus
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            </TableCell>
-          </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-      {openEdit && selectedDoc && (
-      <EditDocumentModal
-        open={openEdit}
-        onOpenChange={setOpenEdit}
-        document={selectedDoc}
-        onSuccess={fetchDocuments}
-      />
-    )}
-    <AlertDialog open={errorOpen} onOpenChange={setErrorOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Gagal Menghapus Dokumen</AlertDialogTitle>
-          <AlertDialogDescription>
-            {errorMessage}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <AlertDialogFooter>
-          <AlertDialogAction>OK</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-    </div>
-  );
-}
+                    Tidak ada data
+                  </TableCell>
+                </TableRow>
+              ) : (
+                currentDocuments.map((doc) => (
+                  <TableRow key={doc.id}>
+                    <TableCell>{doc.number}</TableCell>
+                    <TableCell>{doc.document_types ?? "-"}</TableCell>
+                    <TableCell>
+                      {projects.find(p => String(p.id) === String(doc.project_id))?.project_name ?? "-"}
+                    </TableCell>
+                    <TableCell>
+                      {clients.find(c => String(c.id) === String(doc.client_id))?.name ?? "-"}
+                    </TableCell>
+                    <TableCell>
+                      <Button asChild size="sm" variant="outline">
+                        <a
+                          href={doc.document_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Detail
+                        </a>
+                      </Button>
+                    </TableCell>
+    
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedDoc(doc);
+                            setOpenEdit(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+    
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => setDeleteId(doc.id)}
+                            >
+                              Hapus
+                            </Button>
+                          </AlertDialogTrigger>
+    
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Hapus dokumen ini?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tindakan ini tidak dapat dibatalkan.
+                                Dokumen akan dihapus permanen.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+    
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Batal</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(deleteId)}
+                                className="bg-red-600 text-white hover:bg-red-700"
+                              >
+                                Ya, Hapus
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+    
+        {/* PAGINATION */}
+        <div className="flex justify-between items-center px-4 py-4 border-t">
+          {/* kiri */}
+          <span className="text-sm text-muted-foreground">
+            Total {documents.length} data
+          </span>
+    
+          {/* kanan */}
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+            >
+              Prev
+            </Button>
+    
+            <span className="text-sm">
+              Page {currentPage} of {totalPages}
+            </span>
+    
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+    
+        {/* EDIT MODAL */}
+        {openEdit && selectedDoc && (
+          <EditDocumentModal
+            open={openEdit}
+            onOpenChange={setOpenEdit}
+            initialData={selectedDoc}
+            onSuccess={fetchDocuments}
+          />
+        )}
+    
+        {/* ERROR MODAL */}
+        <AlertDialog open={errorOpen} onOpenChange={setErrorOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Gagal Menghapus Dokumen</AlertDialogTitle>
+              <AlertDialogDescription>
+                {errorMessage}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction>OK</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+}    

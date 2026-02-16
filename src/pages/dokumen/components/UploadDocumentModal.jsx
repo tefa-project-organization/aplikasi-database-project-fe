@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,17 +21,20 @@ import {
 import { UploadCloud, Loader2 } from "lucide-react";
 import { DialogClose } from "@/components/ui/dialog";
 
-export default function UploadDocumentModal({ onSuccess }) {
+export default function UploadDocumentModal({ onSuccess, onError }) {
   /* ================= STATE ================= */
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [message, setMessage] = useState("");
+  const [open, setOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [clientPics, setClientPics] = useState([]);
 
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
 
   const [form, setForm] = useState({
-    number: "",
     project_id: "",
     client_id: "",
     client_pic_id: "",
@@ -61,16 +65,29 @@ export default function UploadDocumentModal({ onSuccess }) {
       return;
     }
 
+    if (
+      !form.project_id ||
+      !form.client_id ||
+      !form.client_pic_id ||
+      !form.document_types ||
+      !form.date_signed
+    ) {
+      setStatus("error");
+      setMessage("Semua field wajib diisi");
+      return;
+    }
+    
     setLoading(true);
     setStatus("");
     setMessage("");
-
-    const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) =>
-      formData.append(key, value)
-    );
+  const formData = new FormData();
+    formData.append("project_id", form.project_id);
+    formData.append("client_id", form.client_id);
+    formData.append("client_pic_id", form.client_pic_id);
+    formData.append("document_types", form.document_types);
+    formData.append("date_signed", form.date_signed);
     formData.append("document", file);
-
+  
     try {
       const res = await fetch(
         "https://backend-database-two.vercel.app/api/v1/documents/create",
@@ -79,21 +96,32 @@ export default function UploadDocumentModal({ onSuccess }) {
           body: formData,
         }
       );
-
-      if (!res.ok) throw new Error();
-
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        throw new Error(data.message || "Gagal upload dokumen");
+      }
+  
       setStatus("success");
       setMessage("Dokumen berhasil diupload");
-      onSuccess?.();
-      resetForm();
-    } catch {
+
+      onSuccess?.("Dokumen berhasil disimpan");
+
+      // tutup modal
+      setTimeout(() => {
+        setOpen(false);
+        resetForm();
+      }, 300);
+
+    } catch (err) {
       setStatus("error");
-      setMessage("Gagal upload dokumen");
+      setMessage(err.message || "Gagal upload dokumen");
     } finally {
       setLoading(false);
     }
   };
-
+  
   /* ================= RESET ================= */
   const resetForm = () => {
     setFile(null);
@@ -110,10 +138,81 @@ export default function UploadDocumentModal({ onSuccess }) {
       date_signed: "",
     });
   };
+// FETCH PROJECT API
+useEffect(() => {
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch("https://backend-database-two.vercel.app/api/v1/projects/show-all");
+      const data = await response.json();
+
+      if (data.status) {
+        setProjects(data.data.items); // Simpan daftar project ke state
+      } else {
+        console.error("Gagal mengambil data project");
+      }
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
+
+  fetchProjects();
+}, []);
+
+// FETCH API CLIENT 
+useEffect(() => {
+  const fetchClients = async () => {
+    try {
+      const response = await fetch("https://backend-database-two.vercel.app/api/v1/clients/show-all");
+      const data = await response.json();
+
+      if (data.status) {
+        setClients(data.data.items); // Simpan daftar client ke state
+      } else {
+        console.error("Gagal mengambil data client");
+      }
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+    }
+  };
+
+  fetchClients();
+}, []);
+
+// FETCh API CLIENT_PIC
+useEffect(() => {
+  const fetchClientPics = async () => {
+    try {
+      const response = await fetch("https://backend-database-two.vercel.app/api/v1/client_pics/show-all");
+      const data = await response.json();
+
+      if (data.status) {
+        setClientPics(data.data.items); // Simpan daftar Client PIC ke state
+      } else {
+        console.error("Gagal mengambil data Client PIC");
+      }
+    } catch (error) {
+      console.error("Error fetching Client PICs:", error);
+    }
+  };
+
+  fetchClientPics();
+}, []);
+
+useEffect(() => {
+  if (message) {
+    const timer = setTimeout(() => {
+      setMessage("");
+      setStatus("");
+    }, 5000); // 5000ms = 5 detik
+
+    return () => clearTimeout(timer);
+  }
+}, [message]);
+
 
   /* ================= UI ================= */
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>+ Upload Dokumen</Button>
       </DialogTrigger>
@@ -130,50 +229,44 @@ export default function UploadDocumentModal({ onSuccess }) {
 
           {/* BODY */}
           <div className="flex-1 overflow-y-auto space-y-6 p-6 scrollbar-none [&::-webkit-scrollbar]:hidden">
-            {/* Nomor Dokumen */}
-            <div className="space-y-2">
-              <Label>Nomor Dokumen</Label>
-              <Input
-                placeholder="DOC-010"
-                value={form.number}
-                onChange={(e) =>
-                  setForm({ ...form, number: e.target.value })
-                }
-              />
-            </div>
 
             {/* Project */}
             <div className="space-y-2">
               <Label>Project</Label>
               <Select
-                onValueChange={(v) =>
-                  setForm({ ...form, project_id: v })
-                }
+                value={form.project_id}
+                onValueChange={(v) => setForm({ ...form, project_id: v })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Project" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="24">Project A</SelectItem>
-                  <SelectItem value="25">Project B</SelectItem>
+                  {projects.map((project) => (
+                 <SelectItem key={project.id} value={project.id}>
+                   {project.project_name} ({project.project_code})
+                 </SelectItem>
+                 
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Client */}
+           {/* Client */}
             <div className="space-y-2">
               <Label>Client</Label>
               <Select
-                onValueChange={(v) =>
-                  setForm({ ...form, client_id: v })
-                }
+                value={form.client_id}
+                onValueChange={(v) => setForm({ ...form, client_id: v })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Client" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2">Client ABC</SelectItem>
-                  <SelectItem value="3">Client XYZ</SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -182,20 +275,21 @@ export default function UploadDocumentModal({ onSuccess }) {
             <div className="space-y-2">
               <Label>Client PIC</Label>
               <Select
-                onValueChange={(v) =>
-                  setForm({ ...form, client_pic_id: v })
-                }
+                value={form.client_pic_id}
+                onValueChange={(v) => setForm({ ...form, client_pic_id: v })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Pilih PIC" />
+                  <SelectValue placeholder="Pilih Client PIC" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2">John Doe</SelectItem>
-                  <SelectItem value="3">Jane Smith</SelectItem>
+                  {clientPics.map((pic) => (
+                    <SelectItem key={pic.id} value={pic.id}>
+                      {pic.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-
             {/* Document Type */}
             <div className="space-y-2">
               <Label>Tipe Dokumen</Label>
@@ -274,7 +368,7 @@ export default function UploadDocumentModal({ onSuccess }) {
                 </p>
 
                 <p className="text-xs text-muted-foreground">
-                  PDF, DOCX, JPG (Max 5MB)
+                  PDF, DOCX, (Max 5MB)
                 </p>
 
                 <Input
