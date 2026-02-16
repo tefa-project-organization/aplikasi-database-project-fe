@@ -37,6 +37,7 @@ import {
   DELETE_PROJECT_TEAM,
 } from "@/constants/api/project_teams";
 import { SHOW_ALL_PROJECTS } from "@/constants/api/project";
+import { SHOW_ALL_TEAM_MEMBER } from "@/constants/api/project_team_members";
 
 import TeamForm from "./TeamForm"; // Import TeamForm
 
@@ -48,6 +49,7 @@ export default function Team() {
   // ===============================
   const [teams, setTeams] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -91,16 +93,37 @@ export default function Team() {
   const fetchTeams = async () => {
     setLoading(true);
     try {
-      const res = await apiGet(SHOW_ALL_PROJECT_TEAMS);
-      setTeams(
-        res?.data?.items ||
-        res?.data?.data?.items ||
-        res?.items ||
-        []
-      );
+      const [teamsRes, membersRes] = await Promise.all([
+        apiGet(SHOW_ALL_PROJECT_TEAMS),
+        apiGet(SHOW_ALL_TEAM_MEMBER),
+      ]);
+
+      const teamsData =
+        teamsRes?.data?.items ||
+        teamsRes?.data?.data?.items ||
+        teamsRes?.items ||
+        [];
+
+      const membersData =
+        membersRes?.data?.items ||
+        membersRes?.data?.data?.items ||
+        membersRes?.items ||
+        [];
+
+      // Merge members count ke teams
+      const teamsWithMemberCount = teamsData.map((team) => ({
+        ...team,
+        members_count: membersData.filter(
+          (m) => m.project_teams_id === team.id
+        ).length,
+      }));
+
+      setTeams(teamsWithMemberCount);
+      setTeamMembers(membersData);
     } catch (err) {
       console.error("Fetch teams error:", err);
       setTeams([]);
+      setTeamMembers([]);
     }
     setLoading(false);
   };
@@ -256,28 +279,55 @@ export default function Team() {
           filteredTeams.map((team) => (
             <Card
               key={team.id}
-              className="hover:shadow-md transition-shadow"
+              className="relative overflow-hidden bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/20 dark:to-indigo-800/20 border border-indigo-200 dark:border-indigo-700 shadow-sm hover:shadow-md transition-all duration-300 group"
             >
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Users className="h-5 w-5 text-primary" />
+              {/* Decorative corner */}
+              <div className="absolute top-0 right-0 w-20 h-20 bg-indigo-500 opacity-10 rounded-bl-full" />
+              <CardHeader className="relative pb-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="p-2 bg-indigo-500 rounded-xl shadow-sm shrink-0">
+                      <Users className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-base truncate" title={team.project_teams_name}>
+                        {team.project_teams_name}
+                      </CardTitle>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {team.project_teams_email}
+                      </p>
+                    </div>
                   </div>
-                  {team.project_teams_name}
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {team.project_teams_email}
-                </p>
+                  <span className="shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-indigo-500 text-white">
+                    Team
+                  </span>
+                </div>
               </CardHeader>
 
-              <CardContent className="flex justify-between items-center border-t pt-4">
-                <span className="text-sm font-medium">— Anggota</span>
-                <Button
-                  size="sm"
-                  onClick={() => navigate(`/team/${team.id}`)}
-                >
-                  Detail
-                </Button>
+              <CardContent className="pt-2 relative">
+                {/* Member count info */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10">
+                    <Users className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-xs font-medium text-indigo-700 dark:text-indigo-300">
+                      {team.members_count || 0} Anggota
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center border-t border-border/40 pt-4">
+                  <span className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
+                    Lihat Detail
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-[11px] font-medium hover:bg-background/80"
+                    onClick={() => navigate(`/team/${team.id}`)}
+                  >
+                    Detail
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))
