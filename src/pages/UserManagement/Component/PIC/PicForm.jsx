@@ -33,7 +33,7 @@ const picSchema = Yup.object().shape({
   project_id: Yup.number().required("Project is required"),
 })
 
-export default function PicForm({ clients = [], projects = [], onSubmit }) {
+export default function PicForm({ clients = [], projects = [], pics = [], onSubmit }) {
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState({
     name: "",
@@ -85,7 +85,21 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
     if (errors.project_id) setErrors((prev) => ({ ...prev, project_id: null }))
   }
 
+  // Get project IDs that already have a PIC assigned
+  const assignedProjectIds = pics.map(pic => pic.project_id).filter(Boolean)
+
+  // Filter projects that are already assigned (for display purposes)
+  const assignedProjects = projects.filter(p => assignedProjectIds.includes(p.id))
+  const availableProjects = projects.filter(p => !assignedProjectIds.includes(p.id))
+
   const handleSubmit = async () => {
+    // Check if selected project already has a PIC
+    if (assignedProjectIds.includes(form.project_id)) {
+      const assignedPic = pics.find(pic => pic.project_id === form.project_id)
+      toast.error(`Project ini sudah memiliki PIC: ${assignedPic?.name || 'Unknown'}. Silakan pilih project lain.`)
+      return
+    }
+
     try {
       await picSchema.validate(form, { abortEarly: false })
       setErrors({})
@@ -290,7 +304,8 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
                     <CommandList>
                       <CommandEmpty>No project found.</CommandEmpty>
                       <CommandGroup>
-                        {projects.map((project) => (
+                        {/* Available projects (not assigned) */}
+                        {availableProjects.map((project) => (
                           <CommandItem
                             key={project.id}
                             value={project.name}
@@ -305,6 +320,26 @@ export default function PicForm({ clients = [], projects = [], onSubmit }) {
                             {project.name}
                           </CommandItem>
                         ))}
+                        {/* Already assigned projects - disabled */}
+                        {assignedProjects.map((project) => {
+                          const assignedPic = pics.find(pic => pic.project_id === project.id)
+                          return (
+                            <CommandItem
+                              key={project.id}
+                              value={project.name}
+                              disabled
+                              className="opacity-50 cursor-not-allowed"
+                            >
+                              <Check className="mr-2 h-4 w-4 opacity-0" />
+                              <span className="flex items-center gap-2">
+                                {project.name}
+                                <span className="text-xs text-red-500 font-medium">
+                                  (Sudah di-assign: {assignedPic?.name || 'PIC'})
+                                </span>
+                              </span>
+                            </CommandItem>
+                          )
+                        })}
                       </CommandGroup>
                     </CommandList>
                   </Command>
