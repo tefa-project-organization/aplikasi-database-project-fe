@@ -2,14 +2,26 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
-import { apiGet } from "@/lib/api";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+
+import { apiGet, apiDelete } from "@/lib/api";
 
 // API
 import { SHOW_ONE_PROJECT_TEAM } from "@/constants/api/project_teams";
 import { SHOW_ALL_EMPLOYEES } from "@/constants/api/employees";
 
-// ADD MEMBER
+// MODAL ADD / EDIT
 import TeamAddMember from "./widget/TeamAddMember";
 
 export default function TeamDetailPage() {
@@ -22,11 +34,16 @@ export default function TeamDetailPage() {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [openAddMember, setOpenAddMember] = useState(false);
-  
+  const [openForm, setOpenForm] = useState(false);
+  const [editingMember, setEditingMember] = useState(null);
+
+
+  const [deleteMember, setDeleteMember] = useState(null);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // =========================
-  // FETCH TEAM DETAIL
+  // FETCH TEAM
   // =========================
   const fetchTeam = async () => {
     try {
@@ -36,7 +53,7 @@ export default function TeamDetailPage() {
       setTeam(data || null);
       setMembers(data?.project_team_members || []);
     } catch (err) {
-      console.error("Fetch team detail error:", err);
+      console.error(err);
       setTeam(null);
       setMembers([]);
     }
@@ -46,74 +63,92 @@ export default function TeamDetailPage() {
   // FETCH EMPLOYEES
   // =========================
   const fetchEmployees = async () => {
-  try {
-    const res = await apiGet(SHOW_ALL_EMPLOYEES);
-    setEmployees(res?.data?.data?.employees || []);
-  } catch (err) {
-    console.error("Fetch employees error:", err);
-    setEmployees([]);
-  }
-};
-
+    try {
+      const res = await apiGet(SHOW_ALL_EMPLOYEES);
+      setEmployees(res?.data?.data?.employees || []);
+    } catch (err) {
+      console.error(err);
+      setEmployees([]);
+    }
+  };
 
   // =========================
   // EMPLOYEE MAP
   // =========================
   const employeeMap = useMemo(() => {
-  return employees.reduce((acc, emp) => {
-    const key =
-      Number(emp.id) ||
-      Number(emp.employee_id) ||
-      Number(emp.id_employee);
-
-    if (key) {
-      acc[key] = emp;
-    }
-
-    return acc;
-  }, {});
-}, [employees]);
-
-
+    return employees.reduce((acc, emp) => {
+      acc[Number(emp.id)] = emp;
+      return acc;
+    }, {});
+  }, [employees]);
 
   const getEmployeeName = (id) => {
-  const key = Number(id);
-  if (!key) return "-";
-
-  const emp = employeeMap[key];
-  if (!emp) return "-";
-
-  return (
-    emp.employee_name ||
-    emp.name ||
-    emp.full_name ||
-    "-"
-  );
-};
-
-
+    const emp = employeeMap[Number(id)];
+    return emp?.employee_name || emp?.name || "-";
+  };
 
   // =========================
   // EFFECT
   // =========================
- useEffect(() => {
-  if (!teamId) return;
+  useEffect(() => {
+    if (!teamId) return;
 
-  const load = async () => {
-    setLoading(true);
-    await fetchEmployees(); 
-    await fetchTeam();      
-    setLoading(false);
-  };
+    const load = async () => {
+      setLoading(true);
+      await fetchEmployees();
+      await fetchTeam();
+      setLoading(false);
+    };
 
-  load();
-}, [teamId]);
-
-
-  
+    load();
+  }, [teamId]);
 
   // =========================
-  // RENDER
+  // HANDLERS
+  // =========================
+  const handleAddMember = () => {
+    setEditingMember(null);   // reset edit
+    setOpenForm(true);
+  };
+  
+  const handleEditMember = (member) => {
+    setEditingMember(member); // isi data edit
+    setOpenForm(true);
+  };  
+
+  const handleDeleteMember = (member) => {
+    setDeleteMember(member);
+    setOpenDelete(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteMember) return;
+
+    setDeleting(true);
+
+    try {
+      const res = await apiDelete(
+        `/team_members/delete/${deleteMember.id}`
+      );
+
+      if (!res?.error) {
+        toast.success("Anggota berhasil dihapus");
+        fetchTeam();
+        setOpenDelete(false);
+        setDeleteMember(null);
+      } else {
+        toast.error(res?.message || "Gagal menghapus anggota");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Terjadi kesalahan server");
+    }
+
+    setDeleting(false);
+  };
+
+  // =========================
+  // LOADING
   // =========================
   if (loading) {
     return (
@@ -123,6 +158,9 @@ export default function TeamDetailPage() {
     );
   }
 
+  // =========================
+  // TEAM NOT FOUND
+  // =========================
   if (!team) {
     return (
       <div className="text-center py-20">
@@ -134,8 +172,10 @@ export default function TeamDetailPage() {
     );
   }
 
+  // =========================
+  // MAIN UI
+  // =========================
   return (
-    
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       {/* HEADER */}
       <div className="flex justify-between items-center">
@@ -184,11 +224,10 @@ export default function TeamDetailPage() {
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <h3 className="font-semibold">Anggota Team</h3>
-          <Button size="sm" onClick={() => setOpenAddMember(true)}>
+          <Button size="sm" onClick={handleAddMember}>
             + Tambah Anggota
           </Button>
         </div>
-
         {members.length > 0 ? (
           <div className="space-y-2">
             {members.map((m) => (
@@ -206,9 +245,27 @@ export default function TeamDetailPage() {
                   </p>
                 </div>
 
-                <p className="text-xs text-muted-foreground">
-                  Rp {m.role_levels?.role_price}
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-xs text-muted-foreground">
+                    Rp {m.role_levels?.role_price}
+                  </p>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEditMember(m)}
+                  >
+                    Edit
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleDeleteMember(m)}
+                  >
+                    Hapus
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -219,14 +276,52 @@ export default function TeamDetailPage() {
         )}
       </div>
 
-      {/* ADD MEMBER */}
+      {/* ADD / EDIT MODAL */}
       <TeamAddMember
-        open={openAddMember}
-        setOpen={setOpenAddMember}
+        open={openForm}
+        setOpen={setOpenForm}
         teamId={teamId}
-        onSuccess={fetchTeam}
+        isEdit={!!editingMember}
+        initialData={editingMember}
+        onSuccess={() => {
+          fetchTeam();
+          setOpenForm(false);
+          setEditingMember(null);
+        }}
       />
+
+      {/* DELETE CONFIRM DIALOG */}
+      <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Hapus Anggota?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menghapus{" "}
+              <span className="font-semibold">
+                {deleteMember &&
+                  getEmployeeName(deleteMember.employee_id)}
+              </span>
+              ? Tindakan ini tidak bisa dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>
+              Batal
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleting ? "Menghapus..." : "Hapus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
-  
 }

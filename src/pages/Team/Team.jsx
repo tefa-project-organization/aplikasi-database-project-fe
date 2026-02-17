@@ -54,9 +54,12 @@ export default function Team() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("default");
-  const [openForm, setOpenForm] = useState(false); // State untuk mengontrol form
+  const [openForm, setOpenForm] = useState(false); 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [teamToDelete, setTeamToDelete] = useState(null);
+  const [isEdit, setIsEdit] = useState(false);
+  const [editingTeam, setEditingTeam] = useState(null);
+
   
 
   // ===============================
@@ -152,22 +155,16 @@ export default function Team() {
   // DELETE
   // ===============================
   const handleCreate = () => {
-    setOpenDetail(false);
-    setDetailTeamId(null);
-
     setIsEdit(false);
     setEditingTeam(null);
     setOpenForm(true);
-  };
+  };  
 
   const handleEdit = (team) => {
-    setOpenDetail(false);
-    setDetailTeamId(null);
-
     setIsEdit(true);
     setEditingTeam(team);
     setOpenForm(true);
-  };
+  };  
 
   const handleDetail = (id) => {
     setOpenForm(false);        // ⬅️ INI KUNCI UTAMA
@@ -177,8 +174,6 @@ export default function Team() {
     setDetailTeamId(id);
     setOpenDetail(true);
   };
-
-
 
   const handleDeleteClick = (team) => {
     setTeamToDelete(team);
@@ -230,7 +225,7 @@ export default function Team() {
         </div>
 
         <Button
-         onClick={() => setOpenForm(true)}
+         onClick={handleCreate}
          className="flex items-center gap-2"
         >
          <Plus className="h-4 w-4" />
@@ -255,14 +250,18 @@ export default function Team() {
 
       {/* TEAM FORM */}
       <TeamForm
-       open={openForm}
-       onClose={() => setOpenForm(false)}
-       setOpen={setOpenForm}
-       projects={projects}
-       onSuccess={() => {
-       setOpenForm(false);
-       fetchTeams();
-      }}
+        open={openForm}
+        onClose={() => setOpenForm(false)}
+        setOpen={setOpenForm}
+        projects={projects}
+        isEdit={isEdit}
+        initialData={editingTeam}
+        onSuccess={() => {
+          setOpenForm(false);
+          setIsEdit(false);
+          setEditingTeam(null);
+          fetchTeams();
+        }}
       />
 
       {/* GRID TEAM */}
@@ -315,19 +314,34 @@ export default function Team() {
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center border-t border-border/40 pt-4">
-                  <span className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
-                    Lihat Detail
-                  </span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-[11px] font-medium hover:bg-background/80"
-                    onClick={() => navigate(`/team/${team.id}`)}
-                  >
-                    Detail
-                  </Button>
-                </div>
+                <div className="flex justify-end items-center border-t border-border/40 pt-4 gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="text-[11px]"
+                  onClick={() => handleEdit(team)}
+                >
+                  Edit
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="text-[11px]"
+                  onClick={() => handleDeleteClick(team)}
+                >
+                  Delete
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-[11px]"
+                  onClick={() => navigate(`/team/${team.id}`)}
+                >
+                  Detail
+                </Button>
+              </div>
               </CardContent>
             </Card>
           ))

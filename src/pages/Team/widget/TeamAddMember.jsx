@@ -32,10 +32,9 @@ export default function TeamAddMember({
   setOpen,
   teamId,
   onSuccess,
+  isEdit = false,
+  initialData = null,
 }) {
-  const isEdit = typeof open === "object" && open?.edit
-  const editData = isEdit ? open.data : null
-
   const [employees, setEmployees] = useState([])
   const [roles, setRoles] = useState([])
   const [loading, setLoading] = useState(false)
@@ -67,15 +66,18 @@ export default function TeamAddMember({
     setLoading(false)
   }
 
+  // ===============================
+  // INIT FORM
+  // ===============================
   useEffect(() => {
     if (!open) return
 
     fetchData()
 
-    if (isEdit && editData) {
+    if (isEdit && initialData) {
       setForm({
-        employee_id: String(editData.employee_id),
-        role_id: String(editData.role_id),
+        employee_id: String(initialData.employee_id),
+        role_id: String(initialData.role_id),
       })
     } else {
       setForm({
@@ -83,7 +85,7 @@ export default function TeamAddMember({
         role_id: "",
       })
     }
-  }, [open])
+  }, [open, isEdit, initialData])
 
   // ===============================
   // SUBMIT
@@ -103,13 +105,15 @@ export default function TeamAddMember({
       }
 
       const res = isEdit
-        ? await apiPut(UPDATE_TEAM_MEMBER(editData.id), payload)
+        ? await apiPut(UPDATE_TEAM_MEMBER(initialData.id), payload)
         : await apiPost(CREATE_TEAM_MEMBER, payload)
 
       if (!res?.error) {
         onSuccess?.()
         setOpen(false)
-        toast.success(`Member berhasil ${isEdit ? "diupdate" : "ditambahkan"}`)
+        toast.success(
+          `Member berhasil ${isEdit ? "diupdate" : "ditambahkan"}`
+        )
       } else {
         toast.error(res?.message || "Gagal menyimpan member")
       }
@@ -131,7 +135,9 @@ export default function TeamAddMember({
             {isEdit ? "Edit Anggota Team" : "Tambah Anggota Team"}
           </DialogTitle>
           <DialogDescription>
-            {isEdit ? "Perbarui data anggota team yang sudah ada." : "Tambahkan anggota baru ke dalam team."}
+            {isEdit
+              ? "Perbarui data anggota team yang sudah ada."
+              : "Tambahkan anggota baru ke dalam team."}
           </DialogDescription>
         </DialogHeader>
 
@@ -201,7 +207,11 @@ export default function TeamAddMember({
             disabled={submitting}
             className="min-w-[120px]"
           >
-            {submitting ? "Menyimpan..." : "Simpan"}
+            {submitting
+              ? "Menyimpan..."
+              : isEdit
+              ? "Update"
+              : "Simpan"}
           </Button>
         </DialogFooter>
       </DialogContent>
