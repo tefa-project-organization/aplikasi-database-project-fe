@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import AdvancedPagination from "@/components/ui/AdvancedPagination"
 import EmployeeForm from "./EmployeeForm"
 import EmployeeDetail from "./EmployeeDetail"
 import {
@@ -139,6 +140,13 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
                     </TableHeader>
 
                     <TableBody>
+                        {paginatedEmployees.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                                    No employee found
+                                </TableCell>
+                            </TableRow>
+                        )}
                         {paginatedEmployees.map((employee) => (
                             <TableRow key={employee.id}>
                                 <TableCell className="font-medium">{employee.nik?.trim()}</TableCell>
@@ -199,29 +207,11 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
             </div>
 
             {/* PAGINATION */}
-            <div className="flex justify-between items-center">
-                <span>
-                    Page {currentPage} of {totalPages || 1}
-                </span>
-                <div className="space-x-2">
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                    >
-                        Prev
-                    </Button>
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages}
-                    >
-                        Next
-                    </Button>
-                </div>
-            </div>
+            <AdvancedPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+            />
         </div>
     )
 }

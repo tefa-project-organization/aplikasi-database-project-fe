@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import AdvancedPagination from "@/components/ui/AdvancedPagination"
 import ClientForm from "./ClientForm"
 import EditClientForm from "./EditClientForm"
 
@@ -136,6 +137,13 @@ export default function ClientTable({
             </TableRow>
           </TableHeader>
           <TableBody>
+            {paginatedClients.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  No client found
+                </TableCell>
+              </TableRow>
+            )}
             {paginatedClients.map((client) => (
               <TableRow key={client.id}>
                 <TableCell className="font-medium">
@@ -200,37 +208,11 @@ export default function ClientTable({
       </div>
 
       {/* PAGINATION */}
-      <div className="flex items-center justify-between">
-        <span>
-          Page {currentPage} of {totalPages || 1}
-        </span>
-        <div className="space-x-2">
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={currentPage === 1}
-            onClick={() =>
-              setCurrentPage((prev) =>
-                Math.max(prev - 1, 1)
-              )
-            }
-          >
-            Prev
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={currentPage === totalPages}
-            onClick={() =>
-              setCurrentPage((prev) =>
-                Math.min(prev + 1, totalPages)
-              )
-            }
-          >
-            Next
-          </Button>
-        </div>
-      </div>
+      <AdvancedPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   )
 }

@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import AdvancedPagination from "@/components/ui/AdvancedPagination"
 import PicForm from "./PicForm"
 import PicDetail from "./PicDetail"
 import EditPicForm from "./EditPicForm"
@@ -181,19 +182,11 @@ export default function PicTable({
                 </Table>
             </div>
 
-            <div className="flex justify-between items-center">
-                <span>
-                    Page {currentPage} of {totalPages || 1}
-                </span>
-                <div className="space-x-2">
-                    <Button size="sm" variant="outline" disabled={currentPage === 1} onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}>
-                        Prev
-                    </Button>
-                    <Button size="sm" variant="outline" disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}>
-                        Next
-                    </Button>
-                </div>
-            </div>
+            <AdvancedPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+            />
         </div>
     )
 }

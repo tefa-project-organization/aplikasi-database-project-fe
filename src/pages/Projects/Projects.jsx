@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
+import AdvancedPagination from "@/components/ui/AdvancedPagination";
 import { apiGet, apiDelete, apiPost, apiPatch, apiPut } from "@/lib/api";
 import { SHOW_ALL_PROJECTS, SHOW_ONE_PROJECT, DELETE_PROJECT, CREATE_PROJECT, UPDATE_PROJECT } from "@/constants/api/project";
 
@@ -326,38 +327,12 @@ export default function Projects() {
       )}
 
       {/* PAGINATION */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-6">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-          >
-            Prev
-          </Button>
-
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <Button
-              key={page}
-              size="sm"
-              variant={page === currentPage ? "default" : "outline"}
-              onClick={() => setCurrentPage(page)}
-            >
-              {page}
-            </Button>
-          ))}
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </Button>
-        </div>
-      )}
+      <AdvancedPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        className="mt-6"
+      />
 
       {/* Detail Dialog - TIDAK MENGGUNAKAN ProjectForm */}
       <Dialog open={openDetail} onOpenChange={setOpenDetail}>

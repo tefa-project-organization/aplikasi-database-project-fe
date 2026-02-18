@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { apiGet } from "@/lib/api"
 import { SHOW_ALL_HISTORY } from "@/constants/api/history"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import AdvancedPagination from "@/components/ui/AdvancedPagination"
 import {
   Dialog,
   DialogContent,
@@ -133,13 +134,12 @@ export default function History() {
         </Table>
       </div>
 
-      <div className="flex justify-between items-center mt-2">
-        <span>Page {page} of {totalPages}</span>
-        <div className="space-x-2">
-          <Button size="sm" variant="outline" onClick={() => fetchLogs(Math.max(1, page - 1))} disabled={page === 1}>Prev</Button>
-          <Button size="sm" variant="outline" onClick={() => fetchLogs(Math.min(totalPages, page + 1))} disabled={page === totalPages}>Next</Button>
-        </div>
-      </div>
+      <AdvancedPagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={fetchLogs}
+        className="mt-4"
+      />
 
       {/* DETAIL DIALOG */}
       <Dialog open={!!detailLog} onOpenChange={(open) => { if (!open) setDetailLog(null) }}>

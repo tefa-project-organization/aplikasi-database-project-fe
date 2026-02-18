@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import AdvancedPagination from "@/components/ui/AdvancedPagination";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -278,37 +279,12 @@ const [clients, setClients] = useState([]);
         </div>
     
         {/* PAGINATION */}
-        <div className="flex justify-between items-center px-4 py-4 border-t">
-          {/* kiri */}
-          <span className="text-sm text-muted-foreground">
-            Total {documents.length} data
-          </span>
-    
-          {/* kanan */}
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-            >
-              Prev
-            </Button>
-    
-            <span className="text-sm">
-              Page {currentPage} of {totalPages}
-            </span>
-    
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
+        <AdvancedPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          className="px-4 py-4 border-t"
+        />
     
         {/* EDIT MODAL */}
         {openEdit && selectedDoc && (
