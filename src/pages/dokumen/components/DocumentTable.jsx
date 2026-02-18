@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "@lottiefiles/lottie-player";
 import EditDocumentModal from "./EditDocumentModal";
 import {
   Table,
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import AdvancedPagination from "@/components/ui/AdvancedPagination";
+import loadingPaperplane from "@/assets/icon/Loading 40 _ Paperplane.json";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -125,7 +127,14 @@ const [clients, setClients] = useState([]);
             Document Manager
           </h1>
   
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-white border-t-transparent"/>
+          <lottie-player
+            src={loadingPaperplane}
+            background="transparent"
+            speed="1"
+            style={{ width: "150px", height: "150px" }}
+            autoplay
+            loop
+          />
   
           <p className="text-sm text-muted-foreground">
             Memuat data dokumen...
