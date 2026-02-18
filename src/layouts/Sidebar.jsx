@@ -62,11 +62,11 @@ export default function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className={`transition-all duration-200 bg-white/70 dark:bg-black/70 backdrop-blur-xl border-r border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] ${open ? "w-64" : "w-14"}`}
+      className={`transition-all duration-200 bg-sidebar/70 backdrop-blur-xl border-r border-sidebar-border shadow-[0_8px_32px_rgba(0,0,0,0.1)] ${open ? "w-64" : "w-14"}`}
     >
       {/* HEADER */}
       <div
-        className={`flex items-center border-b border-black/5 dark:border-white/10 transition-all duration-200 bg-gradient-to-b from-white/40 to-transparent dark:from-white/5
+        className={`flex items-center border-b border-sidebar-border transition-all duration-200 bg-gradient-to-b from-white/40 to-transparent dark:from-sidebar-accent/20
         ${open ? "px-4 py-4 justify-start gap-3" : "px-3 py-4 justify-center"}`}
       >
         <img
@@ -109,7 +109,7 @@ export default function AppSidebar() {
                     <div
                       className={`flex items-center gap-2 rounded-lg transition-all duration-200 group
                       ${open ? "px-4 py-2 justify-start" : "p-3 justify-center"}
-                      data-[active=true]:bg-black/5 dark:data-[active=true]:bg-white/10 data-[active=true]:shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:data-[active=true]:shadow-[inset_0_1px_2px_rgba(255,255,255,0.1)] hover:bg-black/5 dark:hover:bg-white/5`}
+                      data-[active=true]:bg-sidebar-accent data-[active=true]:shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:data-[active=true]:shadow-[inset_0_1px_2px_rgba(255,255,255,0.1)] hover:bg-sidebar-accent`}
                     >
                       <img
                         src={item.icon}
@@ -135,7 +135,7 @@ export default function AppSidebar() {
       </SidebarContent>
 
       {/* FOOTER - Logo saja */}
-      <div className="border-t border-black/5 dark:border-white/10 mt-auto p-3 flex justify-center bg-gradient-to-t from-black/5 dark:from-black/20 to-transparent">
+      <div className="border-t border-sidebar-border mt-auto p-3 flex justify-center bg-gradient-to-t from-sidebar-accent/20 to-transparent">
         <img
           src={theme === "dark" ? WgsIconWhite : WgsIconBlack}
           alt="WGS Logo"
