@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,11 +51,13 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
         client_id: initialData.client_id || "",
         client_pic_id: initialData.client_pic_id || "",
         document_types: initialData.document_types || "",
-        date_signed: initialData.date_signed || "",
+        date_signed: initialData.date_signed
+          ? initialData.date_signed.split("T")[0]
+          : "",
       });
     }
   }, [initialData]);
-
+  
   const [form, setForm] = useState({
     project_id: "",
     client_id: "",
@@ -95,38 +98,45 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
   /* ================= SUBMIT ================= */
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+  
     if (!initialData?.id) {
       setErrorMessage("ID dokumen tidak ditemukan");
       setErrorOpen(true);
       return;
     }
-    
+  
     setLoading(true);
   
-    const formData = new FormData();
-    formData.append("project_id", form.project_id);
-    formData.append("client_id", form.client_id);
-    formData.append("client_pic_id", form.client_pic_id);
-    formData.append("document_types", form.document_types);
-    formData.append("date_signed", form.date_signed);
-  
-    if (file) {
-      formData.append("document", file);
-    }
-  
     try {
+      const formData = new FormData();
+      formData.append("project_id", form.project_id);
+      formData.append("client_id", form.client_id);
+      formData.append("client_pic_id", form.client_pic_id);
+      formData.append("document_types", form.document_types);
+      formData.append("date_signed", form.date_signed);
+  
+      if (file) {
+        formData.append("document", file);
+      }
+  
       const res = await fetch(
         `https://backend-database-two.vercel.app/api/v1/documents/update/${initialData.id}`,
         {
           method: "PUT",
           body: formData,
-          credentials: "include",
+          credentials: "include"
         }
-      );
+      );      
   
-      const result = await res.json();
-      console.log(result);
+      const text = await res.text();
+  
+      let result;
+  
+      try {
+        result = JSON.parse(text);
+      } catch {
+        throw new Error(text);
+      }
   
       if (!res.ok) {
         throw new Error(result.message || "Update gagal");
@@ -134,15 +144,15 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
   
       onSuccess?.();
       onOpenChange(false);
+  
     } catch (err) {
       console.error(err);
-      setErrorMessage(err.message || "Gagal update dokumen");
+      setErrorMessage(err.message);
       setErrorOpen(true);
     } finally {
       setLoading(false);
     }
-  };
-  
+  };  
 
   // FETCH API PROJECT
   useEffect(() => {
@@ -220,13 +230,17 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl overflow-hidden">
-        <div className="flex flex-col h-[min(90vh,700px)]">
-          {/* HEADER */}
-          <DialogHeader>
-            <DialogTitle>Edit Dokumen</DialogTitle>
-          </DialogHeader>
+    <DialogContent className="max-w-xl overflow-hidden">
+      <div className="flex flex-col h-[min(90vh,700px)]">
 
+        <DialogHeader>
+          <DialogTitle>Edit Dokumen</DialogTitle>
+
+          <DialogDescription>
+            Edit informasi dokumen dan upload file jika diperlukan.
+          </DialogDescription>
+
+        </DialogHeader>
           {/* BODY */}
           <div className="flex-1 overflow-y-auto space-y-6 p-6 scrollbar-none [&::-webkit-scrollbar]:hidden">
 
@@ -305,7 +319,10 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
               <Select
                 value={form.document_types}
                 onValueChange={(v) =>
-                  setForm({ ...form, document_types: v })
+                  setForm((prev) => ({
+                    ...prev,
+                    document_types: v,
+                  }))
                 }
               >
                 <SelectTrigger>
@@ -313,8 +330,8 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="BAST">BAST</SelectItem>
-                  <SelectItem value="MOU">MOU</SelectItem>
-                  <SelectItem value="CONTRACT">Contract</SelectItem>
+                  <SelectItem value="BA">BA</SelectItem>
+                  <SelectItem value="OP">OP</SelectItem>
                 </SelectContent>
               </Select>
               {errors.document_types && (

@@ -294,8 +294,12 @@ useEffect(() => {
             <div className="space-y-2">
               <Label>Tipe Dokumen</Label>
               <Select
+                value={form.document_types}
                 onValueChange={(v) =>
-                  setForm({ ...form, document_types: v })
+                  setForm((prev) => ({
+                    ...prev,
+                    document_types: v,
+                  }))
                 }
               >
                 <SelectTrigger>
@@ -303,8 +307,8 @@ useEffect(() => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="BAST">BAST</SelectItem>
-                  <SelectItem value="MOU">MOU</SelectItem>
-                  <SelectItem value="CONTRACT">Contract</SelectItem>
+                  <SelectItem value="BA">BA</SelectItem>
+                  <SelectItem value="OP">OP</SelectItem>
                 </SelectContent>
               </Select>
             </div>
