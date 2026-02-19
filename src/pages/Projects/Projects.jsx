@@ -6,6 +6,7 @@ import { Spinner } from "@/components/ui/spinner";
 import AdvancedPagination from "@/components/ui/AdvancedPagination";
 import { apiGet, apiDelete, apiPost, apiPatch, apiPut } from "@/lib/api";
 import { SHOW_ALL_PROJECTS, SHOW_ONE_PROJECT, DELETE_PROJECT, CREATE_PROJECT, UPDATE_PROJECT } from "@/constants/api/project";
+import { SHOW_ALL_CLIENTS } from "@/constants/api/clients";
 
 // CHILD COMPONENTS
 import FilterControls from "./widget/FilterControls";
@@ -28,6 +29,7 @@ export default function Projects() {
   const [detailProject, setDetailProject] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [clients, setClients] = useState([]);
 
   const parseDate = (dateStr) => {
     if (!dateStr) return null;
@@ -48,18 +50,27 @@ export default function Projects() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [editingProjectId, setEditingProjectId] = useState(null);
-
-
-  // fix duplicate client options
+  
+  const fetchClients = async () => {
+    try {
+      const res = await apiGet(SHOW_ALL_CLIENTS);
+  
+      const items =
+        res?.data?.data?.items || [];
+  
+      setClients(items);
+    } catch (err) {
+      console.error("Fetch clients error:", err);
+      setClients([]);
+    }
+  };
+  
   const clientOptions = useMemo(() => {
-    const map = new Map();
-    projects.forEach((p) => {
-      if (p.client_id && !map.has(p.client_id)) {
-        map.set(p.client_id, { id: p.client_id, name: `Client ${p.client_id}` });
-      }
-    });
-    return Array.from(map.values());
-  }, [projects]);
+    return clients.map((c) => ({
+      id: c.id,
+      name: c.name, // ✅ ini yang benar
+    }));
+  }, [clients]);  
 
   const projectTypes = useMemo(() => {
     const types = projects
@@ -85,6 +96,7 @@ export default function Projects() {
 
   useEffect(() => {
     fetchProjects();
+    fetchClients();
   }, []);
 
   const handleDetail = async (id) => {
@@ -361,7 +373,9 @@ export default function Projects() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Klien</label>
-                  <p className="mt-1 text-base">Client {detailProject.client_id}</p>
+                  <p className="mt-1 text-base">
+                     {clients.find(c => c.id === detailProject.client_id)?.name || "-"}
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Nilai Kontrak</label>
