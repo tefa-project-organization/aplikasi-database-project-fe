@@ -125,14 +125,13 @@ export default function PicTable({
                             <TableHead className="whitespace-nowrap">Name</TableHead>
                             <TableHead className="whitespace-nowrap hidden sm:table-cell">Title</TableHead>
                             <TableHead className="whitespace-nowrap hidden md:table-cell">Phone</TableHead>
-                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Email</TableHead>
                             <TableHead className="text-right whitespace-nowrap">Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {paginatedPics.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center text-muted-foreground">
+                                <TableCell colSpan={4} className="text-center text-muted-foreground">
                                     No PIC found
                                 </TableCell>
                             </TableRow>
@@ -142,7 +141,6 @@ export default function PicTable({
                                 <TableCell className="font-medium whitespace-nowrap">{pic.name}</TableCell>
                                 <TableCell className="whitespace-nowrap hidden sm:table-cell">{pic.title || "-"}</TableCell>
                                 <TableCell className="whitespace-nowrap hidden md:table-cell">{pic.phone || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{pic.email || "-"}</TableCell>
                                 <TableCell className="text-right whitespace-nowrap">
                                     <div className="flex justify-end gap-1 flex-nowrap">
                                         <Button size="icon" variant="outline" className="h-8 w-8 p-0" onClick={() => setDetailPic(pic)} title="Detail">

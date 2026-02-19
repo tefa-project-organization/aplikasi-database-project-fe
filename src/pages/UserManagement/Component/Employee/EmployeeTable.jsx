@@ -130,7 +130,7 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
                         <TableRow>
                             <TableHead className="whitespace-nowrap">Name</TableHead>
                             <TableHead className="whitespace-nowrap hidden sm:table-cell">Position</TableHead>
-                            <TableHead className="whitespace-nowrap">Status</TableHead>
+                            <TableHead className="whitespace-nowrap hidden md:table-cell">Status</TableHead>
                             <TableHead className="text-right whitespace-nowrap">Action</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -147,7 +147,7 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
                             <TableRow key={employee.id}>
                                 <TableCell className="font-medium whitespace-nowrap">{employee.name}</TableCell>
                                 <TableCell className="whitespace-nowrap hidden sm:table-cell">{employee.position?.position_name || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap">
+                                <TableCell className="whitespace-nowrap hidden md:table-cell">
                                     <Badge
                                         variant="outline"
                                         className={getBadgeStyles(employee.status?.status_name?.toLowerCase())}
