@@ -187,14 +187,14 @@ const [clients, setClients] = useState([]);
     
         {/* TABLE WRAPPER */}
         <div className="rounded-lg border overflow-hidden overflow-x-auto">
-          <Table className="min-w-[700px] md:min-w-full">
+          <Table className="min-w-[300px]">
             <TableHeader>
               <TableRow>
                 <TableHead className="whitespace-nowrap">Nomor</TableHead>
-                <TableHead className="whitespace-nowrap hidden sm:table-cell">Tipe</TableHead>
+                <TableHead className="whitespace-nowrap hidden xs:table-cell">Tipe</TableHead>
                 <TableHead className="whitespace-nowrap hidden md:table-cell">Project</TableHead>
                 <TableHead className="whitespace-nowrap hidden lg:table-cell">Client</TableHead>
-                <TableHead className="whitespace-nowrap">File</TableHead>
+                <TableHead className="whitespace-nowrap hidden sm:table-cell">File</TableHead>
                 <TableHead className="text-center whitespace-nowrap">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -213,46 +213,51 @@ const [clients, setClients] = useState([]);
                 currentDocuments.map((doc) => (
                   <TableRow key={doc.id}>
                     <TableCell className="whitespace-nowrap">{doc.number}</TableCell>
-                    <TableCell className="whitespace-nowrap hidden sm:table-cell">{doc.document_types ?? "-"}</TableCell>
+                    <TableCell className="whitespace-nowrap hidden xs:table-cell">{doc.document_types ?? "-"}</TableCell>
                     <TableCell className="whitespace-nowrap hidden md:table-cell">
                       {projects.find(p => String(p.id) === String(doc.project_id))?.project_name ?? "-"}
                     </TableCell>
                     <TableCell className="whitespace-nowrap hidden lg:table-cell">
                       {clients.find(c => String(c.id) === String(doc.client_id))?.name ?? "-"}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      <Button asChild size="sm" variant="outline">
+                    <TableCell className="whitespace-nowrap hidden sm:table-cell">
+                      <Button asChild size="icon" variant="outline" className="h-8 w-8 p-0">
                         <a
                           href={doc.document_url}
                           target="_blank"
                           rel="noopener noreferrer"
+                          title="View File"
                         >
-                          Detail
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                         </a>
                       </Button>
                     </TableCell>
     
                     <TableCell className="text-right whitespace-nowrap">
-                      <div className="flex justify-end gap-2 flex-wrap">
+                      <div className="flex justify-end gap-1 flex-nowrap">
                         <Button
-                          size="sm"
+                          size="icon"
                           variant="outline"
+                          className="h-8 w-8 p-0"
                           onClick={() => {
                             setSelectedDoc(doc);
                             setOpenEdit(true);
                           }}
+                          title="Edit"
                         >
-                          Edit
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                         </Button>
     
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
-                              size="sm"
+                              size="icon"
                               variant="destructive"
+                              className="h-8 w-8 p-0"
                               onClick={() => setDeleteId(doc.id)}
+                              title="Delete"
                             >
-                              Hapus
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                             </Button>
                           </AlertDialogTrigger>
     

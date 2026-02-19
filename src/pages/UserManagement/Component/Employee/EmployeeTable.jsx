@@ -125,7 +125,7 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
 
             {/* TABLE */}
             <div className="rounded-md border overflow-x-auto">
-                <Table className="min-w-[900px] md:min-w-full">
+                <Table className="min-w-[350px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead className="whitespace-nowrap hidden sm:table-cell">NIK</TableHead>
@@ -133,7 +133,7 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
                             <TableHead className="whitespace-nowrap">Name</TableHead>
                             <TableHead className="whitespace-nowrap hidden md:table-cell">Position</TableHead>
                             <TableHead className="whitespace-nowrap hidden lg:table-cell">Email</TableHead>
-                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Phone</TableHead>
+                            <TableHead className="whitespace-nowrap hidden xl:table-cell">Phone</TableHead>
                             <TableHead className="whitespace-nowrap">Status</TableHead>
                             <TableHead className="text-right whitespace-nowrap">Action</TableHead>
                         </TableRow>
@@ -154,7 +154,7 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
                                 <TableCell className="font-medium whitespace-nowrap">{employee.name}</TableCell>
                                 <TableCell className="whitespace-nowrap hidden md:table-cell">{employee.position?.position_name || "-"}</TableCell>
                                 <TableCell className="whitespace-nowrap hidden lg:table-cell">{employee.email || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{employee.phone || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden xl:table-cell">{employee.phone || "-"}</TableCell>
                                 <TableCell className="whitespace-nowrap">
                                     <Badge
                                         variant="outline"
@@ -164,13 +164,15 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right whitespace-nowrap">
-                                    <div className="flex justify-end gap-2 flex-wrap">
+                                    <div className="flex justify-end gap-1 flex-nowrap">
                                         <Button
                                             variant="outline"
-                                            size="sm"
+                                            size="icon"
+                                            className="h-8 w-8 p-0"
                                             onClick={() => setDetailEmployee(employee)}
+                                            title="Detail"
                                         >
-                                            Detail
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                                         </Button>
                                         <AlertDialog open={isDeleteDialogOpen && employeeToDelete?.id === employee.id} onOpenChange={(open) => {
                                             setIsDeleteDialogOpen(open)
@@ -179,10 +181,12 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
                                             <AlertDialogTrigger asChild>
                                                 <Button
                                                     variant="destructive"
-                                                    size="sm"
+                                                    size="icon"
+                                                    className="h-8 w-8 p-0"
                                                     onClick={() => setEmployeeToDelete(employee)}
+                                                    title="Delete"
                                                 >
-                                                    Delete
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                                                 </Button>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>

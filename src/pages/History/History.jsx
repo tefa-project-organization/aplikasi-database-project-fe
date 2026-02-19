@@ -101,7 +101,7 @@ export default function History() {
       </div>
 
       <div className="rounded-md border overflow-x-auto">
-        <Table className="min-w-[700px] md:min-w-full">
+        <Table className="min-w-[250px]">
           <TableHeader>
             <TableRow>
               <TableHead className="whitespace-nowrap hidden sm:table-cell">No.</TableHead>
@@ -120,7 +120,9 @@ export default function History() {
                 <TableCell className="whitespace-nowrap hidden md:table-cell">{log.action}</TableCell>
                 <TableCell className="whitespace-nowrap hidden lg:table-cell">{log.timestamp ? new Date(log.timestamp).toLocaleString() : "-"}</TableCell>
                 <TableCell className="text-right whitespace-nowrap">
-                  <Button size="sm" variant="outline" onClick={() => setDetailLog(log)}>Detail</Button>
+                  <Button size="icon" variant="outline" className="h-8 w-8 p-0" onClick={() => setDetailLog(log)} title="Detail">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

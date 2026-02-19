@@ -125,7 +125,7 @@ export default function ClientTable({
 
       {/* TABLE */}
       <div className="rounded-md border overflow-x-auto">
-        <Table className="min-w-[600px] md:min-w-full">
+        <Table className="min-w-[250px]">
           <TableHeader>
             <TableRow>
               <TableHead className="whitespace-nowrap">Client Name</TableHead>
@@ -152,13 +152,15 @@ export default function ClientTable({
                 <TableCell className="whitespace-nowrap hidden sm:table-cell">{client.phone}</TableCell>
                 <TableCell className="whitespace-nowrap hidden md:table-cell">{client.npwp}</TableCell>
                 <TableCell className="text-right whitespace-nowrap">
-                  <div className="flex justify-end gap-2 flex-wrap">
+                  <div className="flex justify-end gap-1 flex-nowrap">
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="icon"
+                      className="h-8 w-8 p-0"
                       onClick={() => onDetail?.(client)}
+                      title="Detail"
                     >
-                      Detail
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                     </Button>
                     <EditClientForm
                       client={client}
@@ -168,10 +170,12 @@ export default function ClientTable({
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
-                          size="sm"
+                          size="icon"
                           variant="destructive"
+                          className="h-8 w-8 p-0"
+                          title="Delete"
                         >
-                          Delete
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
