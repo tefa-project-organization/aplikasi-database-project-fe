@@ -57,7 +57,7 @@ export default function Dashboard() {
     { label: "Projects", icon: FolderKanban, value: 0 },
     { label: "Clients", icon: Briefcase, value: 0 },
     { label: "Teams", icon: Users, value: 0 },
-    { label: "PIC", icon: UserCog, value: 0, sublabel: "Total" },
+    { label: "PIC Aktif", icon: UserCog, value: 0 },
     { label: "Employees", icon: User, value: 0 },
   ])
   const [runningCount, setRunningCount] = useState(0)
