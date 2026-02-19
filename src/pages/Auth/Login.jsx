@@ -158,7 +158,7 @@ export default function Login() {
 
                   <Button
                     type="submit"
-                    className="w-full h-10 bg-neutral-900 text-white hover:bg-neutral-800 transition"
+                    className="w-full h-10"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "Processing..." : "Masuk"}

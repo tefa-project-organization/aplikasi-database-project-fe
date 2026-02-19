@@ -17,6 +17,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { apiGet } from "@/lib/api"
 import { DASHBOARD_API } from "@/constants/api/dashboard"
+import { SHOW_ALL_CLIENT_PICS } from "@/constants/api/client_pic"
 
 const statColors = {
   Projects: {
@@ -37,7 +38,7 @@ const statColors = {
     border: "border-purple-200 dark:border-purple-700",
     value: "text-purple-600 dark:text-purple-400",
   },
-  PIC: {
+  "PIC Aktif": {
     bg: "bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20",
     iconBg: "bg-emerald-500",
     border: "border-emerald-200 dark:border-emerald-700",
@@ -56,7 +57,7 @@ export default function Dashboard() {
     { label: "Projects", icon: FolderKanban, value: 0 },
     { label: "Clients", icon: Briefcase, value: 0 },
     { label: "Teams", icon: Users, value: 0 },
-    { label: "PIC", icon: UserCog, value: 0 },
+    { label: "PIC", icon: UserCog, value: 0, sublabel: "Total" },
     { label: "Employees", icon: User, value: 0 },
   ])
   const [runningCount, setRunningCount] = useState(0)
@@ -67,22 +68,39 @@ export default function Dashboard() {
     setLoadingStats(true)
     setLoadingRunning(true)
 
-    const res = await apiGet(DASHBOARD_API)
-    if (!res.error && res.data?.data) {
-      const d = res.data.data
+    try {
+      // Fetch dashboard summary
+      const res = await apiGet(DASHBOARD_API)
+      
+      // Fetch pics untuk hitung PIC aktif
+      const picsRes = await apiGet(SHOW_ALL_CLIENT_PICS)
+      
+      if (!res.error && res.data?.data) {
+        const d = res.data.data
 
-      setStats([
-        { label: "Projects", icon: FolderKanban, value: d.total_projects ?? 0 },
-        { label: "Clients", icon: Briefcase, value: d.total_clients ?? 0 },
-        { label: "Teams", icon: Users, value: d.total_teams ?? 0 },
-        { label: "PIC", icon: UserCog, value: d.total_pic ?? 0 },
-        { label: "Employees", icon: User, value: d.total_employees ?? 0 },
-      ])
-      setRunningCount(d.running_projects ?? 0)
-      setLoadingStats(false)
-      setLoadingRunning(false)
-    } else {
-      console.error("Gagal fetch dashboard:", res.message)
+        // Hitung PIC aktif (yang punya project_id)
+        let activePics = 0
+        if (!picsRes.error) {
+          const pics = picsRes.data?.items || picsRes.data?.data?.items || []
+          
+          // PIC aktif = yang punya project_id (tidak null/undefined)
+          activePics = pics.filter(pic => pic.project_id && pic.project_id !== null && pic.project_id !== undefined).length
+        }
+
+        setStats([
+          { label: "Projects", icon: FolderKanban, value: d.total_projects ?? 0 },
+          { label: "Clients", icon: Briefcase, value: d.total_clients ?? 0 },
+          { label: "Teams", icon: Users, value: d.total_teams ?? 0 },
+          { label: "PIC Aktif", icon: UserCog, value: activePics },
+          { label: "Employees", icon: User, value: d.total_employees ?? 0 },
+        ])
+        setRunningCount(d.running_projects ?? 0)
+      } else {
+        console.error("Gagal fetch dashboard:", res.message)
+      }
+    } catch (err) {
+      console.error("Error fetch dashboard:", err)
+    } finally {
       setLoadingStats(false)
       setLoadingRunning(false)
     }
@@ -134,7 +152,7 @@ export default function Dashboard() {
 
                 <CardHeader className="flex flex-row items-center justify-between pb-2 bg-transparent">
                   <CardTitle className="text-sm text-muted-foreground font-medium">
-                    Jumlah {item.label}
+                    {item.label}
                   </CardTitle>
 
                   <div
