@@ -23,6 +23,14 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 /* ✅ DUMMY DATA (tidak mengganggu API asli) */
 const dummyDocuments = [
@@ -61,7 +69,8 @@ export default function DocumentTable({ refresh }) {
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; 
+  const itemsPerPage = 5;
+  const [detailDoc, setDetailDoc] = useState(null);
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -192,7 +201,9 @@ const [clients, setClients] = useState([]);
               <TableRow>
                 <TableHead className="whitespace-nowrap">Nomor</TableHead>
                 <TableHead className="whitespace-nowrap hidden sm:table-cell">Tipe</TableHead>
-                <TableHead className="text-center whitespace-nowrap">Action</TableHead>
+                <TableHead className="whitespace-nowrap hidden md:table-cell">Project</TableHead>
+                <TableHead className="whitespace-nowrap hidden lg:table-cell">Client</TableHead>
+                <TableHead className="text-right whitespace-nowrap">Action</TableHead>
               </TableRow>
             </TableHeader>
     
@@ -200,7 +211,7 @@ const [clients, setClients] = useState([]);
               {documents.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={3}
+                    colSpan={5}
                     className="text-center text-muted-foreground"
                   >
                     Tidak ada data
@@ -211,9 +222,25 @@ const [clients, setClients] = useState([]);
                   <TableRow key={doc.id}>
                     <TableCell className="whitespace-nowrap">{doc.number}</TableCell>
                     <TableCell className="whitespace-nowrap hidden sm:table-cell">{doc.document_types ?? "-"}</TableCell>
-    
+                    <TableCell className="whitespace-nowrap hidden md:table-cell">
+                      {projects.find(p => String(p.id) === String(doc.project_id))?.project_name ?? "-"}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap hidden lg:table-cell">
+                      {clients.find(c => String(c.id) === String(doc.client_id))?.name ?? "-"}
+                    </TableCell>
+
                     <TableCell className="text-right whitespace-nowrap">
                       <div className="flex justify-end gap-1 flex-nowrap">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8 p-0"
+                          onClick={() => setDetailDoc(doc)}
+                          title="Detail"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        </Button>
+
                         <Button
                           size="icon"
                           variant="outline"
@@ -226,7 +253,7 @@ const [clients, setClients] = useState([]);
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                         </Button>
-    
+
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
@@ -303,6 +330,54 @@ const [clients, setClients] = useState([]);
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* DETAIL DIALOG */}
+        <Dialog open={!!detailDoc} onOpenChange={(open) => { if (!open) setDetailDoc(null) }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Detail Dokumen</DialogTitle>
+              <DialogDescription>
+                Informasi lengkap dokumen {detailDoc?.number}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="p-2 max-h-[60vh] overflow-y-auto no-scrollbar">
+              {detailDoc ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">Nomor</div><div>{detailDoc.number}</div>
+                    <div className="font-medium">Tipe</div><div>{detailDoc.document_types ?? "-"}</div>
+                    <div className="font-medium">Project</div>
+                    <div>
+                      {projects.find(p => String(p.id) === String(detailDoc.project_id))?.project_name ?? "-"}
+                    </div>
+                    <div className="font-medium">Client</div>
+                    <div>
+                      {clients.find(c => String(c.id) === String(detailDoc.client_id))?.name ?? "-"}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t">
+                    <div className="font-medium mb-2">File Dokumen:</div>
+                    <Button asChild size="sm" variant="outline">
+                      <a
+                        href={detailDoc.document_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Lihat File
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <DialogFooter>
+              <Button onClick={() => setDetailDoc(null)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     );
-}    
+}
