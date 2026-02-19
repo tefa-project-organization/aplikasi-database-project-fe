@@ -125,15 +125,11 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
 
             {/* TABLE */}
             <div className="rounded-md border overflow-x-auto">
-                <Table className="min-w-[350px]">
+                <Table className="min-w-[250px]">
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="whitespace-nowrap hidden sm:table-cell">NIK</TableHead>
-                            <TableHead className="whitespace-nowrap hidden sm:table-cell">NIP</TableHead>
                             <TableHead className="whitespace-nowrap">Name</TableHead>
-                            <TableHead className="whitespace-nowrap hidden md:table-cell">Position</TableHead>
-                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Email</TableHead>
-                            <TableHead className="whitespace-nowrap hidden xl:table-cell">Phone</TableHead>
+                            <TableHead className="whitespace-nowrap hidden sm:table-cell">Position</TableHead>
                             <TableHead className="whitespace-nowrap">Status</TableHead>
                             <TableHead className="text-right whitespace-nowrap">Action</TableHead>
                         </TableRow>
@@ -142,19 +138,15 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
                     <TableBody>
                         {paginatedEmployees.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                                <TableCell colSpan={4} className="text-center text-muted-foreground">
                                     No employee found
                                 </TableCell>
                             </TableRow>
                         )}
                         {paginatedEmployees.map((employee) => (
                             <TableRow key={employee.id}>
-                                <TableCell className="font-medium whitespace-nowrap hidden sm:table-cell">{employee.nik?.trim()}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden sm:table-cell">{employee.nip?.trim()}</TableCell>
                                 <TableCell className="font-medium whitespace-nowrap">{employee.name}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden md:table-cell">{employee.position?.position_name || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{employee.email || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden xl:table-cell">{employee.phone || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden sm:table-cell">{employee.position?.position_name || "-"}</TableCell>
                                 <TableCell className="whitespace-nowrap">
                                     <Badge
                                         variant="outline"

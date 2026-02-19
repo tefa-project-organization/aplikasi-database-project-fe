@@ -119,22 +119,20 @@ export default function PicTable({
             </div>
 
             <div className="rounded-md border overflow-x-auto">
-                <Table className="min-w-[400px]">
+                <Table className="min-w-[250px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead className="whitespace-nowrap">Name</TableHead>
-                            <TableHead className="whitespace-nowrap hidden xs:table-cell">Title</TableHead>
-                            <TableHead className="whitespace-nowrap hidden sm:table-cell">Phone</TableHead>
-                            <TableHead className="whitespace-nowrap hidden md:table-cell">Email</TableHead>
-                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Client</TableHead>
-                            <TableHead className="whitespace-nowrap hidden xl:table-cell">Project</TableHead>
+                            <TableHead className="whitespace-nowrap hidden sm:table-cell">Title</TableHead>
+                            <TableHead className="whitespace-nowrap hidden md:table-cell">Phone</TableHead>
+                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Email</TableHead>
                             <TableHead className="text-right whitespace-nowrap">Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {paginatedPics.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                                <TableCell colSpan={5} className="text-center text-muted-foreground">
                                     No PIC found
                                 </TableCell>
                             </TableRow>
@@ -142,11 +140,9 @@ export default function PicTable({
                         {paginatedPics.map((pic) => (
                             <TableRow key={pic.id}>
                                 <TableCell className="font-medium whitespace-nowrap">{pic.name}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden xs:table-cell">{pic.title || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden sm:table-cell">{pic.phone || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden md:table-cell">{pic.email || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{pic.client_name || getClientName(pic.client_id)}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden xl:table-cell">{pic.project_name || getProjectName(pic.project_id)}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden sm:table-cell">{pic.title || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden md:table-cell">{pic.phone || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{pic.email || "-"}</TableCell>
                                 <TableCell className="text-right whitespace-nowrap">
                                     <div className="flex justify-end gap-1 flex-nowrap">
                                         <Button size="icon" variant="outline" className="h-8 w-8 p-0" onClick={() => setDetailPic(pic)} title="Detail">
