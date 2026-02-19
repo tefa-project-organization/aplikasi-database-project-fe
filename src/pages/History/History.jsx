@@ -100,26 +100,26 @@ export default function History() {
         </div>
       </div>
 
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border overflow-x-auto">
+        <Table className="min-w-[700px] md:min-w-full">
           <TableHeader>
             <TableRow>
-              <TableHead>No.</TableHead>
-              <TableHead>Entity</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Timestamp</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableHead className="whitespace-nowrap hidden sm:table-cell">No.</TableHead>
+              <TableHead className="whitespace-nowrap">Entity</TableHead>
+              <TableHead className="whitespace-nowrap hidden md:table-cell">Action</TableHead>
+              <TableHead className="whitespace-nowrap hidden lg:table-cell">Timestamp</TableHead>
+              <TableHead className="text-right whitespace-nowrap">Action</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {displayed.map((log, i) => (
               <TableRow key={`${log.id}-${i}`}>
-                <TableCell className="font-medium">{(i + 1) + (page - 1) * limit}</TableCell>
-                <TableCell>{log.entity}</TableCell>
-                <TableCell>{log.action}</TableCell>
-                <TableCell>{log.timestamp ? new Date(log.timestamp).toLocaleString() : "-"}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="font-medium whitespace-nowrap hidden sm:table-cell">{(i + 1) + (page - 1) * limit}</TableCell>
+                <TableCell className="whitespace-nowrap">{log.entity}</TableCell>
+                <TableCell className="whitespace-nowrap hidden md:table-cell">{log.action}</TableCell>
+                <TableCell className="whitespace-nowrap hidden lg:table-cell">{log.timestamp ? new Date(log.timestamp).toLocaleString() : "-"}</TableCell>
+                <TableCell className="text-right whitespace-nowrap">
                   <Button size="sm" variant="outline" onClick={() => setDetailLog(log)}>Detail</Button>
                 </TableCell>
               </TableRow>

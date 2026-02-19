@@ -124,18 +124,18 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
             </div>
 
             {/* TABLE */}
-            <div className="rounded-md border">
-                <Table>
+            <div className="rounded-md border overflow-x-auto">
+                <Table className="min-w-[900px] md:min-w-full">
                     <TableHeader>
                         <TableRow>
-                            <TableHead>NIK</TableHead>
-                            <TableHead>NIP</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Position</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Action</TableHead>
+                            <TableHead className="whitespace-nowrap hidden sm:table-cell">NIK</TableHead>
+                            <TableHead className="whitespace-nowrap hidden sm:table-cell">NIP</TableHead>
+                            <TableHead className="whitespace-nowrap">Name</TableHead>
+                            <TableHead className="whitespace-nowrap hidden md:table-cell">Position</TableHead>
+                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Email</TableHead>
+                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Phone</TableHead>
+                            <TableHead className="whitespace-nowrap">Status</TableHead>
+                            <TableHead className="text-right whitespace-nowrap">Action</TableHead>
                         </TableRow>
                     </TableHeader>
 
@@ -149,13 +149,13 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
                         )}
                         {paginatedEmployees.map((employee) => (
                             <TableRow key={employee.id}>
-                                <TableCell className="font-medium">{employee.nik?.trim()}</TableCell>
-                                <TableCell>{employee.nip?.trim()}</TableCell>
-                                <TableCell className="font-medium">{employee.name}</TableCell>
-                                <TableCell>{employee.position?.position_name || "-"}</TableCell>
-                                <TableCell>{employee.email || "-"}</TableCell>
-                                <TableCell>{employee.phone || "-"}</TableCell>
-                                <TableCell>
+                                <TableCell className="font-medium whitespace-nowrap hidden sm:table-cell">{employee.nik?.trim()}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden sm:table-cell">{employee.nip?.trim()}</TableCell>
+                                <TableCell className="font-medium whitespace-nowrap">{employee.name}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden md:table-cell">{employee.position?.position_name || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{employee.email || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{employee.phone || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap">
                                     <Badge
                                         variant="outline"
                                         className={getBadgeStyles(employee.status?.status_name?.toLowerCase())}
@@ -163,42 +163,44 @@ export default function EmployeeTable({ employees = [], onAddEmployee, onDetail,
                                         {employee.status?.status_name || "-"}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="text-right space-x-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setDetailEmployee(employee)}
-                                    >
-                                        Detail
-                                    </Button>
-                                    <AlertDialog open={isDeleteDialogOpen && employeeToDelete?.id === employee.id} onOpenChange={(open) => {
-                                        setIsDeleteDialogOpen(open)
-                                        if (!open) setEmployeeToDelete(null)
-                                    }}>
-                                        <AlertDialogTrigger asChild>
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                onClick={() => setEmployeeToDelete(employee)}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    Apakah Anda yakin ingin menghapus employee "{employee.name}"? Tindakan ini tidak dapat dibatalkan.
+                                <TableCell className="text-right whitespace-nowrap">
+                                    <div className="flex justify-end gap-2 flex-wrap">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setDetailEmployee(employee)}
+                                        >
+                                            Detail
+                                        </Button>
+                                        <AlertDialog open={isDeleteDialogOpen && employeeToDelete?.id === employee.id} onOpenChange={(open) => {
+                                            setIsDeleteDialogOpen(open)
+                                            if (!open) setEmployeeToDelete(null)
+                                        }}>
+                                            <AlertDialogTrigger asChild>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() => setEmployeeToDelete(employee)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Apakah Anda yakin ingin menghapus employee "{employee.name}"? Tindakan ini tidak dapat dibatalkan.
                                                 </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel onClick={() => setEmployeeToDelete(null)}>Batal</AlertDialogCancel>
-                                                <AlertDialogAction onClick={handleDelete}>
-                                                    Hapus
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel onClick={() => setEmployeeToDelete(null)}>Batal</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={handleDelete}>
+                                                        Hapus
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}

@@ -124,14 +124,14 @@ export default function ClientTable({
       </div>
 
       {/* TABLE */}
-      <div className="rounded-md border">
-        <Table>
+      <div className="rounded-md border overflow-x-auto">
+        <Table className="min-w-[600px] md:min-w-full">
           <TableHeader>
             <TableRow>
-              <TableHead>Client Name</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>NPWP</TableHead>
-              <TableHead className="text-right">
+              <TableHead className="whitespace-nowrap">Client Name</TableHead>
+              <TableHead className="whitespace-nowrap hidden sm:table-cell">Phone</TableHead>
+              <TableHead className="whitespace-nowrap hidden md:table-cell">NPWP</TableHead>
+              <TableHead className="text-right whitespace-nowrap">
                 Action
               </TableHead>
             </TableRow>
@@ -146,60 +146,62 @@ export default function ClientTable({
             )}
             {paginatedClients.map((client) => (
               <TableRow key={client.id}>
-                <TableCell className="font-medium">
+                <TableCell className="font-medium whitespace-nowrap">
                   {client.name}
                 </TableCell>
-                <TableCell>{client.phone}</TableCell>
-                <TableCell>{client.npwp}</TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDetail?.(client)}
-                  >
-                    Detail
-                  </Button>
-                  <EditClientForm
-                    client={client}
-                    onSubmit={onUpdateClient}
-                    getClientById={getClientById}
-                  />
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                      >
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Hapus Client
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Apakah kamu yakin ingin
-                          menghapus client
-                          <strong> {client.name} </strong>
-                          ? Tindakan ini tidak dapat
-                          dibatalkan.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() =>
-                            handleDeleteClient(client)
-                          }
+                <TableCell className="whitespace-nowrap hidden sm:table-cell">{client.phone}</TableCell>
+                <TableCell className="whitespace-nowrap hidden md:table-cell">{client.npwp}</TableCell>
+                <TableCell className="text-right whitespace-nowrap">
+                  <div className="flex justify-end gap-2 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDetail?.(client)}
+                    >
+                      Detail
+                    </Button>
+                    <EditClientForm
+                      client={client}
+                      onSubmit={onUpdateClient}
+                      getClientById={getClientById}
+                    />
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="destructive"
                         >
-                          Hapus
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Hapus Client
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Apakah kamu yakin ingin
+                            menghapus client
+                            <strong> {client.name} </strong>
+                            ? Tindakan ini tidak dapat
+                            dibatalkan.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() =>
+                              handleDeleteClient(client)
+                            }
+                          >
+                            Hapus
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

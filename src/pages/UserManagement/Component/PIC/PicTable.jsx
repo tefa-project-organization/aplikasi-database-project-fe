@@ -118,17 +118,17 @@ export default function PicTable({
                 </div>
             </div>
 
-            <div className="rounded-md border">
-                <Table>
+            <div className="rounded-md border overflow-x-auto">
+                <Table className="min-w-[900px] md:min-w-full">
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Title</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Client</TableHead>
-                            <TableHead>Project</TableHead>
-                            <TableHead className="text-right">Action</TableHead>
+                            <TableHead className="whitespace-nowrap">Name</TableHead>
+                            <TableHead className="whitespace-nowrap">Title</TableHead>
+                            <TableHead className="whitespace-nowrap hidden sm:table-cell">Phone</TableHead>
+                            <TableHead className="whitespace-nowrap hidden md:table-cell">Email</TableHead>
+                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Client</TableHead>
+                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Project</TableHead>
+                            <TableHead className="text-right whitespace-nowrap">Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -141,40 +141,42 @@ export default function PicTable({
                         )}
                         {paginatedPics.map((pic) => (
                             <TableRow key={pic.id}>
-                                <TableCell className="font-medium">{pic.name}</TableCell>
-                                <TableCell>{pic.title || "-"}</TableCell>
-                                <TableCell>{pic.phone || "-"}</TableCell>
-                                <TableCell>{pic.email || "-"}</TableCell>
-                                <TableCell>{pic.client_name || getClientName(pic.client_id)}</TableCell>
-                                <TableCell>{pic.project_name || getProjectName(pic.project_id)}</TableCell>
-                                <TableCell className="text-right space-x-2">
-                                    <Button size="sm" variant="outline" onClick={() => setDetailPic(pic)}>
-                                        Detail
-                                    </Button>
-                                    <EditPicForm
-                                        pic={pic}
-                                        onSubmit={onUpdatePic}
-                                        getPicById={getPicById}
-                                        clients={clients}
-                                        projects={projects}
-                                    />
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button size="sm" variant="destructive">Delete</Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Hapus PIC</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    Apakah kamu yakin ingin menghapus PIC <strong>{pic.name}</strong>? Tindakan ini tidak dapat dibatalkan.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDeletePic(pic)}>Hapus</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
+                                <TableCell className="font-medium whitespace-nowrap">{pic.name}</TableCell>
+                                <TableCell className="whitespace-nowrap">{pic.title || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden sm:table-cell">{pic.phone || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden md:table-cell">{pic.email || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{pic.client_name || getClientName(pic.client_id)}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{pic.project_name || getProjectName(pic.project_id)}</TableCell>
+                                <TableCell className="text-right whitespace-nowrap">
+                                    <div className="flex justify-end gap-2 flex-wrap">
+                                        <Button size="sm" variant="outline" onClick={() => setDetailPic(pic)}>
+                                            Detail
+                                        </Button>
+                                        <EditPicForm
+                                            pic={pic}
+                                            onSubmit={onUpdatePic}
+                                            getPicById={getPicById}
+                                            clients={clients}
+                                            projects={projects}
+                                        />
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button size="sm" variant="destructive">Delete</Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Hapus PIC</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Apakah kamu yakin ingin menghapus PIC <strong>{pic.name}</strong>? Tindakan ini tidak dapat dibatalkan.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDeletePic(pic)}>Hapus</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}

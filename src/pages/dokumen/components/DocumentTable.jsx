@@ -186,16 +186,16 @@ const [clients, setClients] = useState([]);
       <div className="mt-10">
     
         {/* TABLE WRAPPER */}
-        <div className="rounded-lg border overflow-hidden">
-          <Table>
+        <div className="rounded-lg border overflow-hidden overflow-x-auto">
+          <Table className="min-w-[700px] md:min-w-full">
             <TableHeader>
               <TableRow>
-                <TableHead>Nomor</TableHead>
-                <TableHead>Tipe</TableHead>
-                <TableHead>Project</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>File</TableHead>
-                <TableHead className="text-center">Action</TableHead>
+                <TableHead className="whitespace-nowrap">Nomor</TableHead>
+                <TableHead className="whitespace-nowrap hidden sm:table-cell">Tipe</TableHead>
+                <TableHead className="whitespace-nowrap hidden md:table-cell">Project</TableHead>
+                <TableHead className="whitespace-nowrap hidden lg:table-cell">Client</TableHead>
+                <TableHead className="whitespace-nowrap">File</TableHead>
+                <TableHead className="text-center whitespace-nowrap">Action</TableHead>
               </TableRow>
             </TableHeader>
     
@@ -212,15 +212,15 @@ const [clients, setClients] = useState([]);
               ) : (
                 currentDocuments.map((doc) => (
                   <TableRow key={doc.id}>
-                    <TableCell>{doc.number}</TableCell>
-                    <TableCell>{doc.document_types ?? "-"}</TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap">{doc.number}</TableCell>
+                    <TableCell className="whitespace-nowrap hidden sm:table-cell">{doc.document_types ?? "-"}</TableCell>
+                    <TableCell className="whitespace-nowrap hidden md:table-cell">
                       {projects.find(p => String(p.id) === String(doc.project_id))?.project_name ?? "-"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap hidden lg:table-cell">
                       {clients.find(c => String(c.id) === String(doc.client_id))?.name ?? "-"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap">
                       <Button asChild size="sm" variant="outline">
                         <a
                           href={doc.document_url}
@@ -232,8 +232,8 @@ const [clients, setClients] = useState([]);
                       </Button>
                     </TableCell>
     
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
+                    <TableCell className="text-right whitespace-nowrap">
+                      <div className="flex justify-end gap-2 flex-wrap">
                         <Button
                           size="sm"
                           variant="outline"
