@@ -315,33 +315,33 @@ export default function Team() {
                 </div>
 
                 <div className="flex justify-end items-center border-t border-border/40 pt-4 gap-2">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="text-[11px]"
-                  onClick={() => handleEdit(team)}
-                >
-                  Edit
-                </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-[11px]"
+                    onClick={() => navigate(`/team/${team.id}`)}
+                  >
+                    Detail
+                  </Button>
 
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  className="text-[11px]"
-                  onClick={() => handleDeleteClick(team)}
-                >
-                  Delete
-                </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-[11px]"
+                    onClick={() => handleEdit(team)}
+                  >
+                    Edit
+                  </Button>
 
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-[11px]"
-                  onClick={() => navigate(`/team/${team.id}`)}
-                >
-                  Detail
-                </Button>
-              </div>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="text-[11px]"
+                    onClick={() => handleDeleteClick(team)}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))
