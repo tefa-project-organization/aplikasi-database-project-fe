@@ -119,22 +119,19 @@ export default function PicTable({
             </div>
 
             <div className="rounded-md border overflow-x-auto">
-                <Table className="min-w-[900px] md:min-w-full">
+                <Table className="min-w-[250px]">
                     <TableHeader>
                         <TableRow>
                             <TableHead className="whitespace-nowrap">Name</TableHead>
-                            <TableHead className="whitespace-nowrap">Title</TableHead>
-                            <TableHead className="whitespace-nowrap hidden sm:table-cell">Phone</TableHead>
-                            <TableHead className="whitespace-nowrap hidden md:table-cell">Email</TableHead>
-                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Client</TableHead>
-                            <TableHead className="whitespace-nowrap hidden lg:table-cell">Project</TableHead>
+                            <TableHead className="whitespace-nowrap hidden sm:table-cell">Title</TableHead>
+                            <TableHead className="whitespace-nowrap hidden md:table-cell">Phone</TableHead>
                             <TableHead className="text-right whitespace-nowrap">Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {paginatedPics.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                                <TableCell colSpan={4} className="text-center text-muted-foreground">
                                     No PIC found
                                 </TableCell>
                             </TableRow>
@@ -142,15 +139,12 @@ export default function PicTable({
                         {paginatedPics.map((pic) => (
                             <TableRow key={pic.id}>
                                 <TableCell className="font-medium whitespace-nowrap">{pic.name}</TableCell>
-                                <TableCell className="whitespace-nowrap">{pic.title || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden sm:table-cell">{pic.phone || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden md:table-cell">{pic.email || "-"}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{pic.client_name || getClientName(pic.client_id)}</TableCell>
-                                <TableCell className="whitespace-nowrap hidden lg:table-cell">{pic.project_name || getProjectName(pic.project_id)}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden sm:table-cell">{pic.title || "-"}</TableCell>
+                                <TableCell className="whitespace-nowrap hidden md:table-cell">{pic.phone || "-"}</TableCell>
                                 <TableCell className="text-right whitespace-nowrap">
-                                    <div className="flex justify-end gap-2 flex-wrap">
-                                        <Button size="sm" variant="outline" onClick={() => setDetailPic(pic)}>
-                                            Detail
+                                    <div className="flex justify-end gap-1 flex-nowrap">
+                                        <Button size="icon" variant="outline" className="h-8 w-8 p-0" onClick={() => setDetailPic(pic)} title="Detail">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                                         </Button>
                                         <EditPicForm
                                             pic={pic}
@@ -161,7 +155,9 @@ export default function PicTable({
                                         />
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
-                                                <Button size="sm" variant="destructive">Delete</Button>
+                                                <Button size="icon" variant="destructive" className="h-8 w-8 p-0" title="Delete">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                                                </Button>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
