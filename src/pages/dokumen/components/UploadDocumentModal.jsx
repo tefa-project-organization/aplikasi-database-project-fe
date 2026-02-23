@@ -82,11 +82,9 @@ export default function UploadDocumentModal({ onSuccess, onError }) {
     setMessage("");
   const formData = new FormData();
     formData.append("project_id", form.project_id);
-    formData.append("client_id", form.client_id);
-    formData.append("client_pic_id", form.client_pic_id);
     formData.append("document_types", form.document_types);
     formData.append("date_signed", form.date_signed);
-    formData.append("document", file);
+    formData.append("documentFile", file);
   
     try {
       const res = await fetch(
@@ -235,7 +233,18 @@ useEffect(() => {
               <Label>Project</Label>
               <Select
                 value={form.project_id}
-                onValueChange={(v) => setForm({ ...form, project_id: v })}
+                onValueChange={(v) => {
+                const selectedProject = projects.find(
+                  p => String(p.id) === String(v)
+                );
+
+                  setForm({
+                    ...form,
+                    project_id: v,
+                    client_id: selectedProject?.clients?.id || "",
+                    client_pic_id: selectedProject?.client_pics?.id || "",
+                  });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Project" />
@@ -256,7 +265,7 @@ useEffect(() => {
               <Label>Client</Label>
               <Select
                 value={form.client_id}
-                onValueChange={(v) => setForm({ ...form, client_id: v })}
+                disabled
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Client" />
@@ -276,7 +285,7 @@ useEffect(() => {
               <Label>Client PIC</Label>
               <Select
                 value={form.client_pic_id}
-                onValueChange={(v) => setForm({ ...form, client_pic_id: v })}
+                disabled
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Pilih Client PIC" />
