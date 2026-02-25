@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +17,7 @@ import {
 
 export default function History() {
   const [logs, setLogs] = useState([])
+  const [allLogs, setAllLogs] = useState([])
   const [detailLog, setDetailLog] = useState(null)
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
@@ -42,12 +43,31 @@ export default function History() {
     setLoading(false)
   }
 
+  const fetchAllLogs = async () => {
+    setLoading(true)
+    try {
+      const res = await apiGet(SHOW_ALL_HISTORY, { page: 1, limit: 1000 })
+      const items = res?.data?.items || res?.data?.data?.items || res?.items || []
+      setAllLogs(items)
+      setPage(1)
+    } catch (err) {
+      console.error("Fetch all logs error:", err)
+      setAllLogs([])
+    }
+    setLoading(false)
+  }
+
   useEffect(() => {
-    fetchLogs()
-  }, [])
+    if (search.trim().length > 0) {
+      fetchAllLogs()
+    } else {
+      fetchLogs(1)
+    }
+  }, [search])
 
   // Map log data to table structure
-  const processed = logs.map((l) => {
+  const dataSource = search.trim().length > 0 ? allLogs : logs
+  const processed = dataSource.map((l) => {
     return {
       ...l,
       id: l.log_id,
@@ -77,7 +97,20 @@ export default function History() {
     return 0
   })
 
-  const displayed = sorted
+  const isSearchActive = search.trim().length > 0
+  const effectiveTotalPages = isSearchActive ? Math.ceil(sorted.length / limit) : totalPages
+  const paginatedData = isSearchActive 
+    ? sorted.slice((page - 1) * limit, page * limit)
+    : sorted
+  const displayed = paginatedData
+
+  const handlePageChange = (p) => {
+    if (isSearchActive) {
+      setPage(p)
+    } else {
+      fetchLogs(p)
+    }
+  }
 
   return (
     <div className="p-6">
@@ -138,8 +171,8 @@ export default function History() {
 
       <AdvancedPagination
         currentPage={page}
-        totalPages={totalPages}
-        onPageChange={fetchLogs}
+        totalPages={effectiveTotalPages}
+        onPageChange={handlePageChange}
         className="mt-4"
       />
 
