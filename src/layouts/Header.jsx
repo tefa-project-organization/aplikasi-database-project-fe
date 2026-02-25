@@ -56,14 +56,14 @@ export default function Header() {
   /**
    * AMBIL EMAIL DARI BERBAGAI KEMUNGKINAN STRUKTUR
    */
-  const getUserEmail = () => {
+  const getUserEmail = () => {  
     if (!employees) {
       return "user@example.com";
     }
 
     // Struktur: employees.employees.email (berdasarkan console.log)
-    if (employees.employees?.email) {
-      return employees.employees.email;
+    if (employees.user?.email) {
+      return employees.user.email;
     }
 
     // Fallback langsung
@@ -76,7 +76,8 @@ export default function Header() {
       const stored = localStorage.getItem("employees");
       if (stored) {
         const parsed = JSON.parse(stored);
-        return parsed.employees?.email || parsed.email || "user@example.com";
+        console.log("Parsed localStorage:", parsed);
+        return parsed.user?.email || parsed.email || "user@example.com";
       }
     } catch (e) {
       console.warn("Gagal parse localStorage:", e);
