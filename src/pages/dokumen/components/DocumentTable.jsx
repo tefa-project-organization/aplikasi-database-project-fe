@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "@lottiefiles/lottie-player";
 import EditDocumentModal from "./EditDocumentModal";
 import {
@@ -71,6 +71,7 @@ export default function DocumentTable({ refresh }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [detailDoc, setDetailDoc] = useState(null);
+  const hasFetched = useRef(false);
 
   const fetchDocuments = async () => {
     setLoading(true);
@@ -97,26 +98,29 @@ export default function DocumentTable({ refresh }) {
     }
   };
 
+  const fetchProjectsAndClients = async () => {
+  try {
+    const [projectRes, clientRes] = await Promise.all([
+      fetch("https://backend-database-two.vercel.app/api/v1/projects/show-all"),
+      fetch("https://backend-database-two.vercel.app/api/v1/clients/show-all"),
+    ]);
+
+    const projectData = await projectRes.json();
+    const clientData = await clientRes.json();
+
+    setProjects(projectData.data?.items || []);
+    setClients(clientData.data?.items || []);
+  } catch (error) {
+    console.error("Error fetching project/client:", error);
+    setProjects([]);
+    setClients([]);
+  }
+};
+
   useEffect(() => {
-    const fetchProjectsAndClients = async () => {
-      try {
-        const [projectRes, clientRes] = await Promise.all([
-          fetch("https://backend-database-two.vercel.app/api/v1/projects/show-all"),
-          fetch("https://backend-database-two.vercel.app/api/v1/clients/show-all"),
-        ]);
-  
-        const projectData = await projectRes.json();
-        const clientData = await clientRes.json();
-  
-        setProjects(projectData.data?.items || []);
-        setClients(clientData.data?.items || []);
-      } catch (error) {
-        console.error("Error fetching project/client:", error);
-        setProjects([]);
-        setClients([]);
-      }
-    };
-  
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
     fetchProjectsAndClients();
   }, []);
   
