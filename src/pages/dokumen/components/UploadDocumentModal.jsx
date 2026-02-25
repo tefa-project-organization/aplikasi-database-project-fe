@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,66 +60,68 @@ export default function UploadDocumentModal({ onSuccess, onError }) {
 
   /* ================= SUBMIT ================= */
   const handleSubmit = async () => {
-    if (!file) {
-      setStatus("error");
-      setMessage("File belum dipilih");
-      return;
-    }
+  if (!file) {
+    setStatus("error");
+    setMessage("File belum dipilih");
+    return;
+  }
 
-    if (
-      !form.project_id ||
-      !form.client_id ||
-      !form.client_pic_id ||
-      !form.document_types ||
-      !form.date_signed
-    ) {
-      setStatus("error");
-      setMessage("Semua field wajib diisi");
-      return;
-    }
-    
-    setLoading(true);
-    setStatus("");
-    setMessage("");
-  const formData = new FormData();
-    formData.append("project_id", form.project_id);
-    formData.append("document_types", form.document_types);
-    formData.append("date_signed", form.date_signed);
-    formData.append("documentFile", file);
-  
-    try {
-      const res = await fetch(
-        "https://backend-database-two.vercel.app/api/v1/documents/create",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-  
-      const data = await res.json();
-  
-      if (!res.ok) {
-        throw new Error(data.message || "Gagal upload dokumen");
+  setLoading(true);
+
+  try {
+    // 1️⃣ Upload ke Supabase Storage
+    const filePath = `documents/${Date.now()}-${file.name}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("document_file")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) throw uploadError;
+
+    // 2️⃣ Ambil public URL
+    const { data } = supabase.storage
+      .from("document_file")
+      .getPublicUrl(filePath);
+
+    const documentUrl = data.publicUrl;
+
+    // 3️⃣ Kirim metadata ke backend
+    const res = await fetch(
+      "https://backend-database-two.vercel.app/api/v1/documents/create",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          project_id: form.project_id,
+          document_types: form.document_types,
+          date_signed: form.date_signed,
+          document_url: documentUrl,
+        }),
       }
-  
-      setStatus("success");
-      setMessage("Dokumen berhasil diupload");
+    );
 
-      onSuccess?.("Dokumen berhasil disimpan");
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message);
 
-      // tutup modal
-      setTimeout(() => {
-        setOpen(false);
-        resetForm();
-      }, 300);
+    setStatus("success");
+    setMessage("Dokumen berhasil diupload");
+    onSuccess?.();
 
-    } catch (err) {
-      setStatus("error");
-      setMessage(err.message || "Gagal upload dokumen");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setTimeout(() => {
+      setOpen(false);
+      resetForm();
+    }, 300);
+
+  } catch (err) {
+    setStatus("error");
+    setMessage(err.message || "Upload gagal");
+  } finally {
+    setLoading(false);
+  }
+};
   
   /* ================= RESET ================= */
   const resetForm = () => {

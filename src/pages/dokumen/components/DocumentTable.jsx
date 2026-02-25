@@ -71,6 +71,7 @@ export default function DocumentTable({ refresh }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [detailDoc, setDetailDoc] = useState(null);
+  const hasFetched = useRef(false);
 
   const fetchDocuments = async () => {
     setLoading(true);
