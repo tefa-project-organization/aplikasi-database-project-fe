@@ -1,5 +1,6 @@
 // ErrorPage.jsx
 import { useTheme } from "@/context/ThemeContext";
+import icon from "@/assets/icon/Lonely 404.json";
 
 export default function ErrorPage() {
   const { theme } = useTheme();
@@ -7,7 +8,7 @@ export default function ErrorPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center px-4 bg-background">
       <lottie-player
-        src="/src/assets/icon/Lonely 404.json"
+        src={icon}
         autoplay
         loop
         style={{
