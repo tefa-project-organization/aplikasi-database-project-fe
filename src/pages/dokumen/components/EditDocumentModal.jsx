@@ -27,6 +27,7 @@ import {
   AlertDialogFooter,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { string } from "yup";
 
 
 export default function EditDocumentModal({ open, onOpenChange, onSuccess, initialData }) {
@@ -112,7 +113,7 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
       formData.append("project_id", form.project_id);
       formData.append("client_id", form.client_id);
       formData.append("client_pic_id", form.client_pic_id);
-      formData.append("document_types", Number(form.document_types));
+      formData.append("document_types",form.document_types);
       formData.append("date_signed", form.date_signed);
   
       if (file) {
@@ -329,7 +330,7 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
 
             {/* Document Type */}
             <div className="space-y-2">
-              <Label>Tipe Dokumen</Label>
+            <Label>Tipe Dokumen</Label>
               <Select
                 value={form.document_types}
                 onValueChange={(v) =>
@@ -343,9 +344,9 @@ export default function EditDocumentModal({ open, onOpenChange, onSuccess, initi
                   <SelectValue placeholder="Pilih Tipe Dokumen" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">BAST</SelectItem>
-                  <SelectItem value="2">BA</SelectItem>
-                  <SelectItem value="3">OP</SelectItem>
+                  <SelectItem value="BAST">BAST</SelectItem>
+                  <SelectItem value="BA">BA</SelectItem>
+                  <SelectItem value="OP">OP</SelectItem>
                 </SelectContent>
               </Select>
               {errors.document_types && (

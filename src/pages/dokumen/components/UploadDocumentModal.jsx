@@ -143,7 +143,7 @@ export default function UploadDocumentModal({ onSuccess, onError }) {
 useEffect(() => {
   const fetchProjects = async () => {
     try {
-      const response = await fetch("https://backend-database-two.vercel.app/api/v1/projects/show-all");
+      const response = await fetch("https://backend-database-two.vercel.app/api/v1/projects/show-all?limit=10000");
       const data = await response.json();
 
       if (data.status) {
