@@ -32,34 +32,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-/* ✅ DUMMY DATA (tidak mengganggu API asli) */
-const dummyDocuments = [
-  {
-    id: 1,
-    number: "DOC-001",
-    document_types: "Kontrak",
-    project_id: "Website Company Profile",
-    client_id: "PT Maju Jaya",
-    document_url: "#",
-  },
-  {
-    id: 2,
-    number: "DOC-002",
-    document_types: "Invoice",
-    project_id: "Aplikasi Laundry",
-    client_id: "CV Bersih Selalu",
-    document_url: "#",
-  },
-  {
-    id: 3,
-    number: "DOC-003",
-    document_types: "Laporan",
-    project_id: "Sistem Absensi",
-    client_id: "SMKN 4 Bandung",
-    document_url: "#",
-  },
-];
-
 export default function DocumentTable({ refresh }) {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
