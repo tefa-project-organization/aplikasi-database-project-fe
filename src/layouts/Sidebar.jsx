@@ -10,6 +10,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext"
+import { routePermissions } from "@/config/permission"
 
 // Icons
 import WgsIconBlack from "@/assets/icon/logo_wgs_fullBlack.svg";
@@ -26,38 +28,52 @@ export default function AppSidebar() {
   const { open, isMobile, setOpenMobile } = useSidebar();
   const { theme } = useTheme();
 
+  const { employees } = useAuth()
+
+  const role = employees?.user?.position?.position_name
+
   const menuItems = [
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: dashboardIcon,
-    },
-    {
-      label: "Projects",
-      href: "/projects",
-      icon: projectsIcon,
-    },
-    {
-      label: "Team",
-      href: "/team",
-      icon: teamIcon,
-    },
-    {
-      label: "User Management",
-      href: "/usermanagement",
-      icon: userManagementIcon,
-    },
-    {
-      label: "Upload Dokumen",
-      href: "/upload-documents",
-      icon: uploadicon,
-    },
-    {
-      label: "History",
-      href: "/history",
-      icon: historyIcon,
-    },
-  ];
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: dashboardIcon,
+    roles: routePermissions.dashboard,
+  },
+  {
+    label: "Projects",
+    href: "/projects",
+    icon: projectsIcon,
+    roles: routePermissions.projects,
+  },
+  {
+    label: "Team",
+    href: "/team",
+    icon: teamIcon,
+    roles: routePermissions.team,
+  },
+  {
+    label: "User Management",
+    href: "/usermanagement",
+    icon: userManagementIcon,
+    roles: routePermissions.usermanagement,
+  },
+  {
+    label: "Upload Dokumen",
+    href: "/upload-documents",
+    icon: uploadicon,
+    roles: routePermissions.uploadDocuments,
+  },
+  {
+    label: "History",
+    href: "/history",
+    icon: historyIcon,
+    roles: routePermissions.history,
+  },
+]
+
+const filteredMenu = menuItems.filter((item) =>
+  item.roles.includes(role)
+)
 
   return (
     <Sidebar
@@ -94,7 +110,7 @@ export default function AppSidebar() {
       {/* CONTENT */}
       <SidebarContent className={`${open ? "px-3" : "px-1"}`}>
         <SidebarMenu className="py-3 gap-1">
-          {menuItems.map((item) => (
+          {filteredMenu.map((item) => (
             <SidebarMenuItem key={item.label}>
               <NavLink
                 to={item.href}

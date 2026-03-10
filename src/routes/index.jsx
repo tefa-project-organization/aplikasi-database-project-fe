@@ -13,6 +13,7 @@ import PublicRoute from "./PublicRoute"
 import History from "@/pages/History/History"
 import UploadDocuments from "@/pages/dokumen/UploadDocuments"
 import TeamDetailPage from "@/pages/Team/TeamDetail"
+import { routePermissions } from "@/config/permission"
 
 export default function AppRoutes() {
   return (
@@ -35,17 +36,42 @@ export default function AppRoutes() {
         <Route path="/logout" element={<Logout />} />
 
         {/* APP (PROTECTED) */}
-        <Route element={<PrivateRoute />}>
+        <Route element={<PrivateRoute roles={routePermissions.dashboard} />}>
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
+        </Route>
+
+        <Route element={<PrivateRoute roles={routePermissions.projects} />}>
+          <Route element={<MainLayout />}>
             <Route path="/projects" element={<Projects />} />
+          </Route>
+        </Route>
+
+        <Route element={<PrivateRoute roles={routePermissions.team} />}>
+          <Route element={<MainLayout />}>
             <Route path="/team" element={<Team />} />
             <Route path="/team/:id" element={<TeamDetailPage />} />
+          </Route>
+        </Route>
+
+        <Route element={<PrivateRoute roles={routePermissions.usermanagement} />}>
+          <Route element={<MainLayout />}>
             <Route path="/usermanagement" element={<UserManagement />} />
+          </Route>
+        </Route>
+        <Route element={<PrivateRoute roles={routePermissions.history} />}>
+          <Route element={<MainLayout />}>
             <Route path="/history" element={<History />} />
+          </Route>
+        </Route>
+        <Route element={<PrivateRoute roles={routePermissions.uploadDocuments} />}>
+          <Route element={<MainLayout />}>
             <Route path="/upload-documents" element={<UploadDocuments />} />
           </Route>
         </Route>
+
+        <Route path="/404" element={<ErrorPage />} />
 
         {/* NOT FOUND */}
         <Route path="*" element={<ErrorPage />} />
